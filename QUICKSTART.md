@@ -37,4 +37,4 @@ The successfully run pipeline should look like this:
 ## Deploying Training Pipeline via ADO (Azure DevOps)
 ---
 
-test
+test 2
