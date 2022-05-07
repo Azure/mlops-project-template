@@ -43,6 +43,7 @@ stages :
               az deployment sub validate \
                 --resource-group $(resource_group) \
                 --template-file ./infrastructure/bicep/main.bicep \
+                --location $(location)
                 --parameters location=$(location) resourceGroupName=$(resource_group) prefix=$(namespace) postfix=$(postfix)
 
   - stage: CheckOutBicepAndDeploy
