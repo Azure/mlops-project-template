@@ -1,11 +1,11 @@
 variables:
-- template: ../../config-aml.yml
+- template: ../../../config-aml.yml
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
-    - template: ../../config-infra-prod.yml
+    - template: ../../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../config-infra-dev.yml
+    - template: ../../../config-infra-dev.yml
 
 trigger:
 - none
@@ -15,13 +15,43 @@ pool:
 
 
 stages :
+  - stage: Lint
+    displayName: Lint and Preflight check
+    jobs:
+    - job: LintBicep
+      displayName: Lint Bicep Code
+      steps:
+        - checkout: self
+        - script: |
+            az bicep build --file ./infrastructure/bicep/main.bicep
+          name: LintBicepCode
+          displayName: Run Bicep Linter
+
+  - stage: PreflightValidation
+    jobs:
+    - job: ValidateBicepCode
+      displayName: Validate Bicep Code
+      steps:
+        - task: AzureCli@2
+          name: RunPreflightValidateion
+          displayName: Run Preflight Validation
+          inputs:
+            azureSubscription: $(ado_service_connection_rg)
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              az deployment sub validate \
+                --name $(Build.DefinitionName) \
+                --template-file ./infrastructure/bicep/main.bicep \
+                --location $(location) \
+                --parameters location=$(location) resourceGroupName=$(resource_group) prefix=$(namespace) postfix=$(postfix)
+
   - stage: CheckOutBicepAndDeploy
     displayName: Deploy AML Workspace
     jobs:
     - job: DeployBicep
       displayName: Create Bicep Deployment
       steps:
-      - checkout: self
       - task: AzureCLI@2
         displayName: Running Deployment
         inputs:
