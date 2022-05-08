@@ -5,7 +5,7 @@ type: pipeline
 inputs:
   pipeline_job_input: #using local data, will crate an anonymous data asset
     type: uri_folder
-    path: ./data/
+    path: ../data/
 
 outputs: 
   pipeline_job_transformed_data:

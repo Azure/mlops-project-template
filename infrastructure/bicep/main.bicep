@@ -22,7 +22,7 @@ module stoacct './modules/stoacct.bicep' = {
   scope: resourceGroup(resgrp.name)
   params: {
     env: env
-    baseName: baseName
+    baseName: uniqueString(resgrp.id)
     location: location
   }
 }
