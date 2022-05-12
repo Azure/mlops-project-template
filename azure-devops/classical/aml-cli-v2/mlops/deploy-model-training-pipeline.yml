@@ -42,6 +42,3 @@ stages:
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
           pipeline_file: data-science-regression/pipeline.yml
-      # - template: templates/${{ variables.version }}/promote-model.yml@mlops-templates
-      #   parameters: 
-      #     promote_env_name: 
