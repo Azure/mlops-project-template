@@ -138,3 +138,6 @@ terraform.tfstate.backup
 .terraform.tfstate.lock.info
 .terraform
 terraform.tfvars
+
+/infrastructure/bicep/main.json
+! /infrastructure/bicep/bicepconfig.json
