@@ -10,7 +10,10 @@ variables:
     - template: ../../../config-infra-dev.yml
 - name: version
   value: aml-cli-v2 #must be either 'python-sdk' or 'aml-cli-v2'
-
+- name: endpoint_name
+  value: batchendpoint1
+- name: endpoint_type
+  value: batch
 
 trigger:
 - none
@@ -27,10 +30,10 @@ resources:
       type: github
 
 stages:
-- stage: DeployTrainingPipeline
-  displayName: Deploy Training Pipeline
+- stage: CreateBatchEndpoint
+  displayName: Create/Update Batch Endpoint 
   jobs:
-    - job: DeployTrainingPipeline
+    - job: DeployBatchEndpoint
       steps:
       - checkout: self
         path: s/
@@ -39,9 +42,19 @@ stages:
       - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
-      - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
-        parameters: 
-          pipeline_file: data-science-regression/pipeline.yml
-      # - template: templates/${{ variables.version }}/promote-model.yml@mlops-templates
-      #   parameters: 
-      #     promote_env_name: 
+      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+        parameters:
+          cluster_name: batch-cluster # name must match cluster name in deployment file below
+          min_instances: 0
+          max_instances: 5
+      - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
+      - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
+        parameters:
+          deployment_name: mlflowdp
+          deployment_file: data-science-regression/components/deploy/batch-endpoint/mlflow-deployment.yml      
+      - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
+        parameters:
+          deployment_name: mlflowdp
+          sample_request: file:https://pipelinedata.blob.core.windows.net/sampledata/nytaxi/taxi-tip-data.csv
+
+

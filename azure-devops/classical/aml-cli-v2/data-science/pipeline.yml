@@ -55,12 +55,12 @@ jobs:
       score_report: ${{parent.outputs.pipeline_job_score_report}}
       deploy_flag: ${{parent.outputs.pipeline_job_deploy_flag}}
 
-  register-job:
-    type: command
-    component: file:./components/register/register.yml
-    inputs:
-      model_name: "taxi-model"
-      model_path: ${{parent.jobs.train-job.outputs.model_output}}
-      deploy_flag: ${{parent.jobs.evaluate-job.outputs.deploy_flag}}
+  # register-job:
+  #   type: command
+  #   component: file:./components/register/register.yml
+  #   inputs:
+  #     model_name: "taxi-model"
+  #     model_path: ${{parent.jobs.train-job.outputs.model_output}}
+  #     deploy_flag: ${{parent.jobs.evaluate-job.outputs.deploy_flag}}
 
 # </jobs>
