@@ -54,7 +54,7 @@ stages :
         vmImage: $(ap_vm_image)
       environment: dev
       strategy:
-        runonce:
+        runOnce:
           deploy:
             steps:
             - checkout: self
