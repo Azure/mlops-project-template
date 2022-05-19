@@ -4,6 +4,8 @@
 variables:
 
   # Global
+  ap_vm_image: ubuntu-20.04
+  
   namespace: mlopsv2
   postfix: 0506
   location: westus

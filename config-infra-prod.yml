@@ -5,6 +5,8 @@
 variables:
 
   # Global
+  ap_vm_image: ubuntu-20.04
+  
   namespace: mlopstab
   postfix: 442
   location: northeurope
