@@ -1,5 +1,4 @@
 variables:
-- template: ../../../config-aml.yml
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
     - template: ../../../config-infra-prod.yml
