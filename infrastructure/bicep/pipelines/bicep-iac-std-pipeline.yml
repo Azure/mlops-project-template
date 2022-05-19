@@ -49,16 +49,27 @@ stages :
   - stage: CheckOutBicepAndDeploy
     displayName: Deploy AML Workspace
     jobs:
-    - job: DeployBicep
-      displayName: Create Bicep Deployment
-      steps:
-      - task: AzureCLI@2
-        displayName: Running Deployment
-        inputs:
-          azureSubscription: $(ado_service_connection_rg)
-          scriptType: bash
-          scriptLocation: inlineScript
-          inlineScript: |
-            az --version
-            echo "deploying bicep..."
-            az deployment sub create --name $(Build.DefinitionName)    --location $(location) --template-file ./infrastructure/bicep/main.bicep --parameters location=$(location) resourceGroupName=$(resource_group) prefix=$(namespace) postfix=$(postfix)
+    - deployment: DevDeployBicep
+      displayName: deploy to dev
+      pool:
+        vmImage: $(ap_vm_image)
+      environment: dev
+      strategy:
+        runonce:
+          deploy:
+            steps:
+            - checkout: self
+            - task: AzureCLI@2
+              displayName: Running Dev Deployment
+              inputs:
+                azureSubscription: $(ado_service_connection_rg)
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az --version
+                  echo "deploying bicep..."
+                  az deployment sub create \
+                    --name $(Build.DefinitionName) \
+                    --location $(location) \
+                    --template-file ./infrastructure/bicep/main.bicep \
+                    --parameters location=$(location) resourceGroupName=$(resource_group) prefix=$(namespace) postfix=$(postfix)
