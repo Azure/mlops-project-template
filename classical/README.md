@@ -1,4 +1,4 @@
-![Header](documentation/repositoryfiles/mlopsheader.jpg)
+![Header](https://github.com/Azure/mlops-v2/blob/main/documentation/repositoryfiles/mlopsheader.jpg)
 
 # Azure MLOps (v2) Pattern: Azure Machine Learning - Classical Machine Learning
 
@@ -13,7 +13,7 @@ This repository follows the architecture linked below:
 
 | Link                                                    | AI Pattern                                                              |
 | ------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [Pattern AML CML](https://github.com/Azure/mlops-v2/blob/main/documentation/architecturepattern/AzureML_CML_Architecture_v0.7.jpg) | Azure Machine Learning - Classical Machine Learning                     |
+| [Pattern AML CML](https://github.com/Azure/mlops-v2/blob/main/documentation/architecturepattern/AzureML_CML_Architecture.png) | Azure Machine Learning - Classical Machine Learning                     |
 
 
 ## 👤 Getting started
