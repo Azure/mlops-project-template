@@ -1,25 +1,21 @@
 param location string
-param baseName string
-param env string
-param computeInstanceName string = '${env}-${baseName}-ci'
+param prefix string
+param postfix string
 param workspaceName string
 
 resource amlci 'Microsoft.MachineLearningServices/workspaces/computes@2020-09-01-preview' = {
-  name: '${workspaceName}/${computeInstanceName}'
+  name: '${workspaceName}/mlwcc${prefix}${postfix}'
   location: location
-  properties:{
+  properties: {
     computeType: 'AmlCompute'
-    properties:{
+    properties: {
       vmSize: 'Standard_DS3_v2'
       subnet: json('null')
-      osType:'Linux'
-      scaleSettings:{
+      osType: 'Linux'
+      scaleSettings: {
         maxNodeCount: 4
         minNodeCount: 0
-
       }
     }
-    
   }
 }
-

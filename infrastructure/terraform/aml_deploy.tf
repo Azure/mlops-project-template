@@ -42,7 +42,7 @@ module "storage_account_aml" {
   location = module.resource_group.location
 
   prefix  = var.prefix
-  postfix = "${var.postfix}aml"
+  postfix = var.postfix
 
   hns_enabled                         = false
   firewall_bypass                     = ["AzureServices"]

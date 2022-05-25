@@ -1,93 +1,97 @@
-targetScope='subscription'
+targetScope = 'subscription'
 
 param location string = 'westus2'
-param env string = 'dev'
-param prefix string 
+param prefix string
 param postfix string
 param resourceGroupName string = 'rg-wus-test'
 
+param tags object = {
+  Owner: 'mlops-v2'
+  Project: 'mlops-v2'
+  Environment: 'dev'
+  Toolkit: 'bicep'
+  Name: prefix
+}
 
-var baseName  = '${prefix}${postfix}'
-
-
-resource resgrp 'Microsoft.Resources/resourceGroups@2020-06-01' = {
+resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: resourceGroupName
   location: location
+
+  tags: tags
 }
 
-
-// storage account
-module stoacct './modules/stoacct.bicep' = {
-  name: 'stoacct'
-  scope: resourceGroup(resgrp.name)
+// Storage Account
+module st './modules/storage_account.bicep' = {
+  name: 'st'
+  scope: resourceGroup(rg.name)
   params: {
-    env: env
-    baseName: uniqueString(resgrp.id)
+    prefix: prefix
+    postfix: postfix
     location: location
+    tags: tags
   }
 }
 
-
-// keyvault
-module kv './modules/kv.bicep' = {
+// Key Vault
+module kv './modules/key_vault.bicep' = {
   name: 'kv'
-  scope: resourceGroup(resgrp.name)
-  params:{
-    env: env
+  scope: resourceGroup(rg.name)
+  params: {
+    prefix: prefix
+    postfix: postfix
     location: location
-    baseName: baseName
+    tags: tags
   }
 }
 
-
-// appinsights
-module appinsight './modules/appinsight.bicep' = {
-  name: 'appinsight'
-  scope: resourceGroup(resgrp.name)
-  params:{
-    baseName: baseName
-    env: env
+// App Insights
+module appi './modules/application_insights.bicep' = {
+  name: 'appi'
+  scope: resourceGroup(rg.name)
+  params: {
+    prefix: prefix
+    postfix: postfix
     location: location
+    tags: tags
   }
 }
 
-// container registry
-module cr './modules/cr.bicep' = {
+// Container Registry
+module cr './modules/container_registry.bicep' = {
   name: 'cr'
-  scope: resourceGroup(resgrp.name)
-  params:{
-    baseName: baseName
-    env: env
+  scope: resourceGroup(rg.name)
+  params: {
+    prefix: prefix
+    postfix: postfix
     location: location
+    tags: tags
   }
 }
 
-
-// amls workspace
-module amls './modules/amls.bicep' = {
-  name: 'amls'
-  scope: resourceGroup(resgrp.name)
-  params:{
-    baseName: baseName
-    env: env
+// AML workspace
+module mlw './modules/aml_workspace.bicep' = {
+  name: 'mlw'
+  scope: resourceGroup(rg.name)
+  params: {
+    prefix: prefix
+    postfix: postfix
     location: location
-    stoacctid: stoacct.outputs.stoacctOut
+    stoacctid: st.outputs.stoacctOut
     kvid: kv.outputs.kvOut
-    appinsightid: appinsight.outputs.appinsightOut
+    appinsightid: appi.outputs.appinsightOut
     crid: cr.outputs.crOut
-    
+    tags: tags
   }
 }
 
-
-// aml compute instance
-module amlci './modules/amlcomputeinstance.bicep' = {
-  name: 'amlci'
-  scope: resourceGroup(resgrp.name)
-  params:{
-    baseName: baseName
-    env: env
+// AML compute cluster
+module mlwcc './modules/aml_computecluster.bicep' = {
+  name: 'mlwcc'
+  scope: resourceGroup(rg.name)
+  params: {
+    prefix: prefix
+    postfix: postfix
     location: location
-    workspaceName: amls.outputs.amlsName
+    workspaceName: mlw.outputs.amlsName
   }
 }
