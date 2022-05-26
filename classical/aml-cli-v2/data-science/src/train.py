@@ -1,8 +1,6 @@
 import argparse
 
 from pathlib import Path
-from uuid import uuid4
-from datetime import datetime
 import os
 import pickle
 
@@ -11,7 +9,6 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 import mlflow
@@ -101,7 +98,7 @@ def main():
     mlflow.log_artifact("regression_results.png")
 
     # Save the model
-    pickle.dump(model, open((Path(args.model_output) / "model.sav"), "wb"))
+    pickle.dump(model, open((Path(args.model_output) / "model.pkl"), "wb"))
 
 if __name__ == "__main__":
     main()

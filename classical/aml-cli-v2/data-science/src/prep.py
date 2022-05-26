@@ -1,8 +1,6 @@
 import argparse
 
 from pathlib import Path
-from uuid import uuid4
-from datetime import datetime
 import os
 import numpy as np
 import pandas as pd
@@ -235,7 +233,7 @@ def main():
     print(final_df.head)
 
     # Output data
-    transformed_data = final_df.to_csv((Path(args.transformed_data) / "transformed_data.csv"))
+    final_df.to_csv((Path(args.transformed_data) / "transformed_data.csv"))
 
     # ------------- Split Data ------------- #
     # -------------------------------------- #
@@ -256,9 +254,9 @@ def main():
     mlflow.log_metric('val size', val.shape[0])
     mlflow.log_metric('test size', test.shape[0])
 
-    train_data = train.to_csv((Path(args.transformed_data) / "train.csv"))
-    val_data = val.to_csv((Path(args.transformed_data) / "val.csv"))
-    test_data = test.to_csv((Path(args.transformed_data) / "test.csv"))
+    train.to_csv((Path(args.transformed_data) / "train.csv"))
+    val.to_csv((Path(args.transformed_data) / "val.csv"))
+    test.to_csv((Path(args.transformed_data) / "test.csv"))
 
 if __name__ == "__main__":
     main()

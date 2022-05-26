@@ -7,10 +7,9 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
-from azureml.core import Run, Experiment, Model
+from azureml.core import Run, Model
 
 import mlflow
 import mlflow.sklearn
@@ -90,7 +89,7 @@ def main():
     print(X_test.columns)
 
     # Load the model from input port
-    model = pickle.load(open((Path(args.model_input) / "model.sav"), "rb"))
+    model = pickle.load(open((Path(args.model_input) / "model.pkl"), "rb"))
     # model = (Path(args.model_input) / 'model.txt').read_text()
     # print('Model: ', model)
 
@@ -147,7 +146,7 @@ def main():
     for model_run in Model.list(ws):
         if model_run.name == args.model_name:
             model_path = Model.download(model_run, exist_ok=True)
-            mdl = pickle.load(open((Path(model_path)), "rb"))
+            mdl = pickle.load(open((Path(model_path) / "model.pkl"), "rb"))
             test_predictions[model_run.id] = mdl.predict(X_test)
             test_scores[model_run.id] = r2_score(y_test, test_predictions[model_run.id])
         
@@ -170,7 +169,7 @@ def main():
     
     mlflow.log_metric("deploy flag", bool(deploy_flag))
     mlflow.log_artifact("model_runs_metrics_plot.png")
-
+    
 
 if __name__ == "__main__":
     main()
