@@ -29,7 +29,7 @@ ws = run.experiment.workspace
 
 def parse_args():
     parser = argparse.ArgumentParser(description="UCI Credit example")
-    parser.add_argument("--transformed_data_path", type=str, default='transformed_data/', help="Directory path to training data")
+    parser.add_argument("--prepared_data_path", type=str, default='prepared_data/', help="Directory path to training data")
     parser.add_argument('--model_name', type=str, help='Name under which model is registered')
     parser.add_argument("--model_path", type=str, default='trained_model/', help="Model output directory")
     parser.add_argument("--explainer_path", type=str, default='trained_model/', help="Model output directory")
@@ -40,7 +40,7 @@ def parse_args():
 def main():
     # Parse command-line arguments
     args = parse_args()
-    transformed_data_path = os.path.join(args.transformed_data_path, run.parent.id)
+    prepared_data_path = os.path.join(args.prepared_data_path, run.parent.id)
     model_path = os.path.join(args.model_path, run.parent.id)
     explainer_path = os.path.join(args.explainer_path, run.parent.id)
     evaluation_path = os.path.join(args.evaluation_path, run.parent.id)
@@ -57,13 +57,13 @@ def main():
     mlflow.sklearn.autolog()
     
     # Read training & testing data
-    print(os.path.join(transformed_data_path, 'train.csv'))
-    train = pd.read_csv(os.path.join(transformed_data_path, 'train.csv'))
+    print(os.path.join(prepared_data_path, 'train.csv'))
+    train = pd.read_csv(os.path.join(prepared_data_path, 'train.csv'))
     train.drop("Sno", axis=1, inplace=True)
     y_train = train['Risk']
     X_train = train.drop('Risk', axis=1)
     
-    test = pd.read_csv(os.path.join(transformed_data_path, 'test.csv'))
+    test = pd.read_csv(os.path.join(prepared_data_path, 'test.csv'))
     test.drop("Sno", axis=1, inplace=True)
     y_test = test['Risk']
     X_test = test.drop('Risk', axis=1)
