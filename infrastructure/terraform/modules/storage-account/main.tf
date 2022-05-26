@@ -9,7 +9,7 @@ locals {
   safe_postfix = replace(var.postfix, "-", "")
 }
 
-resource "azurerm_storage_account" "adl_st" {
+resource "azurerm_storage_account" "st" {
   name                     = "st${local.safe_prefix}${local.safe_postfix}"
   resource_group_name      = var.rg_name
   location                 = var.location
@@ -25,7 +25,7 @@ resource "azurerm_storage_account" "adl_st" {
 
 resource "azurerm_storage_account_network_rules" "firewall_rules" {
   resource_group_name  = var.rg_name
-  storage_account_name = azurerm_storage_account.adl_st.name
+  storage_account_name = azurerm_storage_account.st.name
 
   default_action             = "Allow"
   ip_rules                   = [] # [data.http.ip.body]

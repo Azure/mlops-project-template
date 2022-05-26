@@ -1,13 +1,13 @@
-param baseName string
-param env string
+param prefix string
+param postfix string
 param location string
+param tags object
 
-
-// keyvault
+// Key Vault
 resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
-  name: '${env}-${baseName}-kv'
+  name: 'kv-${prefix}-${postfix}'
   location: location
-  properties:{
+  properties: {
     tenantId: subscription().tenantId
     sku: {
       name: 'standard'
@@ -15,6 +15,8 @@ resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
     }
     accessPolicies: []
   }
+
+  tags: tags
 }
 
 output kvOut string = kv.id
