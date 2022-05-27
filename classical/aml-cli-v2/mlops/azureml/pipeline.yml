@@ -9,12 +9,16 @@ inputs:
     path: ../../data/
 
 outputs: 
-  pipeline_job_transformed_data:
+  pipeline_job_prepared_data:
+    mode: rw_mount  
   pipeline_job_trained_model:
     mode: rw_mount   
   pipeline_job_predictions:
+    mode: rw_mount  
   pipeline_job_score_report:
+    mode: rw_mount  
   pipeline_job_deploy_flag:
+    mode: rw_mount  
 # </inputs_and_outputs>
 
 # <jobs>
@@ -31,12 +35,12 @@ jobs:
     command: >-
       python prep.py 
       --raw_data ${{inputs.raw_data}} 
-      --transformed_data ${{outputs.transformed_data}}
+      --prepared_data ${{outputs.prepared_data}}
     environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
     inputs:
       raw_data: ${{parent.inputs.pipeline_job_input}}
     outputs:
-      transformed_data: ${{parent.outputs.pipeline_job_transformed_data}}
+      prepared_data: ${{parent.outputs.pipeline_job_prepared_data}}
 
   train_model:
     name: train_model
@@ -48,7 +52,7 @@ jobs:
       --model_output ${{outputs.model_output}}
     environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
     inputs:
-      training_data: ${{parent.jobs.prep_data.outputs.transformed_data}}
+      training_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
     outputs:
       model_output: ${{parent.outputs.pipeline_job_trained_model}}
   
@@ -68,7 +72,7 @@ jobs:
     inputs:
       model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
-      test_data: ${{parent.jobs.prep_data.outputs.transformed_data}}
+      test_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
     outputs:
       predictions: ${{parent.outputs.pipeline_job_predictions}}
       score_report: ${{parent.outputs.pipeline_job_score_report}}
