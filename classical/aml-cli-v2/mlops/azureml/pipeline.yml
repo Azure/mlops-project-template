@@ -1,6 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-experiment_name: ml_usecase_regression
+experiment_name: nyc-taxi-regression
 
 # <inputs_and_outputs>
 inputs:
