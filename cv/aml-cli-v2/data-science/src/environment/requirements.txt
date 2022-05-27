@@ -1,0 +1,14 @@
+ # for local testing (cpu)
+torchvision==0.12.0
+torch==1.11.0
+transformers==4.18.0
+
+# for metrics reporting/plotting
+mlflow==1.25.1
+azureml-mlflow==1.41.0
+matplotlib==3.5.2
+tqdm==4.64.0
+psutil==5.9.0
+
+# for unit testing
+pytest==7.1.2
