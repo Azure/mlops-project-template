@@ -42,8 +42,10 @@ def main():
         print("Registering ", model_name)
 
         model = pickle.load(open((Path(model_path) / "model.pkl"), "rb"))
+        # log model using mlflow 
         mlflow.sklearn.log_model(model, model_name)
 
+        # register model using mlflow model
         model_uri = f'runs:/{run_id}/{args.model_name}'
         mlflow.register_model(model_uri, model_name)
         

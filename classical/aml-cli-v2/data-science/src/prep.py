@@ -12,7 +12,7 @@ def parse_args():
 
     parser = argparse.ArgumentParser("prep")
     parser.add_argument("--raw_data", type=str, help="Path to raw data")
-    parser.add_argument("--transformed_data", type=str, help="Path of prepped data")
+    parser.add_argument("--prepared_data", type=str, help="Path of prepped data")
 
     args = parser.parse_args()
 
@@ -27,7 +27,7 @@ def main():
 
     lines = [
         f"Raw data path: {args.raw_data}",
-        f"Data output path: {args.transformed_data}",
+        f"Data output path: {args.prepared_data}",
     ]
 
     for line in lines:
@@ -144,9 +144,9 @@ def main():
     combined_df = green_data_clean.append(yellow_data_clean, ignore_index=True)
     combined_df.reset_index(inplace=True, drop=True)
 
-    output_green = green_data_clean.to_csv((Path(args.transformed_data) / "green_prep_data.csv"))
-    output_yellow = yellow_data_clean.to_csv((Path(args.transformed_data) / "yellow_prep_data.csv"))
-    merged_data = combined_df.to_csv((Path(args.transformed_data) / "merged_data.csv"))
+    output_green = green_data_clean.to_csv((Path(args.prepared_data) / "green_prep_data.csv"))
+    output_yellow = yellow_data_clean.to_csv((Path(args.prepared_data) / "yellow_prep_data.csv"))
+    merged_data = combined_df.to_csv((Path(args.prepared_data) / "merged_data.csv"))
 
     # ------------ Filter Data ------------ #
     # ------------------------------------- #
@@ -234,7 +234,7 @@ def main():
     print(final_df.head)
 
     # Output data
-    final_df.to_csv((Path(args.transformed_data) / "transformed_data.csv"))
+    final_df.to_csv((Path(args.prepared_data) / "prepared_data.csv"))
 
     # ------------- Split Data ------------- #
     # -------------------------------------- #
@@ -255,9 +255,9 @@ def main():
     mlflow.log_metric('val size', val.shape[0])
     mlflow.log_metric('test size', test.shape[0])
 
-    train.to_csv((Path(args.transformed_data) / "train.csv"))
-    val.to_csv((Path(args.transformed_data) / "val.csv"))
-    test.to_csv((Path(args.transformed_data) / "test.csv"))
+    train.to_csv((Path(args.prepared_data) / "train.csv"))
+    val.to_csv((Path(args.prepared_data) / "val.csv"))
+    test.to_csv((Path(args.prepared_data) / "test.csv"))
 
 if __name__ == "__main__":
     main()
