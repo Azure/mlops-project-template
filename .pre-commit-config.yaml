@@ -11,7 +11,8 @@ repos:
     rev: 21.12b0
     hooks:
     -   id: black
-  
+        additional_dependencies: ['click==8.0.4']
+
   # Sort imports deterministically
 -   repo: https://github.com/pycqa/isort
     rev: 5.10.1
