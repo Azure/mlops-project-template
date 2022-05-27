@@ -159,6 +159,7 @@ def main():
             deploy_flag = 0
     else:
         deploy_flag = 1
+    print("Deploy flag: ",deploy_flag)
 
     with open((Path(args.deploy_flag) / "deploy_flag"), 'w') as f:
         f.write('%d' % int(deploy_flag))
