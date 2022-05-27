@@ -1,0 +1,5 @@
+$schema: https://azuremlschemas.azureedge.net/latest/batchDeployment.schema.json
+name: taxibatchdeployment
+endpoint_name: taxi-cost
+model: azureml:taxi-model@latest
+compute: azureml:cpu-cluster
