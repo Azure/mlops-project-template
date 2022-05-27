@@ -6,7 +6,7 @@ experiment_name: ml_usecase_regression
 inputs:
   pipeline_job_input: #using local data, will crate an anonymous data asset
     type: uri_folder
-    path: ../../data/
+    path: ../../../data/
 
 outputs: 
   pipeline_job_transformed_data:
@@ -27,7 +27,7 @@ jobs:
   prep_data:
     name: prep_data
     display_name: prep-data
-    code: ../../data-science/src
+    code: ../../../data-science/src
     command: >-
       python prep.py 
       --raw_data ${{inputs.raw_data}} 
@@ -41,7 +41,7 @@ jobs:
   train_model:
     name: train_model
     display_name: train-model
-    code: ../../data-science/src
+    code: ../../../data-science/src
     command: >-
       python train.py 
       --training_data ${{inputs.training_data}} 
@@ -55,7 +55,7 @@ jobs:
   evaluate_model:
     name: evaluate_model
     display_name: evaluate-model
-    code: ../../data-science/src
+    code: ../../../data-science/src
     command: >-
       python evaluate.py 
       --model_name ${{inputs.model_name}} 
@@ -77,7 +77,7 @@ jobs:
   register_model:
     name: register_model
     display_name: register-model
-    code: ../../data-science/src
+    code: ../../../data-science/src
     command: >-
       python register.py 
       --model_name ${{inputs.model_name}} 
