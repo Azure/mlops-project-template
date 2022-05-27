@@ -146,8 +146,7 @@ def main():
     for model_run in Model.list(ws):
         if model_run.name == args.model_name:
             model_path = Model.download(model_run, exist_ok=True)
-            # mdl = pickle.load(open((Path(model_path) / "model.pkl"), "rb"))
-            mdl = pickle.load(open((Path(model_path)), "rb"))
+            mdl = pickle.load(open((Path(model_path) / "model.pkl"), "rb"))
             test_predictions[model_run.id] = mdl.predict(X_test)
             test_scores[model_run.id] = r2_score(y_test, test_predictions[model_run.id])
         

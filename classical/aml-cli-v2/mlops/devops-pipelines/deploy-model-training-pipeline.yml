@@ -9,7 +9,7 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 - name: version
-  value: aml-cli-v2 #must be either 'python-sdk' or 'aml-cli-v2'
+  value: aml-cli-v2 
 
 
 trigger:
@@ -41,6 +41,7 @@ stages:
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
         parameters:
+          build_type: conda
           environment_name: taxi-train-env
           environment_file: mlops/azureml/train-env.yml
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates

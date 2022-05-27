@@ -4,14 +4,14 @@
 variables:
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
-    - template: ../../../config-infra-prod.yml
+    - template: ../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../../config-infra-dev.yml
+    - template: ../../config-infra-dev.yml
 - name: version
-  value: aml-cli-v2 #must be either 'python-sdk' or 'aml-cli-v2'
+  value: aml-cli-v2 
 - name: endpoint_name
-  value: batchendpoint1
+  value: taxi-batch-endpoint
 - name: endpoint_type
   value: batch
 
@@ -50,11 +50,10 @@ stages:
       - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
         parameters:
-          deployment_name: mlflowdp
-          deployment_file: data-science-regression/components/deploy/batch-endpoint/mlflow-deployment.yml      
+          deployment_name: taxi-batch-dp
+          deployment_file: mlops/azureml/batch-endpoint.yml      
       - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
         parameters:
-          deployment_name: mlflowdp
           sample_request: file:https://pipelinedata.blob.core.windows.net/sampledata/nytaxi/taxi-tip-data.csv
 
 

@@ -36,7 +36,7 @@ jobs:
       python prep.py 
       --raw_data ${{inputs.raw_data}} 
       --prepared_data ${{outputs.prepared_data}}
-    environment: azureml:taxi-train-env
+    environment: azureml:taxi-train-env@latest
     inputs:
       raw_data: ${{parent.inputs.pipeline_job_input}}
     outputs:
@@ -50,7 +50,7 @@ jobs:
       python train.py 
       --training_data ${{inputs.training_data}} 
       --model_output ${{outputs.model_output}}
-    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+    environment: azureml:taxi-train-env@latest
     inputs:
       training_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
     outputs:
@@ -68,7 +68,7 @@ jobs:
       --predictions ${{outputs.predictions}}
       --score_report ${{outputs.score_report}}
       --deploy_flag ${{outputs.deploy_flag}}
-    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+    environment: azureml:taxi-train-env@latest
     inputs:
       model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
@@ -87,7 +87,7 @@ jobs:
       --model_name ${{inputs.model_name}} 
       --model_path ${{inputs.model_path}} 
       --deploy_flag ${{inputs.deploy_flag}}
-    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+    environment: azureml:taxi-train-env@latest
     inputs:
       model_name: "taxi-model"
       model_path: ${{parent.jobs.train_model.outputs.model_output}}
