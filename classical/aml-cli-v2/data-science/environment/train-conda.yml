@@ -17,4 +17,3 @@ dependencies:
       - interpret-community==0.24.1
       - interpret-core==0.2.7
       - azureml-interpret==1.38.0
-name: azureml_c2dc97348bca4191d63c3144d24e6e41

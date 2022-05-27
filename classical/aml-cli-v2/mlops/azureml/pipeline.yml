@@ -36,7 +36,7 @@ jobs:
       python prep.py 
       --raw_data ${{inputs.raw_data}} 
       --prepared_data ${{outputs.prepared_data}}
-    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+    environment: azureml:taxi-train-env
     inputs:
       raw_data: ${{parent.inputs.pipeline_job_input}}
     outputs:
