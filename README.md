@@ -2,31 +2,31 @@
 
 # Azure MLOps (v2) solution accelerator
 
-MLOps or Machine Learning Ops is a set of practices that aims to automate and operationalise the deployment and maintenance of machine learning models across various stages of the lifecycle of a Data Science process. The purpose of an MLOps process is to drive efficiency, increase repeatability and predictability, enable reuse of code and drive consistency across projects. This enables Data Science teams to deploy Machine Learning models to production reliably and efficiently.  
+MLOps or Machine Learning Ops is a set of practices that aims to automate and operationalise the deployment and maintenance of machine learning models across various stages of the lifecycle of a Data Science process. The purpose of an MLOps process is to drive efficiency, increase repeatability and predictability, enable reuse of code and drive consistency across projects. This enables Data Science teams to deploy Machine Learning models to production reliably and efficiently.
 
-While MLOps has many overlapping concepts with DevOps and can be seen as a derivation of DevOps, it varies significantly from DevOps due to the nature of Data Science projects. The following Microsoft articles provide a perspective on MLOps from various viewpoints: 
+While MLOps has many overlapping concepts with DevOps and can be seen as a derivation of DevOps, it varies significantly from DevOps due to the nature of Data Science projects. The following Microsoft articles provide a perspective on MLOps from various viewpoints:
 
-[MLOps using Azure Machine Learning](https://azure.microsoft.com/en-us/services/machine-learning/mlops/#features) 
+[MLOps using Azure Machine Learning](https://azure.microsoft.com/en-us/services/machine-learning/mlops/#features)
 
-[Cloud Adoption Framework Guidance](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/ai-machine-learning-mlops) 
+[Cloud Adoption Framework Guidance](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/ai-machine-learning-mlops)
 
-[How: Machine Learning Operations](https://docs.microsoft.com/en-us/azure/machine-learning/concept-model-management-and-deployment) 
+[How: Machine Learning Operations](https://docs.microsoft.com/en-us/azure/machine-learning/concept-model-management-and-deployment)
 
 
 ## Prerequisites: Repository Overview
 
 The solution accelerator provides a modular end-to-end approach for MLOps in Azure based on pattern architectures. As each organization is unique, we do not expect that each pattern architecture will suit all organizations, however, Digital Natives or enterprises will be able to deploy an MLOps ecosystem fast, simple, reliable, modular, and secure. The time to product is measurable shorter under incerased scalability.
 
-Following are the key principles that have been applied while building the accelerator: 
+Following are the key principles that have been applied while building the accelerator:
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅**Simplicity** 
-  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅**Simplicity**
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅**Segregation of duties & Security**
-  
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅**Reusability**
-  
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅**Modularity**
-  
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅**Enterprise readiness**
 
 This repo provides a templatised approach for the end-to-end Data Science process and focuses on driving efficiency at each stage. For example, it can take a significant amount of time to bootstrap a new Data Science project, hence the repo provides templates that can be reused to establish a cookie cutter approach for the bootstrapping process to shorten the process from days to hours or minutes.
@@ -35,21 +35,21 @@ The best way to consume this accelerator will be to choose a complex use case th
 
 Following the demo helps to understand the concept of the solution accelerator, architectual pattern, and ongoing work extending the solution accelerator to other patterns. Feel free to replace the inner loop model with your model and rerun accordingly.
 
- 
+
 ## 👤 Getting started: Azure Machine Learning - Classical Machine Learning Demo
-  
+
 The demo follows the Classical Machine Learning Pattern with Azure Machine Learning.
-  
+
 ![AML CML](/documentation/architecturepattern/AzureML_CML_Architecture_v0.7.jpg)
-  
+
 Please follow the instructions to execute the demo accordingly:
-  
+
 &nbsp;&nbsp;1.
-  
+
 &nbsp;&nbsp;2.
-  
+
 &nbsp;&nbsp;3.
-  
+
 &nbsp;&nbsp;...
 
 
@@ -66,9 +66,9 @@ Please follow the instructions to execute the demo accordingly:
 | [TBD]                                                   | Azure Machine Learning - Classical Machine Learning using R             |
 | [TBD]                                                   | Azure Machine Learning - Edge AI                                        |
 
-  
+
 ## 📯 (Coming Soon) One-click Deployments:
-  
+
 ## 📯 MLOps infrastructure deployment
 
 | Name                                                        | Description                                                | Try it out      |
@@ -87,8 +87,8 @@ Please follow the instructions to execute the demo accordingly:
 | [TBD]                                                               | Classical machine learning         | Azure Machine Learning, Azure Databricks | [DEPLOY BUTTON] |
 | [TBD]                                                               | Computer Vision                    | Azure Machine Learning, Azure Databricks | [DEPLOY BUTTON] |
 | [TBD]                                                               | Natural Language Processing        | Azure Machine Learning, Azure Databricks | [DEPLOY BUTTON] |
-| [TBD]                                                               | Classical machine learning with R  | Azure Machine Learning                   | [DEPLOY BUTTON] |  
-| [TBD]                                                               | Edge AI                            | Azure Machine Learning                   | [DEPLOY BUTTON] |  
+| [TBD]                                                               | Classical machine learning with R  | Azure Machine Learning                   | [DEPLOY BUTTON] |
+| [TBD]                                                               | Edge AI                            | Azure Machine Learning                   | [DEPLOY BUTTON] |
 
 
 ## Contributing
