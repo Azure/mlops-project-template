@@ -60,15 +60,15 @@ jobs:
       python evaluate.py 
       --model_name ${{inputs.model_name}} 
       --model_input ${{inputs.model_input}} 
-      --test_data ${{inputs.test_data}}
+      --transformed_data ${{inputs.transformed_data}}
       --predictions ${{outputs.predictions}}
       --score_report ${{outputs.score_report}}
       --deploy_flag ${{outputs.deploy_flag}}
-    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+    environment: azureml:taxi-training@latest
     inputs:
       model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
-      test_data: ${{parent.jobs.prep_data.outputs.transformed_data}}
+      transformed_data: ${{parent.jobs.prep_data.outputs.transformed_data}}
     outputs:
       predictions: ${{parent.outputs.pipeline_job_predictions}}
       score_report: ${{parent.outputs.pipeline_job_score_report}}
