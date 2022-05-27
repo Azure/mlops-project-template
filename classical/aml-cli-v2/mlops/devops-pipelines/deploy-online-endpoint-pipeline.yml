@@ -50,7 +50,7 @@ stages:
           deployment_file: mlops/azureml/online-deployment.yml 
       - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
         parameters:
-          sample_request: file:https://pipelinedata.blob.core.windows.net/sampledata/nytaxi/taxi-tip-data.csv
+          sample_request: https://pipelinedata.blob.core.windows.net/sampledata/nytaxi/taxi-tip-data.csv
       - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
         parameters:
           traffic_allocation: blue=100
