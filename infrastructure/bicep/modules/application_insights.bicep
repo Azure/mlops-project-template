@@ -1,16 +1,18 @@
-param baseName string
-param env string
+param prefix string
+param postfix string
 param location string
+param tags object
 
-
-// app insights
+// App Insights
 resource appinsight 'Microsoft.Insights/components@2020-02-02-preview' = {
-  name: '${env}${baseName}-appin'
+  name: 'appi-${prefix}-${postfix}'
   location: location
   kind: 'web'
-  properties:{
+  properties: {
     Application_Type: 'web'
   }
+
+  tags: tags
 }
 
 output appinsightOut string = appinsight.id

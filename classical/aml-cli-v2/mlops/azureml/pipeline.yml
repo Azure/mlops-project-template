@@ -6,19 +6,15 @@ experiment_name: ml_usecase_regression
 inputs:
   pipeline_job_input: #using local data, will crate an anonymous data asset
     type: uri_folder
-    path: ../data/
+    path: ../../data/
 
 outputs: 
   pipeline_job_transformed_data:
-    mode: rw_mount   
   pipeline_job_trained_model:
-    mode: rw_mount
+    mode: rw_mount   
   pipeline_job_predictions:
-    mode: rw_mount 
   pipeline_job_score_report:
-    mode: rw_mount
   pipeline_job_deploy_flag:
-    type: uri_folder
 # </inputs_and_outputs>
 
 # <jobs>
@@ -28,10 +24,10 @@ settings:
   continue_on_step_failure: false
 
 jobs:
-  prep-job:
+  prep_data:
     name: prep_data
     display_name: prep-data
-    code: ./src/prep
+    code: ../../data-science/src
     command: >-
       python prep.py 
       --raw_data ${{inputs.raw_data}} 
@@ -42,24 +38,24 @@ jobs:
     outputs:
       transformed_data: ${{parent.outputs.pipeline_job_transformed_data}}
 
-  train-job:
+  train_model:
     name: train_model
     display_name: train-model
-    code: ./src/train
+    code: ../../data-science/src
     command: >-
       python train.py 
       --training_data ${{inputs.training_data}} 
       --model_output ${{outputs.model_output}}
     environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
     inputs:
-      training_data: ${{parent.jobs.prep-job.outputs.transformed_data}}
+      training_data: ${{parent.jobs.prep_data.outputs.transformed_data}}
     outputs:
       model_output: ${{parent.outputs.pipeline_job_trained_model}}
   
-  evaluate-job:
+  evaluate_model:
     name: evaluate_model
     display_name: evaluate-model
-    code: ./src/evaluate
+    code: ../../data-science/src
     command: >-
       python evaluate.py 
       --model_name ${{inputs.model_name}} 
@@ -71,26 +67,26 @@ jobs:
     environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
     inputs:
       model_name: "taxi-model"
-      model_input: ${{parent.jobs.train-job.outputs.model_output}}
-      test_data: ${{parent.jobs.prep-job.outputs.transformed_data}}
+      model_input: ${{parent.jobs.train_model.outputs.model_output}}
+      test_data: ${{parent.jobs.prep_data.outputs.transformed_data}}
     outputs:
       predictions: ${{parent.outputs.pipeline_job_predictions}}
       score_report: ${{parent.outputs.pipeline_job_score_report}}
       deploy_flag: ${{parent.outputs.pipeline_job_deploy_flag}}
 
-  # register-job:
-  #  name: register_model
-  #  display_name: register-model
-  #  code: ./src/register
-  #  command: >-
-  #    python register.py 
-  #    --model_name ${{inputs.model_name}} 
-  #    --model_path ${{inputs.model_path}} 
-  #    --deploy_flag ${{inputs.deploy_flag}}
-  #  environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
-  #  inputs:
-  #    model_name: "taxi-model"
-  #    model_path: ${{parent.jobs.train-job.outputs.model_output}}
-  #    deploy_flag: ${{parent.jobs.evaluate-job.outputs.deploy_flag}}
+  register_model:
+    name: register_model
+    display_name: register-model
+    code: ../../data-science/src
+    command: >-
+      python register.py 
+      --model_name ${{inputs.model_name}} 
+      --model_path ${{inputs.model_path}} 
+      --deploy_flag ${{inputs.deploy_flag}}
+    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+    inputs:
+      model_name: "taxi-model"
+      model_path: ${{parent.jobs.train_model.outputs.model_output}}
+      deploy_flag: ${{parent.jobs.evaluate_model.outputs.deploy_flag}}
 
 # </jobs>

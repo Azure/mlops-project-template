@@ -1,23 +1,23 @@
-param env string
-param baseName string
+param prefix string
+param postfix string
 param location string
+param tags object
 
-
-// stroage account
+// Storage Account
 resource stoacct 'Microsoft.Storage/storageAccounts@2019-04-01' = {
-  name: '${env}${baseName}sa'
+  name: 'st${prefix}${postfix}'
   location: location
-  sku:{
-    name:'Standard_LRS'
+  sku: {
+    name: 'Standard_LRS'
   }
   kind: 'StorageV2'
-  properties:{
-    encryption:{
-      services:{
-        blob:{
+  properties: {
+    encryption: {
+      services: {
+        blob: {
           enabled: true
         }
-        file:{
+        file: {
           enabled: true
         }
       }
@@ -25,6 +25,8 @@ resource stoacct 'Microsoft.Storage/storageAccounts@2019-04-01' = {
     }
     supportsHttpsTrafficOnly: true
   }
+
+  tags: tags
 }
 
 output stoacctOut string = stoacct.id

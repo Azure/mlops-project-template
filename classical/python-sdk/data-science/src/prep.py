@@ -18,17 +18,17 @@ ws = run.experiment.workspace
 def parse_args():
     parser = argparse.ArgumentParser(description="UCI Credit example")
     parser.add_argument("--data_path", type=str, default='data/', help="Directory path to training data")
-    parser.add_argument("--transformed_data_path", type=str, default='transformed_data/', help="transformed data directory")
+    parser.add_argument("--prepared_data_path", type=str, default='prepared_data/', help="prepared data directory")
     return parser.parse_args()
 
 def main():
     # Parse command-line arguments
     args = parse_args()
-    transformed_data_path = os.path.join(args.transformed_data_path, run.parent.id)
+    prepared_data_path = os.path.join(args.prepared_data_path, run.parent.id)
 
     # Make sure data output path exists
-    if not os.path.exists(transformed_data_path):
-        os.makedirs(transformed_data_path)
+    if not os.path.exists(prepared_data_path):
+        os.makedirs(prepared_data_path)
         
     # Enable auto logging
     mlflow.sklearn.autolog()
@@ -54,9 +54,9 @@ def main():
     run.parent.log('VAL SIZE', val.shape[0])
     run.parent.log('TEST SIZE', test.shape[0])
     
-    TRAIN_PATH = os.path.join(transformed_data_path, "train.csv")
-    VAL_PATH = os.path.join(transformed_data_path, "val.csv")
-    TEST_PATH = os.path.join(transformed_data_path, "test.csv")
+    TRAIN_PATH = os.path.join(prepared_data_path, "train.csv")
+    VAL_PATH = os.path.join(prepared_data_path, "val.csv")
+    TEST_PATH = os.path.join(prepared_data_path, "test.csv")
     
     train.to_csv(TRAIN_PATH, index=False)
     val.to_csv(VAL_PATH, index=False)

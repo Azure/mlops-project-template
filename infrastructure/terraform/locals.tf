@@ -1,9 +1,9 @@
 locals {
   tags = {
-    Owner       = "mlops-tabular"
-    Project     = "mlops-tabular"
+    Owner       = "mlops-v2"
+    Project     = "mlops-v2"
     Environment = "${var.environment}"
-    Toolkit     = "Terraform"
+    Toolkit     = "terraform"
     Name        = "${var.prefix}"
   }
 }

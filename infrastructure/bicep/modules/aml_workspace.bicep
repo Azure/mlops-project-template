@@ -1,39 +1,38 @@
+param prefix string
+param postfix string
 param location string
-param baseName string
-param env string
 param stoacctid string
 param kvid string
 param appinsightid string
 param crid string
+param tags object
 
-
-
-// azure machine learning service
+// AML workspace
 resource amls 'Microsoft.MachineLearningServices/workspaces@2020-09-01-preview' = {
-  name: '${env}${baseName}-ws'
+  name: 'mlw-${prefix}-${postfix}'
   location: location
   identity: {
     type: 'SystemAssigned'
   }
-  sku:{
+  sku: {
     tier: 'basic'
     name: 'basic'
   }
-  properties:{
-    friendlyName: '${env}${baseName}-ws'
+  properties: {
     storageAccount: stoacctid
     keyVault: kvid
     applicationInsights: appinsightid
     containerRegistry: crid
-    encryption:{
+    encryption: {
       status: 'Disabled'
-      keyVaultProperties:{
+      keyVaultProperties: {
         keyIdentifier: ''
         keyVaultArmId: ''
       }
     }
   }
 
+  tags: tags
 }
 
 output amlsName string = amls.name
