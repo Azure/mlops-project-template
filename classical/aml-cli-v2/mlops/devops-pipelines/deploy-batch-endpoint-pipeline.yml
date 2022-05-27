@@ -54,6 +54,7 @@ stages:
           deployment_file: mlops/azureml/batch-endpoint.yml      
       - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
         parameters:
+          deployment_name: taxi-batch-dp
           sample_request: https://pipelinedata.blob.core.windows.net/sampledata/nytaxi/taxi-tip-data.csv
 
 
