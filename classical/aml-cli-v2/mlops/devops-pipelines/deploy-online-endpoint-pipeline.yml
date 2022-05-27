@@ -47,10 +47,10 @@ stages:
       - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
         parameters:
           deployment_name: taxi-online-dp
-          deployment_file: data-science-regression/components/deploy/online-endpoint/blue/blue-deployment.yml 
+          deployment_file: mlops/azureml/online-deployment.yml 
       - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
         parameters:
-          sample_request: data-science-regression/components/deploy/online-endpoint/blue/sample-request.json
+          sample_request: file:https://pipelinedata.blob.core.windows.net/sampledata/nytaxi/taxi-tip-data.csv
       - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
         parameters:
           traffic_allocation: blue=100
