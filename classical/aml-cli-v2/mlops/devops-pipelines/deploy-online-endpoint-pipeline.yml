@@ -45,11 +45,11 @@ stages:
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
         parameters:
-          endpoint_file: mlops/azureml/online/online-endpoint.yml
+          endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
       - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
         parameters:
           deployment_name: taxi-online-dp
-          deployment_file: mlops/azureml/online/online-deployment.yml 
+          deployment_file: mlops/azureml/deploy/online/online-deployment.yml 
       - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
         parameters:
           traffic_allocation: taxi-online-dp=100
