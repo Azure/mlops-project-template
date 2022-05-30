@@ -41,7 +41,7 @@ def main():
     print(arr)
 
     df_list = []
-    for filename in arr:
+    for filename in ['greenTaxiData.csv', 'yellowTaxiData.csv']:
         print("reading file: %s ..." % filename)
         with open(os.path.join(args.raw_data, filename), "r") as handle:
             # print (handle.read())

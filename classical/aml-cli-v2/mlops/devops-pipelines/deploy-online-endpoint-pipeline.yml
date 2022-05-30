@@ -55,3 +55,4 @@ stages:
         parameters:
           deployment_name: taxi-online-dp
           sample_request: data/taxi-request.json
+          request_type: json
