@@ -11,7 +11,7 @@ variables:
 - name: version
   value: aml-cli-v2 
 - name: endpoint_name
-  value: taxi-online-endpoint
+  value: taxi-fare-online
 - name: endpoint_type
   value: online
 

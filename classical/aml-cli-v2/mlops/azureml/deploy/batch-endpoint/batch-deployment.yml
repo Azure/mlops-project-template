@@ -1,6 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/batchDeployment.schema.json
 name: batch-dp
-endpoint_name: taxi-fare
+endpoint_name: taxi-fare-batch
 model: azureml:taxi-model@latest
 compute: azureml:batch-cluster
 resources:
