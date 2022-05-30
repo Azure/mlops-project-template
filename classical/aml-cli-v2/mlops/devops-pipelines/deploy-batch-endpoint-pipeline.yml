@@ -48,13 +48,15 @@ stages:
           min_instances: 0
           max_instances: 5
       - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
+        parameters: 
+          endpoint_file: mlops/azureml/deploy/batch/batch-endpoint.yml
       - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
         parameters:
           deployment_name: taxi-batch-dp
-          deployment_file: mlops/azureml/batch-endpoint.yml      
+          deployment_file: mlops/azureml/deploy/batch/batch-deployment.yml      
       - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
         parameters:
           deployment_name: taxi-batch-dp
-          sample_request: https://pipelinedata.blob.core.windows.net/sampledata/nytaxi/taxi-tip-data.csv
-
+          sample_request: data/taxi-batch.csv
+          request_type: uri_file #either uri_folder or uri_file 
 

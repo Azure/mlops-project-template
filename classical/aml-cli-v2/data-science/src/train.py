@@ -1,3 +1,4 @@
+
 import argparse
 
 from pathlib import Path
@@ -14,10 +15,11 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 import mlflow
 import mlflow.sklearn
 
+
 def parse_args():
 
     parser = argparse.ArgumentParser("train")
-    parser.add_argument("--training_data", type=str, help="Path to training data")
+    parser.add_argument("--prepared_data", type=str, help="Path to training data")
     parser.add_argument("--model_output", type=str, help="Path of output model")
 
     args = parser.parse_args()
@@ -29,7 +31,7 @@ def main():
     args = parse_args()
     
     lines = [
-        f"Training data path: {args.training_data}",
+        f"Training data path: {args.prepared_data}",
         f"Model output path: {args.model_output}",
     ]
 
@@ -37,10 +39,10 @@ def main():
         print(line)
 
     print("mounted_path files: ")
-    arr = os.listdir(args.training_data)
+    arr = os.listdir(args.prepared_data)
     print(arr)
 
-    train_data = pd.read_csv((Path(args.training_data) / "train.csv"))
+    train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
     print(train_data.columns)
 
     # Split the data into input(X) and output(y)
