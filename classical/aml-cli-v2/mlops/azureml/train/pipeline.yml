@@ -64,7 +64,7 @@ jobs:
       --predictions ${{outputs.predictions}}
       --score_report ${{outputs.score_report}}
       --deploy_flag ${{outputs.deploy_flag}}
-    environment: azureml:taxi-training@latest
+    environment: azureml:taxi-train-env@latest
     inputs:
       model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
