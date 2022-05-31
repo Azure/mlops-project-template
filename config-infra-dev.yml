@@ -7,7 +7,7 @@ variables:
   ap_vm_image: ubuntu-20.04
 
   namespace: mlopsv2
-  postfix: 0518
+  postfix: 0520
   location: westus
   environment: dev
   enable_aml_computecluster: true
@@ -22,12 +22,12 @@ variables:
   gh_org_url:
 
   # IaC
-  resource_group: rg-$(namespace)-$(postfix)
-  aml_workspace: mlw-$(namespace)-$(postfix) 
-  application_insights: mlw-$(namespace)-$(postfix)
-  key_vault: kv-$(namespace)-$(postfix)
-  container_registry: cr$(namespace)$(postfix)
-  storage_account: st$(namespace)$(postfix)
+  resource_group: rg-$(namespace)-$(postfix)$(environment)
+  aml_workspace: mlw-$(namespace)-$(postfix)$(environment) 
+  application_insights: mlw-$(namespace)-$(postfix)$(environment)
+  key_vault: kv-$(namespace)-$(postfix)$(environment)
+  container_registry: cr$(namespace)$(postfix)$(environment)
+  storage_account: st$(namespace)$(postfix)$(environment)
 
   # Terraform
   terraform_version: 0.14.7

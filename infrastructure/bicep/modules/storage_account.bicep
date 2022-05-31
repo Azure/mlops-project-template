@@ -1,11 +1,12 @@
 param prefix string
 param postfix string
+param env string
 param location string
 param tags object
 
 // Storage Account
 resource stoacct 'Microsoft.Storage/storageAccounts@2019-04-01' = {
-  name: 'st${prefix}${postfix}'
+  name: 'st${prefix}${postfix}${env}'
   location: location
   sku: {
     name: 'Standard_LRS'

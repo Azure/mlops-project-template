@@ -3,7 +3,7 @@ targetScope = 'subscription'
 param location string = 'westus2'
 param prefix string
 param postfix string
-param resourceGroupName string = 'rg-wus-test'
+param env string 
 
 param tags object = {
   Owner: 'mlops-v2'
@@ -12,6 +12,9 @@ param tags object = {
   Toolkit: 'bicep'
   Name: prefix
 }
+
+var baseName  = '${prefix}-${postfix}${env}'
+var resourceGroupName = 'rg-${baseName}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: resourceGroupName
@@ -27,6 +30,7 @@ module st './modules/storage_account.bicep' = {
   params: {
     prefix: prefix
     postfix: postfix
+    env: env
     location: location
     tags: tags
   }
@@ -39,6 +43,7 @@ module kv './modules/key_vault.bicep' = {
   params: {
     prefix: prefix
     postfix: postfix
+    env: env
     location: location
     tags: tags
   }
@@ -51,6 +56,7 @@ module appi './modules/application_insights.bicep' = {
   params: {
     prefix: prefix
     postfix: postfix
+    env: env
     location: location
     tags: tags
   }
@@ -63,6 +69,7 @@ module cr './modules/container_registry.bicep' = {
   params: {
     prefix: prefix
     postfix: postfix
+    env: env
     location: location
     tags: tags
   }
@@ -75,6 +82,7 @@ module mlw './modules/aml_workspace.bicep' = {
   params: {
     prefix: prefix
     postfix: postfix
+    env: env
     location: location
     stoacctid: st.outputs.stoacctOut
     kvid: kv.outputs.kvOut
@@ -89,8 +97,6 @@ module mlwcc './modules/aml_computecluster.bicep' = {
   name: 'mlwcc'
   scope: resourceGroup(rg.name)
   params: {
-    prefix: prefix
-    postfix: postfix
     location: location
     workspaceName: mlw.outputs.amlsName
   }
