@@ -28,9 +28,7 @@ module st './modules/storage_account.bicep' = {
   name: 'st'
   scope: resourceGroup(rg.name)
   params: {
-    prefix: prefix
-    postfix: postfix
-    env: env
+    baseName: '${prefix}${postfix}${env}'
     location: location
     tags: tags
   }
@@ -41,9 +39,7 @@ module kv './modules/key_vault.bicep' = {
   name: 'kv'
   scope: resourceGroup(rg.name)
   params: {
-    prefix: prefix
-    postfix: postfix
-    env: env
+    baseName: baseName
     location: location
     tags: tags
   }
@@ -54,9 +50,7 @@ module appi './modules/application_insights.bicep' = {
   name: 'appi'
   scope: resourceGroup(rg.name)
   params: {
-    prefix: prefix
-    postfix: postfix
-    env: env
+    baseName: baseName
     location: location
     tags: tags
   }
@@ -67,9 +61,7 @@ module cr './modules/container_registry.bicep' = {
   name: 'cr'
   scope: resourceGroup(rg.name)
   params: {
-    prefix: prefix
-    postfix: postfix
-    env: env
+    baseName: '${prefix}${postfix}${env}'
     location: location
     tags: tags
   }
@@ -80,9 +72,7 @@ module mlw './modules/aml_workspace.bicep' = {
   name: 'mlw'
   scope: resourceGroup(rg.name)
   params: {
-    prefix: prefix
-    postfix: postfix
-    env: env
+    baseName: baseName
     location: location
     stoacctid: st.outputs.stoacctOut
     kvid: kv.outputs.kvOut

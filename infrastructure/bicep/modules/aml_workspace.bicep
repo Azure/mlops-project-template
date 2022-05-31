@@ -1,6 +1,4 @@
-param prefix string
-param postfix string
-param env string
+param baseName string
 param location string
 param stoacctid string
 param kvid string
@@ -10,7 +8,7 @@ param tags object
 
 // AML workspace
 resource amls 'Microsoft.MachineLearningServices/workspaces@2020-09-01-preview' = {
-  name: 'mlw-${prefix}-${postfix}${env}'
+  name: 'mlw-${baseName}'
   location: location
   identity: {
     type: 'SystemAssigned'
