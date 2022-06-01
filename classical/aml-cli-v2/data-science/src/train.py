@@ -15,6 +15,34 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 import mlflow
 import mlflow.sklearn
 
+TARGET_COL = "cost"
+
+NUMERIC_COLS = [
+    "distance",
+    "dropoff_latitude",
+    "dropoff_longitude",
+    "passengers",
+    "pickup_latitude",
+    "pickup_longitude",
+    "pickup_weekday",
+    "pickup_month",
+    "pickup_monthday",
+    "pickup_hour",
+    "pickup_minute",
+    "pickup_second",
+    "dropoff_weekday",
+    "dropoff_month",
+    "dropoff_monthday",
+    "dropoff_hour",
+    "dropoff_minute",
+    "dropoff_second",
+]
+
+CATEGORICAL_COLS = [
+    "store_forward",
+    "vendor",
+]
+
 
 def parse_args():
 
@@ -43,35 +71,10 @@ def main():
     print(arr)
 
     train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
-    print(train_data.columns)
 
     # Split the data into input(X) and output(y)
-    y_train = train_data["cost"]
-    # X = train_data.drop(['cost'], axis=1)
-    X_train = train_data[
-        [
-            "distance",
-            "dropoff_latitude",
-            "dropoff_longitude",
-            "passengers",
-            "pickup_latitude",
-            "pickup_longitude",
-            "store_forward",
-            "vendor",
-            "pickup_weekday",
-            "pickup_month",
-            "pickup_monthday",
-            "pickup_hour",
-            "pickup_minute",
-            "pickup_second",
-            "dropoff_weekday",
-            "dropoff_month",
-            "dropoff_monthday",
-            "dropoff_hour",
-            "dropoff_minute",
-            "dropoff_second",
-        ]
-    ]
+    y_train = train_data[TARGET_COL]
+    X_train = train_data[NUMERIC_COLS + CATEGORICAL_COLS]
 
 
     # Train a Linear Regression Model with the train set

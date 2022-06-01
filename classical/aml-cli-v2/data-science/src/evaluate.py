@@ -24,6 +24,36 @@ import mlflow.sklearn
 run = Run.get_context()
 ws = run.experiment.workspace
 
+TARGET_COL = "cost"
+
+NUMERIC_COLS = [
+    "distance",
+    "dropoff_latitude",
+    "dropoff_longitude",
+    "passengers",
+    "pickup_latitude",
+    "pickup_longitude",
+    "pickup_weekday",
+    "pickup_month",
+    "pickup_monthday",
+    "pickup_hour",
+    "pickup_minute",
+    "pickup_second",
+    "dropoff_weekday",
+    "dropoff_month",
+    "dropoff_monthday",
+    "dropoff_hour",
+    "dropoff_minute",
+    "dropoff_second",
+]
+
+CATEGORICAL_COLS = [
+    "store_forward",
+    "vendor",
+]
+
+SENSITIVE_COLS = ["vendor"] # for fairlearn dashborad
+
 
 def parse_args():
         
@@ -64,57 +94,11 @@ def main():
     train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
     test_data = pd.read_csv((Path(args.prepared_data) / "test.csv"))
 
-    y_train = train_data["cost"]
-    X_train = train_data[
-        [
-            "distance",
-            "dropoff_latitude",
-            "dropoff_longitude",
-            "passengers",
-            "pickup_latitude",
-            "pickup_longitude",
-            "store_forward",
-            "vendor",
-            "pickup_weekday",
-            "pickup_month",
-            "pickup_monthday",
-            "pickup_hour",
-            "pickup_minute",
-            "pickup_second",
-            "dropoff_weekday",
-            "dropoff_month",
-            "dropoff_monthday",
-            "dropoff_hour",
-            "dropoff_minute",
-            "dropoff_second",
-        ]
-    ]
+    y_train = train_data[TARGET_COL]
+    X_train = train_data[NUMERIC_COLS + CATEGORICAL_COLS]
 
-    y_test = test_data["cost"]
-    X_test = test_data[
-        [
-            "distance",
-            "dropoff_latitude",
-            "dropoff_longitude",
-            "passengers",
-            "pickup_latitude",
-            "pickup_longitude",
-            "store_forward",
-            "vendor",
-            "pickup_weekday",
-            "pickup_month",
-            "pickup_monthday",
-            "pickup_hour",
-            "pickup_minute",
-            "pickup_second",
-            "dropoff_weekday",
-            "dropoff_month",
-            "dropoff_monthday",
-            "dropoff_hour",
-            "dropoff_minute",
-            "dropoff_second",
-        ]
-    ]
+    y_test = test_data[TARGET_COL]
+    X_test = test_data[NUMERIC_COLS + CATEGORICAL_COLS]
 
     # Load the model from input port
     model = pickle.load(open((Path(args.model_input) / "model.pkl"), "rb"))
@@ -124,8 +108,8 @@ def main():
 
     # Save the output data with feature columns, predicted cost, and actual cost in csv file
     output_data = X_test.copy()
-    output_data["actual_cost"] = y_test
-    output_data["predicted_cost"] = yhat_test
+    output_data["real_label"] = y_test
+    output_data["predicted_label"] = yhat_test
     output_data.to_csv((Path(args.predictions) / "predictions.csv"))
 
     # Print the results of scoring the predictions against actual values in the test data
@@ -189,9 +173,9 @@ def main():
         f.write('%d' % int(deploy_flag))
                 
     scores["current model"] = score
-    model_runs_metrics_plot = pd.DataFrame(scores, index=["r2 score"]).plot(kind='bar', figsize=(15, 10))
-    model_runs_metrics_plot.figure.savefig("perf_comparison.png")
-    model_runs_metrics_plot.figure.savefig(Path(args.score_report) / "perf_comparison.png")
+    perf_comparison_plot = pd.DataFrame(scores, index=["r2 score"]).plot(kind='bar', figsize=(15, 10))
+    perf_comparison_plot.figure.savefig("perf_comparison.png")
+    perf_comparison_plot.figure.savefig(Path(args.score_report) / "perf_comparison.png")
     
     mlflow.log_metric("deploy flag", bool(deploy_flag))
     mlflow.log_artifact("perf_comparison.png")
@@ -201,8 +185,7 @@ def main():
     # Calculate Fairness Metrics over Sensitive Features
     # Create a dictionary of model(s) you want to assess for fairness 
     
-    sensitive_features = ["vendor"]
-    sf = { col: X_test[[col]] for col in sensitive_features }
+    sf = { col: X_test[[col]] for col in SENSITIVE_COLS }
     predictions["currrent model"] = [x for x in model.predict(X_test)]
     
     dash_dict_all = _create_group_metric_set(y_true=y_test,
