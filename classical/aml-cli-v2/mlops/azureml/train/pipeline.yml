@@ -1,0 +1,92 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: taxi-fare-training
+description: Training Pipeline to train a model that predicts taxi fare price
+
+# <inputs_and_outputs>
+inputs:
+  input: #using local data, will crate an anonymous data asset
+    type: uri_folder
+    path: ../../../data/
+
+outputs: 
+  prepared_data:
+  trained_model:
+  predictions:
+  score_report:
+  deploy_flag:
+# </inputs_and_outputs>
+
+# <jobs>
+settings:
+  default_datastore: azureml:workspaceblobstore
+  default_compute: azureml:cpu-cluster
+  continue_on_step_failure: false
+
+jobs:
+  prep_data:
+    name: prep_data
+    display_name: prep-data
+    code: ../../../data-science/src
+    command: >-
+      python prep.py 
+      --raw_data ${{inputs.raw_data}} 
+      --prepared_data ${{outputs.prepared_data}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      raw_data: ${{parent.inputs.input}}
+    outputs:
+      prepared_data: ${{parent.outputs.prepared_data}}
+
+  train_model:
+    name: train_model
+    display_name: train-model
+    code: ../../../data-science/src
+    command: >-
+      python train.py 
+      --prepared_data ${{inputs.prepared_data}} 
+      --model_output ${{outputs.model_output}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      prepared_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
+    outputs:
+      model_output: ${{parent.outputs.trained_model}}
+  
+  evaluate_model:
+    name: evaluate_model
+    display_name: evaluate-model
+    code: ../../../data-science/src
+    command: >-
+      python evaluate.py 
+      --model_name ${{inputs.model_name}} 
+      --model_input ${{inputs.model_input}} 
+      --prepared_data ${{inputs.prepared_data}}
+      --predictions ${{outputs.predictions}}
+      --score_report ${{outputs.score_report}}
+      --deploy_flag ${{outputs.deploy_flag}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      model_name: "taxi-model"
+      model_input: ${{parent.jobs.train_model.outputs.model_output}}
+      prepared_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
+    outputs:
+      predictions: ${{parent.outputs.predictions}}
+      score_report: ${{parent.outputs.score_report}}
+      deploy_flag: ${{parent.outputs.deploy_flag}}
+
+  register_model:
+    name: register_model
+    display_name: register-model
+    code: ../../../data-science/src
+    command: >-
+      python register.py 
+      --model_name ${{inputs.model_name}} 
+      --model_path ${{inputs.model_path}} 
+      --deploy_flag ${{inputs.deploy_flag}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      model_name: "taxi-model"
+      model_path: ${{parent.jobs.train_model.outputs.model_output}}
+      deploy_flag: ${{parent.jobs.evaluate_model.outputs.deploy_flag}}
+
+# </jobs>

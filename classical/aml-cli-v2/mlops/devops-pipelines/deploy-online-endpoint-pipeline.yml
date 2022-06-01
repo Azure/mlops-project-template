@@ -2,7 +2,6 @@
 # Licensed under the MIT License.
 
 variables:
-- template: ../../config-aml.yml
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
     - template: ../../config-infra-prod.yml
@@ -10,26 +9,32 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 - name: version
-  value: python-sdk
+  value: aml-cli-v2 
+- name: endpoint_name
+  value: taxi-fare-online
+- name: endpoint_type
+  value: online
+
 
 trigger:
 - none
 
 pool:
-  vmImage: $(ap_vm_image)
+  vmImage: ubuntu-20.04
+
 
 resources:
   repositories:
     - repository: mlops-templates  # Template Repo
-      name: Azure/mlops-templates # need to change org name from Azure when pulling the template
+      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
 
 stages:
-- stage: DeployTrainingPipeline
-  displayName: Deploy Training Pipeline
+- stage: CreateOnlineEndpoint
+  displayName: Create/Update Online Endpoint 
   jobs:
-    - job: DeployTrainingPipeline
+    - job: DeployOnlineEndpoint
       steps:
       - checkout: self
         path: s/
@@ -38,16 +43,18 @@ stages:
       - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
-      - template: templates/${{ variables.version }}/create-environment.yml@mlops-templates
+      - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
         parameters:
-          environment_name: $(training_env_name)
-          environment_conda_yaml: $(training_env_conda_yaml)
-      - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
+          endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
+      - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
         parameters:
-          data_type: training
-      - template: templates/${{ variables.version }}/get-compute.yml@mlops-templates
+          deployment_name: taxi-online-dp
+          deployment_file: mlops/azureml/deploy/online/online-deployment.yml 
+      - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
         parameters:
-          compute_type: training
-      - template: templates/${{ variables.version }}/deploy-training-pipeline.yml@mlops-templates
-      - template: templates/${{ variables.version }}/add-pipeline-to-endpoint.yml@mlops-templates
-      - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
+          traffic_allocation: taxi-online-dp=100
+      - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
+        parameters:
+          deployment_name: taxi-online-dp
+          sample_request: data/taxi-request.json
+          request_type: json

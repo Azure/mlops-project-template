@@ -24,6 +24,11 @@ variable "postfix" {
   description = "Postfix for the module name"
 }
 
+variable "env" {
+  type        = string
+  description = "Environment prefix"
+}
+
 variable "storage_account_id" {
   type        = string
   description = "The ID of the Storage Account linked to AML workspace"
