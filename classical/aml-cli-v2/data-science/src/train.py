@@ -142,12 +142,12 @@ def main():
                               random_state=0))])
 
     mlflow.log_param("model", "RandomForestRegressor")
-    mlflow.log_metric("n_estimators", args.regressor__n_estimators)
-    mlflow.log_metric("bootstrap", args.regressor__bootstrap)
-    mlflow.log_metric("max_depth", args.regressor__max_depth)
+    mlflow.log_param("n_estimators", args.regressor__n_estimators)
+    mlflow.log_param("bootstrap", args.regressor__bootstrap)
+    mlflow.log_param("max_depth", args.regressor__max_depth)
     mlflow.log_param("max_features", args.regressor__max_features)
-    mlflow.log_metric("min_samples_leaf", args.regressor__min_samples_leaf)
-    mlflow.log_metric("min_samples_split", args.regressor__min_samples_split)
+    mlflow.log_param("min_samples_leaf", args.regressor__min_samples_leaf)
+    mlflow.log_param("min_samples_split", args.regressor__min_samples_split)
 
     pipeline.fit(X_train, y_train)
 
