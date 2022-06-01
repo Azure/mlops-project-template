@@ -47,9 +47,12 @@ NUMERIC_COLS = [
     "dropoff_second",
 ]
 
-CATEGORICAL_COLS = [
+CAT_NOM_COLS = [
     "store_forward",
     "vendor",
+]
+
+CAT_ORD_COLS = [
 ]
 
 SENSITIVE_COLS = ["vendor"] # for fairlearn dashborad
@@ -95,10 +98,10 @@ def main():
     test_data = pd.read_csv((Path(args.prepared_data) / "test.csv"))
 
     y_train = train_data[TARGET_COL]
-    X_train = train_data[NUMERIC_COLS + CATEGORICAL_COLS]
+    X_train = train_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     y_test = test_data[TARGET_COL]
-    X_test = test_data[NUMERIC_COLS + CATEGORICAL_COLS]
+    X_test = test_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     # Load the model from input port
     model = pickle.load(open((Path(args.model_input) / "model.pkl"), "rb"))
@@ -112,10 +115,6 @@ def main():
     output_data["predicted_label"] = yhat_test
     output_data.to_csv((Path(args.predictions) / "predictions.csv"))
 
-    # Print the results of scoring the predictions against actual values in the test data
-    # The coefficients
-    print("Coefficients: \n", model.coef_)
-
     # Evaluate Model performance with the test set
     r2 = r2_score(y_test, yhat_test)
     mse = mean_squared_error(y_test, yhat_test)
@@ -127,7 +126,6 @@ def main():
         "Scored with the following model:\n{}".format(model)
     )
     with open((Path(args.score_report) / "score.txt"), "a") as f:
-        f.write("\n Coefficients: \n %s \n" % str(model.coef_))
         f.write("Mean squared error: %.2f \n" % mse)
         f.write("Root mean squared error: %.2f \n" % rmse)
         f.write("Mean absolute error: %.2f \n" % mae)
@@ -207,17 +205,18 @@ def main():
 
     
     # -------------------- Explainability ------------------- #
-    tabular_explainer = TabularExplainer(model,
-                                     initialization_examples=X_train,
-                                     features=X_train.columns)
+    tree_explainer = TabularExplainer(model.steps[-1][1],
+                                   initialization_examples=X_train,
+                                   features=X_train.columns,
+                                   transformations=model.steps[0][1])
     
     # save explainer                                 
-    #joblib.dump(tabular_explainer, os.path.join(explainer_path, "explainer"))
+    #joblib.dump(tree_explainer, os.path.join(tree_explainer, "explainer"))
 
     # find global explanations for feature importance
     # you can use the training data or the test data here, 
     # but test data would allow you to use Explanation Exploration
-    global_explanation = tabular_explainer.explain_global(X_test)
+    global_explanation = tree_explainer.explain_global(X_test)
 
     # sorted feature importance values and feature names
     sorted_global_importance_values = global_explanation.get_ranked_global_values()

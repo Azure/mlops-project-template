@@ -9,7 +9,12 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 import mlflow
@@ -38,9 +43,12 @@ NUMERIC_COLS = [
     "dropoff_second",
 ]
 
-CATEGORICAL_COLS = [
+CAT_NOM_COLS = [
     "store_forward",
     "vendor",
+]
+
+CAT_ORD_COLS = [
 ]
 
 
@@ -49,6 +57,20 @@ def parse_args():
     parser = argparse.ArgumentParser("train")
     parser.add_argument("--prepared_data", type=str, help="Path to training data")
     parser.add_argument("--model_output", type=str, help="Path of output model")
+
+    # classifier specific arguments
+    parser.add_argument('--regressor__n_estimators', type=int, default=500,
+                        help='Number of trees')
+    parser.add_argument('--regressor__bootstrap', type=int, default=1,
+                        help='Method of selecting samples for training each tree')   
+    parser.add_argument('--regressor__max_depth', type=int, default=10,
+                        help=' Maximum number of levels in tree')
+    parser.add_argument('--regressor__max_features', type=str, default='auto',
+                        help='Number of features to consider at every split')    
+    parser.add_argument('--regressor__min_samples_leaf', type=int, default=4,
+                        help='Minimum number of samples required at each leaf node')    
+    parser.add_argument('--regressor__min_samples_split', type=int, default=5,
+                        help='Minimum number of samples required to split a node')
 
     args = parser.parse_args()
 
@@ -74,16 +96,65 @@ def main():
 
     # Split the data into input(X) and output(y)
     y_train = train_data[TARGET_COL]
-    X_train = train_data[NUMERIC_COLS + CATEGORICAL_COLS]
-
+    X_train = train_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     # Train a Linear Regression Model with the train set
-    model = LinearRegression().fit(X_train, y_train)
 
-    # Predict using the Linear Regression Model
-    yhat_train = model.predict(X_train)
+    # numerical features
+    numeric_transformer = Pipeline(steps=[
+        ('standardscaler', StandardScaler())])
 
-    # Evaluate Linear Regression performance with the train set
+    # ordinal features transformer
+    ordinal_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(missing_values=np.nan, strategy="most_frequent")),
+        ('minmaxscaler', MinMaxScaler())
+    ])
+
+    # nominal features transformer
+    nominal_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(missing_values=np.nan, strategy="most_frequent")),
+        ('onehot', OneHotEncoder(sparse=False))
+    ])
+
+    # imputer only for all other features
+    imputer_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(missing_values=np.nan, strategy="most_frequent"))
+    ])
+
+    # preprocessing pipeline
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('numeric', numeric_transformer, NUMERIC_COLS),
+           #('ordinal', ordinal_transformer, CAT_ORD_COLS),
+            ('nominal', nominal_transformer, CAT_NOM_COLS)], # other features are already binary
+            remainder="passthrough")
+
+    # append regressor to preprocessing pipeline.
+    # now we have a full prediction pipeline.
+    pipeline = Pipeline(steps=[('preprocessor', preprocessor),
+                          ('regressor', RandomForestRegressor(
+                              n_estimators = args.regressor__n_estimators,
+                              bootstrap = args.regressor__bootstrap,
+                              max_depth = args.regressor__max_depth,
+                              max_features = args.regressor__max_features,
+                              min_samples_leaf = args.regressor__min_samples_leaf,
+                              min_samples_split = args.regressor__min_samples_split,
+                              random_state=0))])
+
+    mlflow.log_param("model", "RandomForestRegressor")
+    mlflow.log_metric("n_estimators", args.regressor__n_estimators)
+    mlflow.log_metric("bootstrap", args.regressor__bootstrap)
+    mlflow.log_metric("max_depth", args.regressor__max_depth)
+    mlflow.log_param("max_features", args.regressor__max_features)
+    mlflow.log_metric("min_samples_leaf", args.regressor__min_samples_leaf)
+    mlflow.log_metric("min_samples_split", args.regressor__min_samples_split)
+
+    pipeline.fit(X_train, y_train)
+
+    # Predict using the Regression Model
+    yhat_train = pipeline.predict(X_train)
+
+    # Evaluate Regression performance with the train set
     r2 = r2_score(y_train, yhat_train)
     mse = mean_squared_error(y_train, yhat_train)
     rmse = np.sqrt(mse)
@@ -103,7 +174,7 @@ def main():
     mlflow.log_artifact("regression_results.png")
 
     # Save the model
-    pickle.dump(model, open((Path(args.model_output) / "model.pkl"), "wb"))
+    pickle.dump(pipeline, open((Path(args.model_output) / "model.pkl"), "wb"))
 
 if __name__ == "__main__":
     main()
