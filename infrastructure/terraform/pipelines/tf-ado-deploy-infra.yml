@@ -2,7 +2,6 @@
 # Licensed under the MIT License.
 
 variables:
-- template: ../../config-aml.yml
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
     - template: ../../config-infra-prod.yml
@@ -20,7 +19,7 @@ resources:
   repositories:
     - repository: mlops-templates 
       name: Azure/mlops-templates 
-      endpoint: mlops-v2-tabular
+      endpoint: github-connection
       type: github
       ref: main #branch name
 
@@ -39,10 +38,10 @@ stages :
       - template: templates/infra/create-storage-account.yml@mlops-templates
       - template: templates/infra/create-storage-container.yml@mlops-templates
   - stage: DeployAzureMachineLearningRG
-    displayName: Deploy AML Resource Group
+    displayName: Deploy AML Workspace
     jobs:
     - job:  DeployAMLWorkspace
-      displayName: 'Deploy AML Workspace'
+      displayName: Deploy Terraform
       steps:
       - checkout: self
         path: s/

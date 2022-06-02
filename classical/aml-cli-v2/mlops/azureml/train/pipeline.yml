@@ -1,20 +1,20 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-experiment_name: ml_usecase_regression
+experiment_name: taxi-fare-training
+description: Training Pipeline to train a model that predicts taxi fare price
 
 # <inputs_and_outputs>
 inputs:
-  pipeline_job_input: #using local data, will crate an anonymous data asset
+  input: #using local data, will crate an anonymous data asset
     type: uri_folder
-    path: ../../data/
+    path: ../../../data/
 
 outputs: 
-  pipeline_job_transformed_data:
-  pipeline_job_trained_model:
-    mode: rw_mount   
-  pipeline_job_predictions:
-  pipeline_job_score_report:
-  pipeline_job_deploy_flag:
+  prepared_data:
+  trained_model:
+  predictions:
+  score_report:
+  deploy_flag:
 # </inputs_and_outputs>
 
 # <jobs>
@@ -27,63 +27,63 @@ jobs:
   prep_data:
     name: prep_data
     display_name: prep-data
-    code: ../../data-science/src
+    code: ../../../data-science/src
     command: >-
       python prep.py 
       --raw_data ${{inputs.raw_data}} 
-      --transformed_data ${{outputs.transformed_data}}
-    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+      --prepared_data ${{outputs.prepared_data}}
+    environment: azureml:taxi-train-env@latest
     inputs:
-      raw_data: ${{parent.inputs.pipeline_job_input}}
+      raw_data: ${{parent.inputs.input}}
     outputs:
-      transformed_data: ${{parent.outputs.pipeline_job_transformed_data}}
+      prepared_data: ${{parent.outputs.prepared_data}}
 
   train_model:
     name: train_model
     display_name: train-model
-    code: ../../data-science/src
+    code: ../../../data-science/src
     command: >-
       python train.py 
-      --training_data ${{inputs.training_data}} 
+      --prepared_data ${{inputs.prepared_data}} 
       --model_output ${{outputs.model_output}}
-    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+    environment: azureml:taxi-train-env@latest
     inputs:
-      training_data: ${{parent.jobs.prep_data.outputs.transformed_data}}
+      prepared_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
     outputs:
-      model_output: ${{parent.outputs.pipeline_job_trained_model}}
+      model_output: ${{parent.outputs.trained_model}}
   
   evaluate_model:
     name: evaluate_model
     display_name: evaluate-model
-    code: ../../data-science/src
+    code: ../../../data-science/src
     command: >-
       python evaluate.py 
       --model_name ${{inputs.model_name}} 
       --model_input ${{inputs.model_input}} 
-      --test_data ${{inputs.test_data}}
+      --prepared_data ${{inputs.prepared_data}}
       --predictions ${{outputs.predictions}}
       --score_report ${{outputs.score_report}}
       --deploy_flag ${{outputs.deploy_flag}}
-    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+    environment: azureml:taxi-train-env@latest
     inputs:
       model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
-      test_data: ${{parent.jobs.prep_data.outputs.transformed_data}}
+      prepared_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
     outputs:
-      predictions: ${{parent.outputs.pipeline_job_predictions}}
-      score_report: ${{parent.outputs.pipeline_job_score_report}}
-      deploy_flag: ${{parent.outputs.pipeline_job_deploy_flag}}
+      predictions: ${{parent.outputs.predictions}}
+      score_report: ${{parent.outputs.score_report}}
+      deploy_flag: ${{parent.outputs.deploy_flag}}
 
   register_model:
     name: register_model
     display_name: register-model
-    code: ../../data-science/src
+    code: ../../../data-science/src
     command: >-
       python register.py 
       --model_name ${{inputs.model_name}} 
       --model_path ${{inputs.model_path}} 
       --deploy_flag ${{inputs.deploy_flag}}
-    environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest
+    environment: azureml:taxi-train-env@latest
     inputs:
       model_name: "taxi-model"
       model_path: ${{parent.jobs.train_model.outputs.model_output}}

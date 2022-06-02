@@ -1,5 +1,5 @@
 resource "azurerm_machine_learning_workspace" "mlw" {
-  name                    = "mlw-${var.prefix}-${var.postfix}"
+  name                    = "mlw-${var.prefix}-${var.postfix}${var.env}"
   location                = var.location
   resource_group_name     = var.rg_name
   application_insights_id = var.application_insights_id
@@ -19,7 +19,7 @@ resource "azurerm_machine_learning_workspace" "mlw" {
 # Compute cluster
 
 resource "azurerm_machine_learning_compute_cluster" "adl_aml_ws_compute_cluster" {
-  name                          = "mlwcc${var.prefix}${var.postfix}"
+  name                          = "cpu-cluster"
   location                      = var.location
   vm_priority                   = "LowPriority"
   vm_size                       = "Standard_DS3_v2"

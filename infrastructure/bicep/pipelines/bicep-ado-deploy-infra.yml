@@ -45,13 +45,13 @@ stages :
                 --name $(Build.DefinitionName) \
                 --template-file ./infrastructure/bicep/main.bicep \
                 --location $(location) \
-                --parameters location=$(location) resourceGroupName=$(resource_group) prefix=$(namespace) postfix=$(postfix)
+                --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)
 
   - stage: CheckOutBicepAndDeploy
     displayName: Deploy AML Workspace
     jobs:
     - deployment: DevDeployBicep
-      displayName: deploy to dev
+      displayName: Deploy Bicep
       pool:
         vmImage: $(ap_vm_image)
       environment: dev
@@ -73,4 +73,4 @@ stages :
                     --name $(Build.DefinitionName) \
                     --location $(location) \
                     --template-file ./infrastructure/bicep/main.bicep \
-                    --parameters location=$(location) resourceGroupName=$(resource_group) prefix=$(namespace) postfix=$(postfix)
+                    --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)

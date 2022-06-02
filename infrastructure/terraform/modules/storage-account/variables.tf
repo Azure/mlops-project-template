@@ -24,6 +24,11 @@ variable "postfix" {
   description = "Postfix for the module name"
 }
 
+variable "env" {
+  type        = string
+  description = "Environment prefix"
+}
+
 variable "hns_enabled" {
   type        = bool
   description = "Hierarchical namespaces enabled/disabled"

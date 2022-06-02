@@ -4,14 +4,14 @@
 variables:
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
-    - template: ../../../config-infra-prod.yml
+    - template: ../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../../config-infra-dev.yml
+    - template: ../../config-infra-dev.yml
 - name: version
-  value: aml-cli-v2 #must be either 'python-sdk' or 'aml-cli-v2'
+  value: aml-cli-v2 
 - name: endpoint_name
-  value: onlineendpoint1
+  value: taxi-fare-online
 - name: endpoint_type
   value: online
 
@@ -44,40 +44,17 @@ stages:
       - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
+        parameters:
+          endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
       - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
         parameters:
-          deployment_name: blue
-          deployment_file: data-science-regression/components/deploy/online-endpoint/blue/blue-deployment.yml 
-      - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
-        parameters:
-          deployment_name: blue
-          sample_request: data-science-regression/components/deploy/online-endpoint/blue/sample-request.json
+          deployment_name: taxi-online-dp
+          deployment_file: mlops/azureml/deploy/online/online-deployment.yml 
       - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
         parameters:
-          traffic_allocation: blue=100
-
-
-# Example: Safe Rollout, can also be used for A/B testing 
-- stage: SafeRollout
-  displayName: Safe rollout of new deployment
-  jobs:
-    - job: SafeRolloutDeployment 
-      steps:
-      - checkout: self
-        path: s/
-      - checkout: mlops-templates
-        path: s/templates/
-      - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
-      - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
-      - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
-      - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
-        parameters:
-          deployment_name: green
-          deployment_file: data-science-regression/components/deploy/online-endpoint/green/green-deployment.yml 
+          traffic_allocation: taxi-online-dp=100
       - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
         parameters:
-          deployment_name: green
-          sample_request: data-science-regression/components/deploy/online-endpoint/green/sample-request.json
-      - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
-        parameters:
-          traffic_allocation: blue=90 green=10
+          deployment_name: taxi-online-dp
+          sample_request: data/taxi-request.json
+          request_type: json
