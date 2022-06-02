@@ -4,10 +4,10 @@
 variables:
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
-    - template: ../../../config-infra-prod.yml
+    - template: ../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../../config-infra-dev.yml
+    - template: ../../config-infra-dev.yml
 
 trigger:
 - none
@@ -24,7 +24,7 @@ stages :
       steps:
         - checkout: self
         - script: |
-            az bicep build --file ./infrastructure/bicep/main.bicep
+            az bicep build --file ./infrastructure/main.bicep
           name: LintBicepCode
           displayName: Run Bicep Linter
 
@@ -43,7 +43,7 @@ stages :
             inlineScript: |
               az deployment sub validate \
                 --name $(Build.DefinitionName) \
-                --template-file ./infrastructure/bicep/main.bicep \
+                --template-file ./infrastructure/main.bicep \
                 --location $(location) \
                 --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)
 
@@ -72,5 +72,5 @@ stages :
                   az deployment sub create \
                     --name $(Build.DefinitionName) \
                     --location $(location) \
-                    --template-file ./infrastructure/bicep/main.bicep \
+                    --template-file ./infrastructure/main.bicep \
                     --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)
