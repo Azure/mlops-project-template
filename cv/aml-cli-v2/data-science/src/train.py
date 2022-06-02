@@ -23,24 +23,17 @@ import traceback
 from distutils.util import strtobool
 
 import mlflow
-from mlflow.models.signature import infer_signature
-
 
 # the long list of torch imports
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.autograd import Variable
-import torchvision
 from torch.optim import lr_scheduler
 from torch.profiler import record_function
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm
 from transformers.utils import ModelOutput
-
-from azureml.core import Run
-
 
 # add path to here, if necessary
 COMPONENT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
@@ -77,9 +70,6 @@ class PyTorchDistributedModelTrainingSequence:
         self.model = None
         self.labels = []
         self.model_signature = None
-
-        # Run
-        self.runid = None
 
         # DISTRIBUTED CONFIG
         self.world_size = 1
@@ -661,6 +651,13 @@ class PyTorchDistributedModelTrainingSequence:
             else:
                 model_to_save = self.model.to("cpu")
 
+            # Save the labels to a csv file.
+            # This file will be required to map the output array
+            # from the API to the labels.
+            with open("label-mapping.txt", "w") as f:
+                f.write("\n".join(self.labels))
+            mlflow.log_artifact("label-mapping.txt")
+
             # MLFLOW: mlflow has a nice method to export the model automatically
             # add tags and environment for it. You can then use it in Azure ML
             # to register your model to an endpoint.
@@ -862,12 +859,6 @@ def run(args):
 
     # sets cuda and distributed config
     training_handler.setup_config(args)
-
-    # Get Run Id
-    run = Run.get_context()
-    run_id = run.get_details()["runId"]
-    training_handler.runid = run_id
-    logger.info(f"Run Id: {run_id}")
 
     # PROFILER: here we use a helper class to enable profiling
     # see profiling.py for the implementation details
