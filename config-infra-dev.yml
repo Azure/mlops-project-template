@@ -17,12 +17,12 @@ variables:
   ado_service_connection_aml_ws: Azure-ARM-Dev
 
   # IaC
-  resource_group: rg-$(namespace)-$(postfix)$(environment)
-  aml_workspace: mlw-$(namespace)-$(postfix)$(environment) 
-  application_insights: mlw-$(namespace)-$(postfix)$(environment)
-  key_vault: kv-$(namespace)-$(postfix)$(environment)
-  container_registry: cr$(namespace)$(postfix)$(environment)
-  storage_account: st$(namespace)$(postfix)$(environment)
+  resource_group: azureml-examples-rg
+  aml_workspace: main 
+  application_insights: maininsights3940d807586b
+  key_vault: mainkeyvaultaa801245b95c
+  container_registry: e7fd97c2665e408bab3c1c126576f89e
+  storage_account: mainstorage5338948febc34
 
   # Terraform
   terraform_version: 0.14.7
