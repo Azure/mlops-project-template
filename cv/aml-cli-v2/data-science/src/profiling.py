@@ -13,6 +13,7 @@ import tempfile
 from torch.profiler import profile, record_function, ProfilerActivity
 from typing import Any
 
+
 def markdown_trace_handler(dir_name: str, rank: int = 0):
     """This handler can be used inside torch.profiler call to output
     tables in markdown format"""
@@ -51,6 +52,7 @@ def markdown_trace_handler(dir_name: str, rank: int = 0):
 
 def composite_trace_handler(handler_list):
     """This can call multiple trace handlers inside one"""
+
     def _handler_fn(prof) -> None:
         for handler in handler_list:
             handler(prof)
@@ -58,7 +60,9 @@ def composite_trace_handler(handler_list):
     return _handler_fn
 
 
-def export_stack_trace_handler(dir_name: str, rank: int=0, metrics=["self_cuda_time_total"]):
+def export_stack_trace_handler(
+    dir_name: str, rank: int = 0, metrics=["self_cuda_time_total"]
+):
     """This handler can be used inside torch.profiler call to output
     tables in markdown format"""
 
@@ -128,24 +132,23 @@ class PyTorchProfilerHandler:
             markdown_logs_export = os.path.join(
                 self.profiler_output_tmp_dir.name, "markdown"
             )
-            trace_handlers.append(markdown_trace_handler(
-                markdown_logs_export, rank=self.rank
-            ))
+            trace_handlers.append(
+                markdown_trace_handler(markdown_logs_export, rank=self.rank)
+            )
 
             # export stacks in txt
             stacks_logs_export = os.path.join(
                 self.profiler_output_tmp_dir.name, "stacks"
             )
-            stack_metrics = [
-                "self_cpu_time_total"
-            ]
+            stack_metrics = ["self_cpu_time_total"]
             if torch.cuda.is_available():
                 stack_metrics.append("self_cuda_time_total")
 
-            trace_handlers.append(export_stack_trace_handler(
-                stacks_logs_export, rank=self.rank,
-                metrics=stack_metrics
-            ))
+            trace_handlers.append(
+                export_stack_trace_handler(
+                    stacks_logs_export, rank=self.rank, metrics=stack_metrics
+                )
+            )
 
             # export tensorboard
             # NOTE: removed due to segfault in pytorch 1.11.0
@@ -170,7 +173,7 @@ class PyTorchProfilerHandler:
                 with_flops=True,
                 profile_memory=True,
                 activities=activities,
-                with_stack=True, # needed to export stacks
+                with_stack=True,  # needed to export stacks
                 on_trace_ready=trace_handler,
             )
             self.profiler.start()
@@ -204,8 +207,9 @@ class PyTorchProfilerHandler:
                 "Not stopping profiler as it was not started in the first place."
             )
 
+
 class LogTimeBlock(object):
-    """ This class should be used to time a code block.
+    """This class should be used to time a code block.
     The time diff is computed from __enter__ to __exit__.
     Example
     -------
@@ -224,8 +228,8 @@ class LogTimeBlock(object):
         kwargs (dict): any keyword will be added  as properties to metrics for logging (work in progress)
         """
         # kwargs
-        self.step = kwargs.get('step', None)
-        self.enabled = kwargs.get('enabled', True)
+        self.step = kwargs.get("step", None)
+        self.enabled = kwargs.get("enabled", True)
 
         # internal variables
         self.name = name
@@ -233,23 +237,25 @@ class LogTimeBlock(object):
         self._logger = logging.getLogger(__name__)
 
     def __enter__(self):
-        """ Starts the timer, gets triggered at beginning of code block """
+        """Starts the timer, gets triggered at beginning of code block"""
         if not self.enabled:
             return
-        self.start_time = time.time() # starts "timer"
+        self.start_time = time.time()  # starts "timer"
 
     def __exit__(self, exc_type, value, traceback):
-        """ Stops the timer and stores accordingly
+        """Stops the timer and stores accordingly
         gets triggered at beginning of code block.
-        
+
         Note:
             arguments are by design for with statements.
         """
         if not self.enabled:
             return
-        run_time = time.time() - self.start_time # stops "timer"
+        run_time = time.time() - self.start_time  # stops "timer"
 
-        self._logger.info(f"--- time elapsed: {self.name} = {run_time:2f} s [step={self.step}]")
+        self._logger.info(
+            f"--- time elapsed: {self.name} = {run_time:2f} s [step={self.step}]"
+        )
         mlflow.log_metric(self.name + ".time", run_time)
 
 
@@ -262,18 +268,18 @@ class LogDiskIOBlock(object):
         kwargs (dict): any keyword will be added  as properties to metrics for logging (work in progress)
         """
         # kwargs
-        self.step = kwargs.get('step', None)
-        self.enabled = kwargs.get('enabled', True)
+        self.step = kwargs.get("step", None)
+        self.enabled = kwargs.get("enabled", True)
 
         # internal variables
         self.name = name
-        self.process_id = os.getpid() # focus on current process
+        self.process_id = os.getpid()  # focus on current process
         self.start_time = None
         self.start_disk_counters = None
         self._logger = logging.getLogger(__name__)
 
     def __enter__(self):
-        """ Get initial values, gets triggered at beginning of code block """
+        """Get initial values, gets triggered at beginning of code block"""
         if not self.enabled:
             return
         try:
@@ -286,9 +292,9 @@ class LogDiskIOBlock(object):
             self.logger.critical("import psutil failed, cannot display disk stats.")
 
     def __exit__(self, exc_type, value, traceback):
-        """ Stops the timer and stores accordingly
+        """Stops the timer and stores accordingly
         gets triggered at beginning of code block.
-        
+
         Note:
             arguments are by design for with statements.
         """
@@ -304,19 +310,32 @@ class LogDiskIOBlock(object):
 
         disk_io_metrics = {}
         end_disk_counters = psutil.Process(self.process_id).io_counters()
-        disk_io_metrics[f"{self.name}.disk.read"] = (end_disk_counters.read_bytes - self.start_disk_counters.read_bytes) / (1024 * 1024)
-        disk_io_metrics[f"{self.name}.disk.write"] = (end_disk_counters.write_bytes - self.start_disk_counters.write_bytes) / (1024 * 1024)
+        disk_io_metrics[f"{self.name}.disk.read"] = (
+            end_disk_counters.read_bytes - self.start_disk_counters.read_bytes
+        ) / (1024 * 1024)
+        disk_io_metrics[f"{self.name}.disk.write"] = (
+            end_disk_counters.write_bytes - self.start_disk_counters.write_bytes
+        ) / (1024 * 1024)
 
-        self._logger.info(f"--- time elapsed: {self.name} = {run_time:2f} s [step={self.step}]")
+        self._logger.info(
+            f"--- time elapsed: {self.name} = {run_time:2f} s [step={self.step}]"
+        )
         self._logger.info(f"--- disk_io_metrics: {disk_io_metrics}s [step={self.step}]")
 
         mlflow.log_metrics(disk_io_metrics)
 
 
-class LogTimeOfIterator():
+class LogTimeOfIterator:
     """This class is intended to "wrap" an existing Iterator
     and log metrics for each next() call"""
-    def __init__(self, wrapped_sequence:Any, name:str, enabled:bool=True, async_collector:dict=None):
+
+    def __init__(
+        self,
+        wrapped_sequence: Any,
+        name: str,
+        enabled: bool = True,
+        async_collector: dict = None,
+    ):
         self.wrapped_sequence = wrapped_sequence
         self.wrapped_iterator = None
 
@@ -328,7 +347,7 @@ class LogTimeOfIterator():
         self.async_collector = async_collector
 
         self._logger = logging.getLogger(__name__)
-    
+
     def __iter__(self):
         """Creates the iterator"""
         if self.enabled:
