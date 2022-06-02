@@ -69,12 +69,15 @@ jobs:
       model_arch_pretrained: true
 
       # training
-      num_epochs: 7
+      num_epochs: 1
       learning_rate: 0.001
       momentum: 0.9
 
       # profiling
       enable_profiling: false
       # multiprocessing_sharing_strategy: "file_system" # WARNING: this can cause hang at job completion
+
+      # Model Registrataion
+      register_model_as: "resnet-dogs-classifier"
 
 # </jobs>

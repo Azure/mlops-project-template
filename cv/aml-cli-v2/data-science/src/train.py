@@ -23,10 +23,14 @@ import traceback
 from distutils.util import strtobool
 
 import mlflow
+from mlflow.models.signature import infer_signature
+
+
 # the long list of torch imports
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.autograd import Variable
 import torchvision
 from torch.optim import lr_scheduler
 from torch.profiler import record_function
@@ -35,6 +39,9 @@ from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm
 from transformers.utils import ModelOutput
 
+from azureml.core import Run
+
+
 # add path to here, if necessary
 COMPONENT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
 if COMPONENT_ROOT not in sys.path:
@@ -42,10 +49,15 @@ if COMPONENT_ROOT not in sys.path:
     sys.path.append(str(COMPONENT_ROOT))
 
 from image_io import build_image_datasets
+
 # internal imports
 from model import MODEL_ARCH_LIST, get_model_metadata, load_model
-from profiling import (LogDiskIOBlock, LogTimeBlock, LogTimeOfIterator,
-                       PyTorchProfilerHandler)
+from profiling import (
+    LogDiskIOBlock,
+    LogTimeBlock,
+    LogTimeOfIterator,
+    PyTorchProfilerHandler,
+)
 
 
 class PyTorchDistributedModelTrainingSequence:
@@ -65,6 +77,9 @@ class PyTorchDistributedModelTrainingSequence:
         self.model = None
         self.labels = []
         self.model_signature = None
+
+        # Run
+        self.runid = None
 
         # DISTRIBUTED CONFIG
         self.world_size = 1
@@ -274,7 +289,7 @@ class PyTorchDistributedModelTrainingSequence:
     def setup_model(self, model):
         """Configures a model for training."""
         self.logger.info(f"Setting up model to use device {self.device}")
-        self.model = model.to(self.device)
+        self.model = model.float().to(self.device)
 
         # DISTRIBUTED: the model needs to be wrapped in a DistributedDataParallel class
         if self.multinode_available:
@@ -387,6 +402,9 @@ class PyTorchDistributedModelTrainingSequence:
                 optimizer.zero_grad()
 
                 outputs = self.model(images)
+
+                # if self.model_signature is None:
+                #     self.model_signature = infer_signature(images, outputs)
 
                 if isinstance(outputs, torch.Tensor):
                     # if we're training a regular pytorch model (ex: torchvision)
@@ -620,7 +638,12 @@ class PyTorchDistributedModelTrainingSequence:
                 model_output_path,
             )
 
-    def save(self, output_dir: str, name: str = "dev", register_as: str = None) -> None:
+    def save(
+        self,
+        output_dir: str,
+        name: str = "dev",
+        register_as: str = None,
+    ) -> None:
         # DISTRIBUTED: you want to save the model only from the main node/process
         # in data distributed mode, all models should theoretically be the same
         if self.self_is_main_node:
@@ -647,6 +670,15 @@ class PyTorchDistributedModelTrainingSequence:
                 registered_model_name=register_as,  # also register it if name is provided
                 signature=self.model_signature,
             )
+
+            # MLFLOW: Register the model with the model registry
+            # This is useful for Azure ML to register your model
+            # to an endpoint.
+            if register_as is not None:
+                mlflow.register_model(
+                    model_uri=f"runs:/{mlflow.active_run().info.run_id}/final_model",
+                    name=register_as,
+                )
 
 
 def build_arguments_parser(parser: argparse.ArgumentParser = None):
@@ -831,6 +863,12 @@ def run(args):
     # sets cuda and distributed config
     training_handler.setup_config(args)
 
+    # Get Run Id
+    run = Run.get_context()
+    run_id = run.get_details()["runId"]
+    training_handler.runid = run_id
+    logger.info(f"Run Id: {run_id}")
+
     # PROFILER: here we use a helper class to enable profiling
     # see profiling.py for the implementation details
     training_profiler = PyTorchProfilerHandler(
@@ -864,6 +902,8 @@ def run(args):
             pretrained=args.model_arch_pretrained,
         )
 
+    # logging of labels
+    logger.info(labels)
     # sets the model for distributed training
     training_handler.setup_model(model)
 
