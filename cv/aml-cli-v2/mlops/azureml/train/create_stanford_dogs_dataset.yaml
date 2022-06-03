@@ -1,0 +1,19 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+
+command: |
+  tar xvfm ${{inputs.archive}} --no-same-owner -C ${{outputs.images}} #TODO: Split data into Train-Validate-Test
+
+inputs:
+  archive:
+    type: uri_file
+    path: http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar
+
+outputs:
+  images:
+    type: uri_folder
+    mode: upload
+    path: azureml://datastores/workspaceblobstore/paths/azureml-vision-datasets/dogs/
+
+environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
+
+compute: azureml:cpu-cluster

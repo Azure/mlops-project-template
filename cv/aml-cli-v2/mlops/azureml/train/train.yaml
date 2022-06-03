@@ -1,0 +1,123 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+description: >-
+  Fine-tunes a pre-trained pytorch model for image classification.
+  Inputs should be provided as distinct directories containing distinct images
+  as we're using [ImageFolder](http://pytorch.org/vision/main/generated/torchvision.datasets.ImageFolder.html) to load data.
+name: pytorch_image_classifier
+display_name: Image Classification Model (PyTorch)
+version: 1.0.4
+
+inputs:
+  # data loading
+  train_images:
+    type: path
+    description: "Path to folder containing training images, stored in subdirectories according to their class."
+  valid_images:
+    type: path
+    description: "Path to folder containing validation images, stored in subdirectories according to their class."
+
+  # data loading
+  batch_size:
+    type: integer
+    min: 1
+    optional: true
+    description: "Train/valid data loading batch size (default: 64)"
+  num_workers:
+    type: integer
+    optional: true
+    description: "Num workers for data loader (default: -1 => all cpus available)"
+  prefetch_factor:
+    type: integer
+    optional: true
+    description: "Data loader prefetch factor (default: 2)"
+  persistent_workers:
+    type: boolean
+    optional: true
+    description: "Use persistent prefetching workers (default: True)"
+  pin_memory:
+    type: boolean
+    optional: true
+    description: "Pin Data loader prefetch factor (default: True)"
+  non_blocking:
+    type: boolean
+    optional: true
+    description: "Use non-blocking transfer to device (default: False)"
+
+  # model
+  model_arch:
+    type: string
+    optional: true
+    description: "Which model architecture to use (default: resnet18)"
+  model_arch_pretrained:
+    type: boolean
+    optional: true
+    description: "Use pretrained model (default: true)"
+
+  # training
+  num_epochs:
+    type: integer
+    optional: true
+    description: "Number of epochs to train for (default: 1)"
+  learning_rate:
+    type: number
+    optional: true
+    description: "Learning rate of optimizer (default: 0.001)"
+  momentum:
+    type: number
+    optional: true
+    description: "Momentum of optimizer (default: 0.9)"
+
+  # model registration
+  register_model_as:
+    type: string
+    optional: true
+    description: "Name to register final model in MLFlow"
+
+  # system parameters
+  enable_profiling:
+    type: boolean
+    default: false
+    description: "Enables profiler"
+  multiprocessing_sharing_strategy:
+    type: string
+    optional: true
+    description: "Check https://pytorch.org/docs/stable/multiprocessing.html"
+
+outputs:
+  checkpoints:
+    type: path
+    description: "Path to export checkpoints"
+  trained_model:
+    type: path
+    description: "Path to the final model"
+
+code: ../../../data-science/src
+
+environment: azureml:nvidia_pytorch@latest
+
+command: >-
+  python train.py
+  --train_images ${{inputs.train_images}}
+  --valid_images ${{inputs.valid_images}}
+  [--batch_size ${{inputs.batch_size}}]
+  [--num_workers ${{inputs.num_workers}}]
+  [--prefetch_factor ${{inputs.prefetch_factor}}]
+  [--persistent_workers ${{inputs.persistent_workers}}]
+  [--pin_memory ${{inputs.pin_memory}}]
+  [--non_blocking ${{inputs.non_blocking}}]
+  [--model_arch ${{inputs.model_arch}}]
+  [--model_arch_pretrained ${{inputs.model_arch_pretrained}}]
+  [--num_epochs ${{inputs.num_epochs}}]
+  [--learning_rate ${{inputs.learning_rate}}]
+  [--momentum ${{inputs.momentum}}]
+  --model_output ${{outputs.trained_model}}
+  --checkpoints ${{outputs.checkpoints}}
+  [--register_model_as ${{inputs.register_model_as}}]
+  --enable_profiling ${{inputs.enable_profiling}}
+  [--multiprocessing_sharing_strategy ${{inputs.multiprocessing_sharing_strategy}}]
+distribution:
+  # NOTE: using type:pytorch will use all the right env variables for pytorch init_process_group
+  type: pytorch
+  process_count_per_instance: 1

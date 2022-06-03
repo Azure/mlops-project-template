@@ -7,7 +7,7 @@ variables:
     - template: ../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../../../config-infra-dev.yml
+    - template: ../../config-infra-dev.yml
 - name: version
   value: aml-cli-v2 
 - name: endpoint_name
@@ -48,13 +48,13 @@ stages:
           endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
       - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
         parameters:
-          deployment_name: taxi-online-dp
+          deployment_name: dogs-online-dp
           deployment_file: mlops/azureml/deploy/online/online-deployment.yml 
       - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
         parameters:
-          traffic_allocation: taxi-online-dp=100
+          traffic_allocation: dogs-online-dp=100
       - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
         parameters:
-          deployment_name: taxi-online-dp
-          sample_request: data/taxi-request.json
+          deployment_name: dogs-online-dp
+          sample_request: data/sample-request.json g
           request_type: json

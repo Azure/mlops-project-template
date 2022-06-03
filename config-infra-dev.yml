@@ -24,6 +24,7 @@ variables:
   container_registry: cr$(namespace)$(postfix)$(environment)
   storage_account: st$(namespace)$(postfix)$(environment)
 
+
   # Terraform
   terraform_version: 0.14.7
   terraform_workingdir: infrastructure/terraform
