@@ -39,6 +39,13 @@ stages:
       - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
+      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+        parameters:
+          cluster_name: gpu-cluster
+          size: Standard_NC6
+          min_instances: 0
+          max_instances: 1
+          cluster_tier: dedicated
       - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
         parameters:
           build_type: docker
