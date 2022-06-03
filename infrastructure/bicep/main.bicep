@@ -8,7 +8,7 @@ param env string
 param tags object = {
   Owner: 'mlops-v2'
   Project: 'mlops-v2'
-  Environment: 'dev'
+  Environment: env
   Toolkit: 'bicep'
   Name: prefix
 }
@@ -28,7 +28,7 @@ module st './modules/storage_account.bicep' = {
   name: 'st'
   scope: resourceGroup(rg.name)
   params: {
-    baseName: '${prefix}${postfix}${env}'
+    baseName: '${uniqueString(rg.id)}${env}'
     location: location
     tags: tags
   }
@@ -61,7 +61,7 @@ module cr './modules/container_registry.bicep' = {
   name: 'cr'
   scope: resourceGroup(rg.name)
   params: {
-    baseName: '${prefix}${postfix}${env}'
+    baseName: '${uniqueString(rg.id)}${env}'
     location: location
     tags: tags
   }

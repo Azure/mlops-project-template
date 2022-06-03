@@ -127,7 +127,7 @@ def main():
             ('numeric', numeric_transformer, NUMERIC_COLS),
            #('ordinal', ordinal_transformer, CAT_ORD_COLS),
             ('nominal', nominal_transformer, CAT_NOM_COLS)], # other features are already binary
-            remainder="passthrough")
+            remainder="drop")
 
     # append regressor to preprocessing pipeline.
     # now we have a full prediction pipeline.
