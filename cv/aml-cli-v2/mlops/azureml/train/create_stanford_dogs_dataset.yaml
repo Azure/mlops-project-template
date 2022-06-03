@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 
 command: |
-  tar xvfm ${{inputs.archive}} --no-same-owner -C ${{outputs.images}}
+  tar xvfm ${{inputs.archive}} --no-same-owner -C ${{outputs.images}} #TODO: Split data into Train-Validate-Test
 
 inputs:
   archive:

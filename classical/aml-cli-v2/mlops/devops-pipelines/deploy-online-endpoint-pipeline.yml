@@ -45,16 +45,16 @@ stages:
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
         parameters:
-          endpoint_file: cv/aml-cli-v2/mlops/azureml/deploy/online/online-endpoint.yml
+          endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
       - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
         parameters:
-          deployment_name: dogs-online-dp
-          deployment_file: cv/aml-cli-v2/mlops/azureml/deploy/online/online-deployment.yml 
+          deployment_name: taxi-online-dp
+          deployment_file: mlops/azureml/deploy/online/online-deployment.yml 
       - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
         parameters:
-          traffic_allocation: dogs-online-dp=100
+          traffic_allocation: taxi-online-dp=100
       - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
         parameters:
-          deployment_name: dogs-online-dp
-          sample_request: cv/aml-cli-v2/data/sample-request.json
+          deployment_name: taxi-online-dp
+          sample_request: data/taxi-request.json
           request_type: json

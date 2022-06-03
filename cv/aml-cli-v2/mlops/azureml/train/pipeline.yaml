@@ -8,7 +8,7 @@ inputs:
     mode: download # pick ro_mount, rw_mount or download
     path: azureml://datastores/workspaceblobstore/paths/azureml-vision-datasets/dogs/**
     # path: azureml://datastores/workspaceblobstore/paths/azureml-vision-datasets/places2/train//**
-  validation_images:
+  validation_images: #TODO: Use different datasets for validation
     type: uri_folder
     mode: download # pick ro_mount, rw_mount or download
     path: azureml://datastores/workspaceblobstore/paths/azureml-vision-datasets/dogs/**
