@@ -45,6 +45,7 @@ stages:
       - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
         parameters:
           cluster_name: batch-cluster # name must match cluster name in deployment file below
+          size: STANDARD_DS3_V2
           min_instances: 0
           max_instances: 5
       - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
