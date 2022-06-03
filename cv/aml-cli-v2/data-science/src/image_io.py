@@ -7,10 +7,8 @@ using the COCO dataset https://cocodataset.org/.
 """
 import os
 import logging
-import csv
 import glob
 
-import torch
 import torchvision
 
 

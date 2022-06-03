@@ -10,7 +10,7 @@ import logging
 import torch
 import mlflow
 import tempfile
-from torch.profiler import profile, record_function, ProfilerActivity
+from torch.profiler import ProfilerActivity
 from typing import Any
 
 

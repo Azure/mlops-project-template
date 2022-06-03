@@ -16,7 +16,6 @@ import argparse
 import json
 import logging
 import os
-import pickle
 import sys
 import time
 import traceback
@@ -44,7 +43,7 @@ if COMPONENT_ROOT not in sys.path:
 from image_io import build_image_datasets
 
 # internal imports
-from model import MODEL_ARCH_LIST, get_model_metadata, load_model
+from model import get_model_metadata, load_model
 from profiling import (
     LogDiskIOBlock,
     LogTimeBlock,
@@ -53,6 +52,7 @@ from profiling import (
 )
 
 torch.set_default_dtype(torch.float64)
+
 
 class PyTorchDistributedModelTrainingSequence:
     """Generic class to run the sequence for training a PyTorch model
@@ -360,7 +360,7 @@ class PyTorchDistributedModelTrainingSequence:
 
         return epoch_eval_metrics
 
-    def _epoch_train(self, epoch, optimizer, criterion):
+    def _epoch_train(self, epoch, optimizer, scheduler, criterion):
         """Called during train() for running the train phase of one epoch."""
         self.model.train()
         self.training_data_sampler.set_epoch(epoch)
@@ -422,6 +422,7 @@ class PyTorchDistributedModelTrainingSequence:
             with record_function("train.backward"):
                 loss.backward()
                 optimizer.step()
+                scheduler.step()
 
         epoch_train_metrics["running_loss"] = running_loss
         epoch_train_metrics["num_correct"] = num_correct
@@ -473,7 +474,9 @@ class PyTorchDistributedModelTrainingSequence:
             epoch_train_start = time.time()
 
             # TRAIN: loop on training set and return metrics
-            epoch_train_metrics = self._epoch_train(epoch, optimizer, criterion)
+            epoch_train_metrics = self._epoch_train(
+                epoch, optimizer, scheduler, criterion
+            )
             self.logger.info(f"Epoch metrics: {epoch_train_metrics}")
 
             # stop timer
