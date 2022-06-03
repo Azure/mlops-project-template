@@ -44,6 +44,15 @@ stages:
           script: |
             echo  '$(System.DefaultWorkingDirectory)'
             tree $(System.DefaultWorkingDirectory) /f
+      - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
+        parameters:
+          build_type: docker
+          environment_name: nvidia_pytorch # Not used for docker builds
+          environment_file: cv/aml-cli-v2/mlops/azureml/train/train-env.yml       
+      - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
+        parameters:
+          build_type: docker
+          environment_file: cv/aml-cli-v2/mlops/azureml/train/create_stanford_dogs_dataset.yaml     
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
           pipeline_file: cv/aml-cli-v2/mlops/azureml/train/pipeline.yaml

@@ -1,6 +1,5 @@
 $schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
 name: nvidia_pytorch
-version: 22.04-py3
 build:
   path: ../../../data-science/src/environment/
 tags:
