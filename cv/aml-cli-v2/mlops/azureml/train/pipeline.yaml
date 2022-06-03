@@ -57,8 +57,8 @@ jobs:
       valid_images: ${{parent.inputs.validation_images}}
 
       # data loading
-      batch_size: 128
-      num_workers: 6
+      batch_size: 64
+      num_workers: 5
       prefetch_factor: 4
       persistent_workers: true
       pin_memory: true
