@@ -95,7 +95,7 @@ outputs:
 
 code: ../../../data-science/src
 
-environment: azureml:azureml:nvidia_pytorch@latest
+environment: azureml:nvidia_pytorch@latest
 
 command: >-
   python train.py
