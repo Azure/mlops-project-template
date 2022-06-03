@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
 name: nvidia_pytorch
 build:
-  path: ../../../data-science/src/environment/
+  path: ../../../data-science/environment/
 tags:
   os: ubuntu
   os_version: 20.04
