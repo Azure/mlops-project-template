@@ -48,7 +48,7 @@ stages:
         parameters:
           build_type: docker
           environment_name: nvidia_pytorch # Not used for docker builds
-          environment_file: cv/aml-cli-v2/mlops/azureml/train/train-env.yml       
+          environment_file: cv/aml-cli-v2/mlops/azureml/train/train-env.yaml       
       - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
         parameters:
           data_type: training
