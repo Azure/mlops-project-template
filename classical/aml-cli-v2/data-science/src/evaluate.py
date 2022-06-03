@@ -205,18 +205,17 @@ def main():
 
     
     # -------------------- Explainability ------------------- #
-    tree_explainer = TabularExplainer(model.steps[-1][1],
+    tabular_explainer = TabularExplainer(model,
                                    initialization_examples=X_train,
-                                   features=X_train.columns,
-                                   transformations=model.steps[0][1])
+                                   features=X_train.columns)
     
     # save explainer                                 
-    #joblib.dump(tree_explainer, os.path.join(tree_explainer, "explainer"))
+    #joblib.dump(tabular_explainer, os.path.join(tabular_explainer, "explainer"))
 
     # find global explanations for feature importance
     # you can use the training data or the test data here, 
     # but test data would allow you to use Explanation Exploration
-    global_explanation = tree_explainer.explain_global(X_test)
+    global_explanation = tabular_explainer.explain_global(X_test)
 
     # sorted feature importance values and feature names
     sorted_global_importance_values = global_explanation.get_ranked_global_values()
