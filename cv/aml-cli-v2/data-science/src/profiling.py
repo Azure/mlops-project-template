@@ -325,7 +325,7 @@ class LogDiskIOBlock(object):
         mlflow.log_metrics(disk_io_metrics)
 
 
-class LogTimeOfIterator:
+class LogTimeOfIterator:  # lgtm [py/iter-returns-non-self]
     """This class is intended to "wrap" an existing Iterator
     and log metrics for each next() call"""
 
