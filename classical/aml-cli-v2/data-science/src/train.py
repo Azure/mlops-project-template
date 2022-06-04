@@ -131,15 +131,25 @@ def main():
 
     # append regressor to preprocessing pipeline.
     # now we have a full prediction pipeline.
-    pipeline = Pipeline(steps=[('preprocessor', preprocessor),
-                          ('regressor', RandomForestRegressor(
-                              n_estimators = args.regressor__n_estimators,
-                              bootstrap = args.regressor__bootstrap,
-                              max_depth = args.regressor__max_depth,
-                              max_features = args.regressor__max_features,
-                              min_samples_leaf = args.regressor__min_samples_leaf,
-                              min_samples_split = args.regressor__min_samples_split,
-                              random_state=0))])
+    
+    #model = Pipeline(steps=[('preprocessor', preprocessor),
+    #                      ('regressor', RandomForestRegressor(
+    #                          n_estimators = args.regressor__n_estimators,
+    #                          bootstrap = args.regressor__bootstrap,
+    #                          max_depth = args.regressor__max_depth,
+    #                          max_features = args.regressor__max_features,
+    #                          min_samples_leaf = args.regressor__min_samples_leaf,
+    #                          min_samples_split = args.regressor__min_samples_split,
+    #                          random_state=0))])
+
+
+    model = RandomForestRegressor(n_estimators = args.regressor__n_estimators,
+                                  bootstrap = args.regressor__bootstrap,
+                                  max_depth = args.regressor__max_depth,
+                                  max_features = args.regressor__max_features,
+                                  min_samples_leaf = args.regressor__min_samples_leaf,
+                                  min_samples_split = args.regressor__min_samples_split,
+                                  random_state=0)
 
     mlflow.log_param("model", "RandomForestRegressor")
     mlflow.log_param("n_estimators", args.regressor__n_estimators)
@@ -149,10 +159,10 @@ def main():
     mlflow.log_param("min_samples_leaf", args.regressor__min_samples_leaf)
     mlflow.log_param("min_samples_split", args.regressor__min_samples_split)
 
-    pipeline.fit(X_train, y_train)
+    model.fit(X_train, y_train)
 
     # Predict using the Regression Model
-    yhat_train = pipeline.predict(X_train)
+    yhat_train = model.predict(X_train)
 
     # Evaluate Regression performance with the train set
     r2 = r2_score(y_train, yhat_train)
@@ -174,7 +184,7 @@ def main():
     mlflow.log_artifact("regression_results.png")
 
     # Save the model
-    pickle.dump(pipeline, open((Path(args.model_output) / "model.pkl"), "wb"))
+    pickle.dump(model, open((Path(args.model_output) / "model.pkl"), "wb"))
 
 if __name__ == "__main__":
     main()
