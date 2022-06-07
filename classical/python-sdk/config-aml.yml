@@ -16,7 +16,7 @@ variables:
   training_env_name: credit-training
 
   # Training AzureML Environment conda yaml
-  training_env_conda_yaml: data-science/environments/train.yml
+  training_env_conda_yaml: data-science/environment/train.yml
 
   # Name for the training pipeline
   training_pipeline_name: credit-training
@@ -47,7 +47,7 @@ variables:
   batch_env_name: credit-batch
 
   # Batch AzureML Environment conda yaml
-  batch_env_conda_yaml: data-science/environments/batch.yml
+  batch_env_conda_yaml: data-science/environment/batch.yml
 
   # Name for the batch scoring pipeline
   batch_pipeline_name: credit-batch-scoring
