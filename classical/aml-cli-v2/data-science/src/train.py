@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
 
 import argparse
 
@@ -77,6 +79,8 @@ def parse_args():
     return args
 
 def main():
+
+    mlflow.start_run()
 
     args = parse_args()
     
@@ -185,6 +189,8 @@ def main():
 
     # Save the model
     pickle.dump(model, open((Path(args.model_output) / "model.pkl"), "wb"))
+    
+    mlflow.end_run()
 
 if __name__ == "__main__":
     main()

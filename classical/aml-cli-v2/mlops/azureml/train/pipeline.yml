@@ -12,9 +12,7 @@ inputs:
 outputs: 
   prepared_data:
   trained_model:
-  predictions:
-  score_report:
-  deploy_flag:
+  evaluation_output:
 # </inputs_and_outputs>
 
 # <jobs>
@@ -61,18 +59,14 @@ jobs:
       --model_name ${{inputs.model_name}} 
       --model_input ${{inputs.model_input}} 
       --prepared_data ${{inputs.prepared_data}}
-      --predictions ${{outputs.predictions}}
-      --score_report ${{outputs.score_report}}
-      --deploy_flag ${{outputs.deploy_flag}}
+      --evaluation_output ${{outputs.evaluation_output}}
     environment: azureml:taxi-train-env@latest
     inputs:
       model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
       prepared_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
     outputs:
-      predictions: ${{parent.outputs.predictions}}
-      score_report: ${{parent.outputs.score_report}}
-      deploy_flag: ${{parent.outputs.deploy_flag}}
+      evaluation_output: ${{parent.outputs.evaluation_output}}
 
   register_model:
     name: register_model
@@ -82,11 +76,11 @@ jobs:
       python register.py 
       --model_name ${{inputs.model_name}} 
       --model_path ${{inputs.model_path}} 
-      --deploy_flag ${{inputs.deploy_flag}}
+      --evaluation_output ${{inputs.evaluation_output}}
     environment: azureml:taxi-train-env@latest
     inputs:
       model_name: "taxi-model"
       model_path: ${{parent.jobs.train_model.outputs.model_output}}
-      deploy_flag: ${{parent.jobs.evaluate_model.outputs.deploy_flag}}
+      evaluation_output: ${{parent.jobs.evaluate_model.outputs.evaluation_output}}
 
 # </jobs>

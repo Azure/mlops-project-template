@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 import argparse
 
 from pathlib import Path
@@ -19,6 +22,8 @@ def parse_args():
     return args
 
 def main():
+
+    mlflow.start_run()
 
     # ---------- Parse Arguments ----------- #
     # -------------------------------------- #
@@ -64,6 +69,8 @@ def main():
     train.to_csv((Path(args.prepared_data) / "train.csv"))
     val.to_csv((Path(args.prepared_data) / "val.csv"))
     test.to_csv((Path(args.prepared_data) / "test.csv"))
+
+    mlflow.end_run()
 
 if __name__ == "__main__":
     main()

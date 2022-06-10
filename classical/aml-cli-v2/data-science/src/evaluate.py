@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 import argparse
 from pathlib import Path
 import os
@@ -9,8 +12,6 @@ from matplotlib import pyplot as plt
 
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
-from azureml.core import Run, Model
-
 from fairlearn.metrics._group_metric_set import _create_group_metric_set
 from azureml.contrib.fairness import upload_dashboard_dictionary, download_dashboard_by_upload_id
 
@@ -19,10 +20,10 @@ from azureml.interpret import ExplanationClient
 
 import mlflow
 import mlflow.sklearn
+import mlflow.pyfunc
+from mlflow.tracking import MlflowClient
+from azureml.core import Run
 
-# current run 
-run = Run.get_context()
-ws = run.experiment.workspace
 
 TARGET_COL = "cost"
 
@@ -64,9 +65,7 @@ def parse_args():
     parser.add_argument("--model_name", type=str, help="Name of registered model")
     parser.add_argument("--model_input", type=str, help="Path of input model")
     parser.add_argument("--prepared_data", type=str, help="Path to transformed data")
-    parser.add_argument("--predictions", type=str, help="Path of predictions")
-    parser.add_argument("--score_report", type=str, help="Path to score report")
-    parser.add_argument('--deploy_flag', type=str, help='A deploy flag whether to deploy or no')
+    parser.add_argument("--evaluation_output", type=str, help="Path of predictions")
 
     args = parser.parse_args()
 
@@ -75,13 +74,14 @@ def parse_args():
 
 def main():
 
+    mlflow.start_run()
+
     args = parse_args()
 
     lines = [
         f"Model path: {args.model_input}",
         f"Test data path: {args.prepared_data}",
-        f"Predictions path: {args.predictions}",
-        f"Scoring output path: {args.score_report}",
+        f"Evaluation output path: {args.evaluation_output}",
     ]
 
     for line in lines:
@@ -113,7 +113,7 @@ def main():
     output_data = X_test.copy()
     output_data["real_label"] = y_test
     output_data["predicted_label"] = yhat_test
-    output_data.to_csv((Path(args.predictions) / "predictions.csv"))
+    output_data.to_csv((Path(args.evaluation_output) / "predictions.csv"))
 
     # Evaluate Model performance with the test set
     r2 = r2_score(y_test, yhat_test)
@@ -122,10 +122,10 @@ def main():
     mae = mean_absolute_error(y_test, yhat_test)
 
     # Print score report to a text file
-    (Path(args.score_report) / "score.txt").write_text(
+    (Path(args.evaluation_output) / "score.txt").write_text(
         "Scored with the following model:\n{}".format(model)
     )
-    with open((Path(args.score_report) / "score.txt"), "a") as f:
+    with open((Path(args.evaluation_output) / "score.txt"), "a") as f:
         f.write("Mean squared error: %.2f \n" % mse)
         f.write("Root mean squared error: %.2f \n" % rmse)
         f.write("Mean absolute error: %.2f \n" % mae)
@@ -150,13 +150,17 @@ def main():
     scores = {}
     predictions = {}
     score = r2_score(y_test, yhat_test) # current model
-    for model_run in Model.list(ws):
-        if model_run.name == args.model_name:
-            model_path = Model.download(model_run, exist_ok=True)
-            mdl = pickle.load(open((Path(model_path) / "model.pkl"), "rb"))
-            predictions[model_run.id] = mdl.predict(X_test)
-            scores[model_run.id] = r2_score(y_test, predictions[model_run.id])
-        
+
+    client = MlflowClient()
+
+    for model_run in client.search_model_versions("name='taxi-model'"):
+        model_name = model_run.name
+        model_version = model_run.version
+        mdl = mlflow.pyfunc.load_model(
+            model_uri=f"models:/{model_name}/{model_version}")
+        predictions[f"{model_name}:{model_version}"] = mdl.predict(X_test)
+        scores[f"{model_name}:{model_version}"] = r2_score(y_test, predictions[f"{model_name}:{model_version}"])
+
     print(scores)
     if scores:
         if score >= max(list(scores.values())):
@@ -167,13 +171,13 @@ def main():
         deploy_flag = 1
     print("Deploy flag: ",deploy_flag)
 
-    with open((Path(args.deploy_flag) / "deploy_flag"), 'w') as f:
+    with open((Path(args.evaluation_output) / "deploy_flag"), 'w') as f:
         f.write('%d' % int(deploy_flag))
                 
     scores["current model"] = score
     perf_comparison_plot = pd.DataFrame(scores, index=["r2 score"]).plot(kind='bar', figsize=(15, 10))
     perf_comparison_plot.figure.savefig("perf_comparison.png")
-    perf_comparison_plot.figure.savefig(Path(args.score_report) / "perf_comparison.png")
+    perf_comparison_plot.figure.savefig(Path(args.evaluation_output) / "perf_comparison.png")
     
     mlflow.log_metric("deploy flag", bool(deploy_flag))
     mlflow.log_artifact("perf_comparison.png")
@@ -197,6 +201,7 @@ def main():
 
     # Set validate_model_ids parameter of upload_dashboard_dictionary to False 
     # if you have not registered your model(s)
+    run = Run.get_context()
     upload_id = upload_dashboard_dictionary(run,
                                             dash_dict_all,
                                             dashboard_name=dashboard_title,
@@ -206,8 +211,9 @@ def main():
     
     # -------------------- Explainability ------------------- #
     tabular_explainer = TabularExplainer(model,
-                                   initialization_examples=X_train,
-                                   features=X_train.columns)
+                                    initialization_examples=X_train,
+                                    features=X_train.columns,
+                                    model_task="regression")
     
     # save explainer                                 
     #joblib.dump(tabular_explainer, os.path.join(tabular_explainer, "explainer"))
@@ -227,7 +233,8 @@ def main():
     
     client = ExplanationClient.from_run(run)
     client.upload_model_explanation(global_explanation, comment='global explanation: all features')
-
+    
+    mlflow.end_run()
 
 if __name__ == "__main__":
     main()
