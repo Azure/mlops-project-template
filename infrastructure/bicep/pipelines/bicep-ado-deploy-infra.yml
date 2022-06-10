@@ -54,7 +54,7 @@ stages :
       displayName: Deploy Bicep
       pool:
         vmImage: $(ap_vm_image)
-      environment: dev
+      environment: $(environment)
       strategy:
         runOnce:
           deploy:
