@@ -1,5 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
+# Original Author: Jeff Omhover (MSFT)
 
 """
 This script provides some helper code to help with pytorch profiling.
