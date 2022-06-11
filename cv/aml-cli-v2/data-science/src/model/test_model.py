@@ -1,5 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
+# Original Author: Jeff Omhover (MSFT)
 
 """
 Creates a super simple 32x32 CNN model for testing.

@@ -1,5 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
+# Original Author: Jeff Omhover (MSFT)
 
 """
 This script provides code to load and setup a variety of models from torchvision.models.

@@ -1,5 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
+# Original Author: Jeff Omhover (MSFT)
+
 
 """
 This script implements a Distributed PyTorch training sequence.

@@ -1,13 +1,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
+# Original Author: Jeff Omhover (MSFT)
 
 """
 This script contains methods to hangle inputs for pytorch model training
 using the COCO dataset https://cocodataset.org/.
 """
-import os
-import logging
 import glob
+import logging
+import os
 
 import torchvision
 
