@@ -1,9 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
+"""
+Evaluates trained ML model using test dataset.
+Saves predictions, evaluation results and deploy flag.
+"""
 
 import argparse
 from pathlib import Path
-import os
 import pickle
 
 import numpy as np
@@ -13,16 +16,16 @@ from matplotlib import pyplot as plt
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 from fairlearn.metrics._group_metric_set import _create_group_metric_set
-from azureml.contrib.fairness import upload_dashboard_dictionary, download_dashboard_by_upload_id
-
 from interpret_community import TabularExplainer
+
+from azureml.core import Run
+from azureml.contrib.fairness import upload_dashboard_dictionary
 from azureml.interpret import ExplanationClient
 
 import mlflow
 import mlflow.sklearn
 import mlflow.pyfunc
 from mlflow.tracking import MlflowClient
-from azureml.core import Run
 
 
 TARGET_COL = "cost"
@@ -60,12 +63,13 @@ SENSITIVE_COLS = ["vendor"] # for fairlearn dashborad
 
 
 def parse_args():
-        
+    '''Parse input arguments'''
+
     parser = argparse.ArgumentParser("predict")
     parser.add_argument("--model_name", type=str, help="Name of registered model")
     parser.add_argument("--model_input", type=str, help="Path of input model")
     parser.add_argument("--prepared_data", type=str, help="Path to transformed data")
-    parser.add_argument("--evaluation_output", type=str, help="Path of predictions")
+    parser.add_argument("--evaluation_output", type=str, help="Path of eval results")
 
     args = parser.parse_args()
 
@@ -73,6 +77,7 @@ def parse_args():
 
 
 def main():
+    '''Read trained model and test dataset, evaluate model and save result'''
 
     mlflow.start_run()
 
@@ -89,10 +94,7 @@ def main():
 
     # ---------------- Model Evaluation ---------------- #
 
-    # Load the test data
-
-    print("mounted_path files: ")
-    arr = os.listdir(args.prepared_data)
+    # Load the train and test data
 
     train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
     test_data = pd.read_csv((Path(args.prepared_data) / "test.csv"))
@@ -104,7 +106,8 @@ def main():
     X_test = test_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     # Load the model from input port
-    model = pickle.load(open((Path(args.model_input) / "model.pkl"), "rb"))
+    with open((Path(args.model_input) / "model.pkl"), "rb") as infile:
+        model = pickle.load(infile)
 
     # Get predictions to y_test (y_test)
     yhat_test = model.predict(X_test)
@@ -123,14 +126,13 @@ def main():
 
     # Print score report to a text file
     (Path(args.evaluation_output) / "score.txt").write_text(
-        "Scored with the following model:\n{}".format(model)
+        f"Scored with the following model:\n{format(model)}"
     )
-    with open((Path(args.evaluation_output) / "score.txt"), "a") as f:
-        f.write("Mean squared error: %.2f \n" % mse)
-        f.write("Root mean squared error: %.2f \n" % rmse)
-        f.write("Mean absolute error: %.2f \n" % mae)
-        f.write("Coefficient of determination: %.2f \n" % r2)
-
+    with open((Path(args.evaluation_output) / "score.txt"), "a") as outfile:
+        outfile.write("Mean squared error: {mse.2f} \n")
+        outfile.write("Root mean squared error: {rmse.2f} \n")
+        outfile.write("Mean absolute error: {mae.2f} \n")
+        outfile.write("Coefficient of determination: {r2.2f} \n")
 
     mlflow.log_metric("test r2", r2)
     mlflow.log_metric("test mse", mse)
@@ -159,9 +161,9 @@ def main():
         mdl = mlflow.pyfunc.load_model(
             model_uri=f"models:/{model_name}/{model_version}")
         predictions[f"{model_name}:{model_version}"] = mdl.predict(X_test)
-        scores[f"{model_name}:{model_version}"] = r2_score(y_test, predictions[f"{model_name}:{model_version}"])
+        scores[f"{model_name}:{model_version}"] = r2_score(
+            y_test, predictions[f"{model_name}:{model_version}"])
 
-    print(scores)
     if scores:
         if score >= max(list(scores.values())):
             deploy_flag = 1
@@ -169,72 +171,76 @@ def main():
             deploy_flag = 0
     else:
         deploy_flag = 1
-    print("Deploy flag: ",deploy_flag)
+    print(f"Deploy flag: {deploy_flag}")
 
-    with open((Path(args.evaluation_output) / "deploy_flag"), 'w') as f:
-        f.write('%d' % int(deploy_flag))
-                
+    with open((Path(args.evaluation_output) / "deploy_flag"), 'w') as outfile:
+        outfile.write(f"{int(deploy_flag)}")
+
+    # add current model score and predictions
     scores["current model"] = score
-    perf_comparison_plot = pd.DataFrame(scores, index=["r2 score"]).plot(kind='bar', figsize=(15, 10))
+    predictions["currrent model"] = model.predict(X_test)
+
+    perf_comparison_plot = pd.DataFrame(
+        scores, index=["r2 score"]).plot(kind='bar', figsize=(15, 10))
     perf_comparison_plot.figure.savefig("perf_comparison.png")
     perf_comparison_plot.figure.savefig(Path(args.evaluation_output) / "perf_comparison.png")
-    
+
     mlflow.log_metric("deploy flag", bool(deploy_flag))
     mlflow.log_artifact("perf_comparison.png")
-    
 
     # -------------------- FAIRNESS ------------------- #
+    # add model fairness
+    sensitive_features = { col: X_test[[col]] for col in SENSITIVE_COLS }
+    fairness(sensitive_features, y_test, predictions)
+
+    # -------------------- Explainability ------------------- #
+    # add model explainability
+    #explainability(model, X_train, X_test)
+
+    mlflow.end_run()
+
+def fairness(sensitive_features, y_test, predictions):
+    '''Generates fairness metrics, uploads results to AML run fairness dashboard'''
+
     # Calculate Fairness Metrics over Sensitive Features
-    # Create a dictionary of model(s) you want to assess for fairness 
-    
-    sf = { col: X_test[[col]] for col in SENSITIVE_COLS }
-    predictions["currrent model"] = [x for x in model.predict(X_test)]
-    
+    # Create a dictionary of model(s) you want to assess for fairness
+
     dash_dict_all = _create_group_metric_set(y_true=y_test,
                                              predictions=predictions,
-                                             sensitive_features=sf,
+                                             sensitive_features=sensitive_features,
                                              prediction_type='regression',
                                             )
-    
+
     # Upload the dashboard to Azure Machine Learning
     dashboard_title = "Fairness insights Comparison of Models"
 
-    # Set validate_model_ids parameter of upload_dashboard_dictionary to False 
+    # Set validate_model_ids parameter of upload_dashboard_dictionary to False
     # if you have not registered your model(s)
     run = Run.get_context()
     upload_id = upload_dashboard_dictionary(run,
                                             dash_dict_all,
                                             dashboard_name=dashboard_title,
                                             validate_model_ids=False)
-    print("\nUploaded to id: {0}\n".format(upload_id))
+    print(f"\nUploaded to id: {format(upload_id)}\n")
 
-    
-    # -------------------- Explainability ------------------- #
+def explainability(model, X_train, X_test):
+    '''Generates explainer, uploads results to AML run explainability dashboard'''
+
     tabular_explainer = TabularExplainer(model,
                                     initialization_examples=X_train,
                                     features=X_train.columns,
                                     model_task="regression")
-    
-    # save explainer                                 
-    #joblib.dump(tabular_explainer, os.path.join(tabular_explainer, "explainer"))
 
     # find global explanations for feature importance
-    # you can use the training data or the test data here, 
+    # you can use the training data or the test data here,
     # but test data would allow you to use Explanation Exploration
     global_explanation = tabular_explainer.explain_global(X_test)
 
-    # sorted feature importance values and feature names
-    sorted_global_importance_values = global_explanation.get_ranked_global_values()
-    sorted_global_importance_names = global_explanation.get_ranked_global_names()
-
-    print("Explainability feature importance:")
-    # alternatively, you can print out a dictionary that holds the top K feature names and values
-    global_explanation.get_feature_importance_dict()
-    
+    # upload results to AML run
+    run = Run.get_context()
     client = ExplanationClient.from_run(run)
     client.upload_model_explanation(global_explanation, comment='global explanation: all features')
-    
-    mlflow.end_run()
+
 
 if __name__ == "__main__":
     main()
