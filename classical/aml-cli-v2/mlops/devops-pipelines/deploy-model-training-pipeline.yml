@@ -32,6 +32,7 @@ stages:
   jobs:
     - job: DeployTrainingPipeline
       steps:
+      - template: mlops/devops-pipelines/run-unit-tests.yml
       - checkout: self
         path: s/
       - checkout: mlops-templates
