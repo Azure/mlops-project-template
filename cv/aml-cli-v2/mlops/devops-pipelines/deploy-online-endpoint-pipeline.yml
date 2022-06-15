@@ -56,5 +56,5 @@ stages:
       - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
         parameters:
           deployment_name: dogs-online-dp
-          sample_request: data/sample-request.json g
+          sample_request: data/sample-request.json
           request_type: json
