@@ -76,28 +76,14 @@ def parse_args():
     return args
 
 
-def main():
+def main(prepared_data, model_input, evaluation_output):
     '''Read trained model and test dataset, evaluate model and save result'''
-
-    mlflow.start_run()
-
-    args = parse_args()
-
-    lines = [
-        f"Model path: {args.model_input}",
-        f"Test data path: {args.prepared_data}",
-        f"Evaluation output path: {args.evaluation_output}",
-    ]
-
-    for line in lines:
-        print(line)
 
     # ---------------- Model Evaluation ---------------- #
 
     # Load the train and test data
-
-    train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
-    test_data = pd.read_csv((Path(args.prepared_data) / "test.csv"))
+    train_data = pd.read_csv((Path(prepared_data) / "train.csv"))
+    test_data = pd.read_csv((Path(prepared_data) / "test.csv"))
 
     y_train = train_data[TARGET_COL]
     X_train = train_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
@@ -106,7 +92,7 @@ def main():
     X_test = test_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     # Load the model from input port
-    with open((Path(args.model_input) / "model.pkl"), "rb") as infile:
+    with open((Path(model_input) / "model.pkl"), "rb") as infile:
         model = pickle.load(infile)
 
     # Get predictions to y_test (y_test)
@@ -116,7 +102,7 @@ def main():
     output_data = X_test.copy()
     output_data["real_label"] = y_test
     output_data["predicted_label"] = yhat_test
-    output_data.to_csv((Path(args.evaluation_output) / "predictions.csv"))
+    output_data.to_csv((Path(evaluation_output) / "predictions.csv"))
 
     # Evaluate Model performance with the test set
     r2 = r2_score(y_test, yhat_test)
@@ -125,10 +111,10 @@ def main():
     mae = mean_absolute_error(y_test, yhat_test)
 
     # Print score report to a text file
-    (Path(args.evaluation_output) / "score.txt").write_text(
+    (Path(evaluation_output) / "score.txt").write_text(
         f"Scored with the following model:\n{format(model)}"
     )
-    with open((Path(args.evaluation_output) / "score.txt"), "a") as outfile:
+    with open((Path(evaluation_output) / "score.txt"), "a") as outfile:
         outfile.write("Mean squared error: {mse.2f} \n")
         outfile.write("Root mean squared error: {rmse.2f} \n")
         outfile.write("Mean absolute error: {mae.2f} \n")
@@ -173,7 +159,7 @@ def main():
         deploy_flag = 1
     print(f"Deploy flag: {deploy_flag}")
 
-    with open((Path(args.evaluation_output) / "deploy_flag"), 'w') as outfile:
+    with open((Path(evaluation_output) / "deploy_flag"), 'w') as outfile:
         outfile.write(f"{int(deploy_flag)}")
 
     # add current model score and predictions
@@ -183,7 +169,7 @@ def main():
     perf_comparison_plot = pd.DataFrame(
         scores, index=["r2 score"]).plot(kind='bar', figsize=(15, 10))
     perf_comparison_plot.figure.savefig("perf_comparison.png")
-    perf_comparison_plot.figure.savefig(Path(args.evaluation_output) / "perf_comparison.png")
+    perf_comparison_plot.figure.savefig(Path(evaluation_output) / "perf_comparison.png")
 
     mlflow.log_metric("deploy flag", bool(deploy_flag))
     mlflow.log_artifact("perf_comparison.png")
@@ -197,7 +183,6 @@ def main():
     # add model explainability
     #explainability(model, X_train, X_test)
 
-    mlflow.end_run()
 
 def fairness(sensitive_features, y_test, predictions):
     '''Generates fairness metrics, uploads results to AML run fairness dashboard'''
@@ -243,4 +228,20 @@ def explainability(model, X_train, X_test):
 
 
 if __name__ == "__main__":
-    main()
+
+    mlflow.start_run()
+
+    args = parse_args()
+
+    lines = [
+        f"Model path: {args.model_input}",
+        f"Test data path: {args.prepared_data}",
+        f"Evaluation output path: {args.evaluation_output}",
+    ]
+
+    for line in lines:
+        print(line)
+    
+    main(args.prepared_data, args.model_input, args.evaluation_output)
+
+    mlflow.end_run()

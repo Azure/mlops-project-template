@@ -25,32 +25,17 @@ def parse_args():
 
     return args
 
-def main():
+def main(raw_data, prepared_data):
     '''Read, split, and save datasets'''
-
-    mlflow.start_run()
-
-    # ---------- Parse Arguments ----------- #
-    # -------------------------------------- #
-
-    args = parse_args()
-
-    lines = [
-        f"Raw data path: {args.raw_data}",
-        f"Data output path: {args.prepared_data}",
-    ]
-
-    for line in lines:
-        print(line)
 
     # ------------ Reading Data ------------ #
     # -------------------------------------- #
 
     print("mounted_path files: ")
-    arr = os.listdir(args.raw_data)
+    arr = os.listdir(raw_data)
     print(arr)
 
-    data = pd.read_csv((Path(args.raw_data) / 'taxi-data.csv'))
+    data = pd.read_csv((Path(raw_data) / 'taxi-data.csv'))
 
     # ------------- Split Data ------------- #
     # -------------------------------------- #
@@ -71,12 +56,30 @@ def main():
     mlflow.log_metric('val size', val.shape[0])
     mlflow.log_metric('test size', test.shape[0])
 
-    train.to_csv((Path(args.prepared_data) / "train.csv"))
-    val.to_csv((Path(args.prepared_data) / "val.csv"))
-    test.to_csv((Path(args.prepared_data) / "test.csv"))
+    train.to_csv((Path(prepared_data) / "train.csv"))
+    val.to_csv((Path(prepared_data) / "val.csv"))
+    test.to_csv((Path(prepared_data) / "test.csv"))
+
+
+if __name__ == "__main__":
+
+    mlflow.start_run()
+
+    # ---------- Parse Arguments ----------- #
+    # -------------------------------------- #
+
+    args = parse_args()
+
+    lines = [
+        f"Raw data path: {args.raw_data}",
+        f"Data output path: {args.prepared_data}",
+    ]
+
+    for line in lines:
+        print(line)
+    
+    main(args.raw_data, args.prepared_data)
 
     mlflow.end_run()
 
-if __name__ == "__main__":
-    main()
     
