@@ -51,13 +51,13 @@ stages:
           data_type: training
           file_type: mltable
           dataset_name: training_data
-          environment_file: data/training/.
+          environment_file: nlp/aml-cli-v2/data/training/.
       - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
         parameters:
           data_type: validation
           file_type: mltable
           dataset_name: validation_data
-          environment_file: data/validation/.
+          environment_file: nlp/aml-cli-v2/data/validation/.
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
-          pipeline_file: mlops/azureml/train/pipeline.yaml 
+          pipeline_file: nlp/aml-cli-v2/mlops/azureml/train/pipeline.yaml 
