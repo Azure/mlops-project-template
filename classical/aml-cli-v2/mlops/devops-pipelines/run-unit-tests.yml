@@ -13,21 +13,19 @@ steps:
     displayName: 'Install testing dependencies'
 
   - script: |
-      pip install -r requirements.txt
+      pip install -r data-science/environment/train-requirements.txt
     displayName: 'Install project requirements'
 
   - script: |   
-      flake8 --output-file=flake8-testresults.xml --format junit-xml --exit-zero
+      flake8 data-science/src/ --output-file=flake8-testresults.xml --format junit-xml --exit-zero
     displayName: 'Run code quality tests (Flake8)'
 
   - script: |      
-      pylint src/ --output-format=pylint_junit.JUnitReporter --exit-zero > pylint-testresults.xml
+      pylint data-science/src/ --output-format=pylint_junit.JUnitReporter --exit-zero > pylint-testresults.xml
     displayName: 'Run code quality tests (Pylint)'
 
   - script: |
-      if [ $(ls operation/tests/unit/ | grep -e test_.*.py) ]; then
-        pytest -v operation/tests/unit/ --doctest-modules --junitxml=unit-testresults.xml --cov=src --cov-append --cov-report=xml:coverage.xml --cov-report=html:htmlcov
-      fi
+      pytest -v data-science/unit-tests/*.py --doctest-modules --junitxml=unit-testresults.xml --cov=src --cov-append --cov-report=xml:coverage.xml --cov-report=html:htmlcov
     displayName: 'Run all unit tests'
 
   - task: PublishTestResults@2
