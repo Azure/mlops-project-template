@@ -20,7 +20,7 @@ outputs:
 # <jobs>
 settings:
   default_datastore: azureml:workspaceblobstore
-  default_compute: azureml:cpu-cluster
+  default_compute: azureml:rai-cluster
   continue_on_step_failure: false
 
 jobs:
