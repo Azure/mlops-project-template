@@ -50,29 +50,29 @@ jobs:
     outputs:
       model_output:
   
-#  evaluate_model:
-#    name: evaluate_model
-#    display_name: evaluate-model
-#    code: ../../../data-science/src
-#    command: >-
-#      python evaluate.py 
-#      --model_name ${{inputs.model_name}} 
-#      --model_input ${{inputs.model_input}} 
-#      --train_data ${{inputs.train_data}}
-#      --test_data ${{inputs.test_data}}
-#      --predictions ${{outputs.predictions}}
-#      --score_report ${{outputs.score_report}}
-#      --deploy_flag ${{outputs.deploy_flag}}
-#    environment: azureml:taxi-train-env@latest
-#    inputs:
-#      model_name: "taxi-model"
-#      model_input: ${{parent.jobs.train_model.outputs.model_output}}
-#      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
-#      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
-#    outputs:
-#      predictions: ${{parent.outputs.predictions}}
-#      score_report: ${{parent.outputs.score_report}}
-#      deploy_flag: ${{parent.outputs.deploy_flag}}
+  evaluate_model:
+    name: evaluate_model
+    display_name: evaluate-model
+    code: ../../../data-science/src
+    command: >-
+      python evaluate.py 
+      --model_name ${{inputs.model_name}} 
+      --model_input ${{inputs.model_input}} 
+      --train_data ${{inputs.train_data}}
+      --test_data ${{inputs.test_data}}
+      --predictions ${{outputs.predictions}}
+      --score_report ${{outputs.score_report}}
+      --deploy_flag ${{outputs.deploy_flag}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      model_name: "taxi-model-somthing"
+      model_input: ${{parent.jobs.train_model.outputs.model_output}}
+      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
+      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
+    outputs:
+      predictions: 
+      score_report: 
+      deploy_flag: 
 
 #  register_model:
 #    name: register_model

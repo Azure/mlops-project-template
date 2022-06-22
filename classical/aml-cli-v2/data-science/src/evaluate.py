@@ -152,7 +152,7 @@ def main():
     for model_run in Model.list(ws):
         if model_run.name == args.model_name:
             model_path = Model.download(model_run, exist_ok=True)
-            mdl = pickle.load(open((Path(model_path) / "model.pkl"), "rb"))
+            mdl =  mlflow.sklearn.load_model(model_path) # pickle.load(open((Path(model_path) / "model.pkl"), "rb"))
             predictions[model_run.id] = mdl.predict(X_test)
             scores[model_run.id] = r2_score(y_test, predictions[model_run.id])
         
