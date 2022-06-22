@@ -121,6 +121,27 @@ jobs:
       comment: Some random string
       rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
 
+  error_analysis_01:
+    limits:
+      timeout: 120
+    type: command
+    component: azureml:rai_insights_erroranalysis@latest
+    inputs:
+      rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+      max_depth: 3
+      filter_features: '["distance", "passengers"]'
+
+  counterfactual_01:
+    type: command
+    component: azureml:rai_insights_counterfactual@latest
+    limits:
+      timeout: 600
+    inputs:
+      rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+      total_CFs: 10
+      desired_range: '[16, 30]'
+      feature_importance: True
+
   gather_01:
     type: command
     component: azureml:rai_insights_gather@latest
@@ -128,6 +149,8 @@ jobs:
       timeout: 120
     inputs:
       constructor: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+      insight_1: ${{parent.jobs.error_analysis_01.outputs.error_analysis}}
+      insight_2: ${{parent.jobs.counterfactual_01.outputs.counterfactual}}
       insight_4: ${{parent.jobs.explain_01.outputs.explanation}}
 
 # </jobs>
