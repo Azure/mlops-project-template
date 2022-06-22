@@ -103,7 +103,7 @@ def main():
     X_test = test_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     # Load the model from input port
-    model = pickle.load(open((Path(args.model_input) / "model.pkl"), "rb"))
+    model = mlflow.sklearn.load_model(args.model_input) #pickle.load(open((Path(args.model_input) / "model.pkl"), "rb"))
 
     # Get predictions to y_test (y_test)
     yhat_test = model.predict(X_test)

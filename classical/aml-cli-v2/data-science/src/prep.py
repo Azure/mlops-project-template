@@ -46,6 +46,9 @@ def main():
 
     data = pd.read_csv((Path(args.raw_data) / 'taxi-data.csv'))
 
+    # Drop the index column
+    data.drop('Unnamed: 0', axis=1, inplace=True)
+
     # ------------- Split Data ------------- #
     # -------------------------------------- #
 

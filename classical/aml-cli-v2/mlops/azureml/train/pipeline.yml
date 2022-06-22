@@ -9,11 +9,6 @@ inputs:
     type: uri_folder
     path: ../../../data/
 
-outputs: 
-  trained_model:
-  predictions:
-  score_report:
-  deploy_flag:
 # </inputs_and_outputs>
 
 # <jobs>
@@ -53,45 +48,86 @@ jobs:
     inputs:
       prepared_data: ${{parent.jobs.prep_data.outputs.train_data}}
     outputs:
-      model_output: ${{parent.outputs.trained_model}}
+      model_output:
   
-  evaluate_model:
-    name: evaluate_model
-    display_name: evaluate-model
-    code: ../../../data-science/src
-    command: >-
-      python evaluate.py 
-      --model_name ${{inputs.model_name}} 
-      --model_input ${{inputs.model_input}} 
-      --train_data ${{inputs.train_data}}
-      --test_data ${{inputs.test_data}}
-      --predictions ${{outputs.predictions}}
-      --score_report ${{outputs.score_report}}
-      --deploy_flag ${{outputs.deploy_flag}}
-    environment: azureml:taxi-train-env@latest
-    inputs:
-      model_name: "taxi-model"
-      model_input: ${{parent.jobs.train_model.outputs.model_output}}
-      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
-      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
-    outputs:
-      predictions: ${{parent.outputs.predictions}}
-      score_report: ${{parent.outputs.score_report}}
-      deploy_flag: ${{parent.outputs.deploy_flag}}
+#  evaluate_model:
+#    name: evaluate_model
+#    display_name: evaluate-model
+#    code: ../../../data-science/src
+#    command: >-
+#      python evaluate.py 
+#      --model_name ${{inputs.model_name}} 
+#      --model_input ${{inputs.model_input}} 
+#      --train_data ${{inputs.train_data}}
+#      --test_data ${{inputs.test_data}}
+#      --predictions ${{outputs.predictions}}
+#      --score_report ${{outputs.score_report}}
+#      --deploy_flag ${{outputs.deploy_flag}}
+#    environment: azureml:taxi-train-env@latest
+#    inputs:
+#      model_name: "taxi-model"
+#      model_input: ${{parent.jobs.train_model.outputs.model_output}}
+#      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
+#      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
+#    outputs:
+#      predictions: ${{parent.outputs.predictions}}
+#      score_report: ${{parent.outputs.score_report}}
+#      deploy_flag: ${{parent.outputs.deploy_flag}}
 
-  register_model:
-    name: register_model
-    display_name: register-model
-    code: ../../../data-science/src
-    command: >-
-      python register.py 
-      --model_name ${{inputs.model_name}} 
-      --model_path ${{inputs.model_path}} 
-      --deploy_flag ${{inputs.deploy_flag}}
-    environment: azureml:taxi-train-env@latest
+#  register_model:
+#    name: register_model
+#    display_name: register-model
+#    code: ../../../data-science/src
+#    command: >-
+#      python register.py 
+#      --model_name ${{inputs.model_name}} 
+#      --model_path ${{inputs.model_path}} 
+#      --deploy_flag ${{inputs.deploy_flag}}
+#    environment: azureml:taxi-train-env@latest
+#    inputs:
+#      model_name: "taxi-model"
+#      model_path: ${{parent.jobs.train_model.outputs.model_output}}
+#      deploy_flag: ${{parent.jobs.evaluate_model.outputs.deploy_flag}}
+
+  register_model_job:
+    type: command
+    component: azureml:register_model@latest
+    limits:
+      timeout: 120
     inputs:
-      model_name: "taxi-model"
-      model_path: ${{parent.jobs.train_model.outputs.model_output}}
-      deploy_flag: ${{parent.jobs.evaluate_model.outputs.deploy_flag}}
+      model_input_path: ${{parent.jobs.train_model.outputs.model_output}}
+      model_base_name: rai_taxi_model
+
+  create_rai_job:
+    type: command
+    component: azureml:rai_insights_constructor@latest
+    limits:
+      timeout: 120
+    inputs:
+      title: Taxi Analysis
+      task_type: regression
+      model_info_path: ${{parent.jobs.register_model_job.outputs.model_info_output_path}}
+      train_dataset: ${{parent.jobs.prep_data.outputs.train_data}}
+      test_dataset: ${{parent.jobs.prep_data.outputs.test_data}}
+      target_column_name: 'cost'
+      categorical_column_names: '["store_forward", "vendor"]'
+
+  explain_01:
+    type: command
+    component: azureml:rai_insights_explanation@latest
+    limits:
+      timeout: 120
+    inputs:
+      comment: Some random string
+      rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+
+  gather_01:
+    type: command
+    component: azureml:rai_insights_gather@latest
+    limits:
+      timeout: 120
+    inputs:
+      constructor: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+      insight_4: ${{parent.jobs.explain_01.outputs.explanation}}
 
 # </jobs>
