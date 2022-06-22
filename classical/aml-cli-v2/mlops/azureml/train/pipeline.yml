@@ -1,6 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-experiment_name: taxi-fare-training
+experiment_name: taxi-fare-training-RAI
 description: Training Pipeline to train a model that predicts taxi fare price
 
 # <inputs_and_outputs>
@@ -10,7 +10,6 @@ inputs:
     path: ../../../data/
 
 outputs: 
-  prepared_data:
   trained_model:
   predictions:
   score_report:
@@ -31,12 +30,16 @@ jobs:
     command: >-
       python prep.py 
       --raw_data ${{inputs.raw_data}} 
-      --prepared_data ${{outputs.prepared_data}}
+      --train_data ${{outputs.train_data}}
+      --test_data ${{outputs.test_data}}
+      --eval_data ${{outputs.eval_data}}
     environment: azureml:taxi-train-env@latest
     inputs:
       raw_data: ${{parent.inputs.input}}
     outputs:
-      prepared_data: ${{parent.outputs.prepared_data}}
+      train_data:
+      test_data:
+      eval_data:
 
   train_model:
     name: train_model
@@ -48,7 +51,7 @@ jobs:
       --model_output ${{outputs.model_output}}
     environment: azureml:taxi-train-env@latest
     inputs:
-      prepared_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
+      prepared_data: ${{parent.jobs.prep_data.outputs.train_data}}
     outputs:
       model_output: ${{parent.outputs.trained_model}}
   
@@ -60,7 +63,8 @@ jobs:
       python evaluate.py 
       --model_name ${{inputs.model_name}} 
       --model_input ${{inputs.model_input}} 
-      --prepared_data ${{inputs.prepared_data}}
+      --train_data ${{inputs.train_data}}
+      --test_data ${{inputs.test_data}}
       --predictions ${{outputs.predictions}}
       --score_report ${{outputs.score_report}}
       --deploy_flag ${{outputs.deploy_flag}}
@@ -68,7 +72,8 @@ jobs:
     inputs:
       model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
-      prepared_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
+      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
+      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
     outputs:
       predictions: ${{parent.outputs.predictions}}
       score_report: ${{parent.outputs.score_report}}

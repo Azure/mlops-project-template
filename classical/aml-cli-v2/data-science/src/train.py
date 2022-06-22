@@ -92,7 +92,7 @@ def main():
     arr = os.listdir(args.prepared_data)
     print(arr)
 
-    train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
+    train_data = pd.read_parquet(Path(args.prepared_data))
 
     # Split the data into input(X) and output(y)
     y_train = train_data[TARGET_COL]

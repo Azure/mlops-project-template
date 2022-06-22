@@ -12,7 +12,9 @@ def parse_args():
 
     parser = argparse.ArgumentParser("prep")
     parser.add_argument("--raw_data", type=str, help="Path to raw data")
-    parser.add_argument("--prepared_data", type=str, help="Path of prepared data")
+    parser.add_argument("--train_data", type=str, help="Path of prepared data")
+    parser.add_argument("--test_data", type=str, help="Path of prepared data")
+    parser.add_argument("--eval_data", type=str, help="Path of prepared data")
 
     args = parser.parse_args()
 
@@ -27,7 +29,9 @@ def main():
 
     lines = [
         f"Raw data path: {args.raw_data}",
-        f"Data output path: {args.prepared_data}",
+        f"Train path: {args.train_data}",
+        f"Test path: {args.test_data}",
+        f"Eval path: {args.eval_data}",
     ]
 
     for line in lines:
@@ -61,9 +65,9 @@ def main():
     mlflow.log_metric('val size', val.shape[0])
     mlflow.log_metric('test size', test.shape[0])
 
-    train.to_csv((Path(args.prepared_data) / "train.csv"))
-    val.to_csv((Path(args.prepared_data) / "val.csv"))
-    test.to_csv((Path(args.prepared_data) / "test.csv"))
+    train.to_parquet((Path(args.train_data) / "train.parquet"))
+    val.to_parquet((Path(args.eval_data) / "eval.parquet"))
+    test.to_parquet((Path(args.test_data) / "test.parquet"))
 
 if __name__ == "__main__":
     main()
