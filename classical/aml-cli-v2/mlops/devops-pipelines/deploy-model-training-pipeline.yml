@@ -34,9 +34,9 @@ stages:
       steps:
       - checkout: self
         path: s/
-      - template: run-unit-tests.yml
       - checkout: mlops-templates
         path: s/templates/
+      - template: templates/tests/unit-tests.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
