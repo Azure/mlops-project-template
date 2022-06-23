@@ -77,7 +77,7 @@ def test_train_model():
     train_df = pd.DataFrame(train_data)
     train_df.to_csv(os.path.join(prepared_data, "train.csv"))
 
-    cmd = f"python data-science/src/train.py --prepared_data={prepared_data} --model_output={model_output}"
+    cmd = f"python data-science/src/train/train.py --prepared_data={prepared_data} --model_output={model_output}"
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     out, err = p.communicate() 
     result = str(out).split('\\n')

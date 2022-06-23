@@ -27,7 +27,6 @@ import mlflow.sklearn
 import mlflow.pyfunc
 from mlflow.tracking import MlflowClient
 
-
 TARGET_COL = "cost"
 
 NUMERIC_COLS = [
@@ -70,16 +69,15 @@ def parse_args():
     parser.add_argument("--model_input", type=str, help="Path of input model")
     parser.add_argument("--prepared_data", type=str, help="Path to transformed data")
     parser.add_argument("--evaluation_output", type=str, help="Path of eval results")
+    parser.add_argument("--runner", type=str, help="Local or Cloud Runner", default="CloudRunner")
 
     args = parser.parse_args()
 
     return args
 
 
-def main(prepared_data, model_input, evaluation_output):
+def main(model_name, prepared_data, model_input, evaluation_output, runner):
     '''Read trained model and test dataset, evaluate model and save result'''
-
-    # ---------------- Model Evaluation ---------------- #
 
     # Load the train and test data
     train_data = pd.read_csv((Path(prepared_data) / "train.csv"))
@@ -94,6 +92,22 @@ def main(prepared_data, model_input, evaluation_output):
     # Load the model from input port
     with open((Path(model_input) / "model.pkl"), "rb") as infile:
         model = pickle.load(infile)
+
+    # ---------------- Model Evaluation ---------------- #
+    yhat_test, score = model_evaluation(X_test, y_test, model, evaluation_output)
+
+    # ----------------- Model Promotion ---------------- #
+    if runner == "CloudRunner":
+        predictions, deploy_flag = model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, score)
+
+    # ----------------- Model Fairness ----------------- #
+    sensitive_features = { col: X_test[[col]] for col in SENSITIVE_COLS }
+    fairness(sensitive_features, y_test, predictions, runner)
+
+    # ----------------- Explainability ----------------- #
+    #explainability(model, X_train, X_test, runner)
+
+def model_evaluation(X_test, y_test, model, evaluation_output):
 
     # Get predictions to y_test (y_test)
     yhat_test = model.predict(X_test)
@@ -134,15 +148,16 @@ def main(prepared_data, model_input, evaluation_output):
     plt.savefig("predictions.png")
     mlflow.log_artifact("predictions.png")
 
-    # -------------------- Promotion ------------------- #
+    return yhat_test, r2
+
+def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, score):
+    
     scores = {}
     predictions = {}
-    score = r2_score(y_test, yhat_test) # current model
 
     client = MlflowClient()
 
-    for model_run in client.search_model_versions("name='taxi-model'"):
-        model_name = model_run.name
+    for model_run in client.search_model_versions(f"name='{model_name}'"):
         model_version = model_run.version
         mdl = mlflow.pyfunc.load_model(
             model_uri=f"models:/{model_name}/{model_version}")
@@ -164,7 +179,7 @@ def main(prepared_data, model_input, evaluation_output):
 
     # add current model score and predictions
     scores["current model"] = score
-    predictions["currrent model"] = model.predict(X_test)
+    predictions["currrent model"] = yhat_test
 
     perf_comparison_plot = pd.DataFrame(
         scores, index=["r2 score"]).plot(kind='bar', figsize=(15, 10))
@@ -174,17 +189,9 @@ def main(prepared_data, model_input, evaluation_output):
     mlflow.log_metric("deploy flag", bool(deploy_flag))
     mlflow.log_artifact("perf_comparison.png")
 
-    # -------------------- FAIRNESS ------------------- #
-    # add model fairness
-    sensitive_features = { col: X_test[[col]] for col in SENSITIVE_COLS }
-    fairness(sensitive_features, y_test, predictions)
+    return predictions, deploy_flag
 
-    # -------------------- Explainability ------------------- #
-    # add model explainability
-    #explainability(model, X_train, X_test)
-
-
-def fairness(sensitive_features, y_test, predictions):
+def fairness(sensitive_features, y_test, predictions, runner):
     '''Generates fairness metrics, uploads results to AML run fairness dashboard'''
 
     # Calculate Fairness Metrics over Sensitive Features
@@ -201,14 +208,15 @@ def fairness(sensitive_features, y_test, predictions):
 
     # Set validate_model_ids parameter of upload_dashboard_dictionary to False
     # if you have not registered your model(s)
-    run = Run.get_context()
-    upload_id = upload_dashboard_dictionary(run,
-                                            dash_dict_all,
-                                            dashboard_name=dashboard_title,
-                                            validate_model_ids=False)
-    print(f"\nUploaded to id: {format(upload_id)}\n")
+    if runner == "CloudRunner":
+        run = Run.get_context()
+        upload_id = upload_dashboard_dictionary(run,
+                                                dash_dict_all,
+                                                dashboard_name=dashboard_title,
+                                                validate_model_ids=False)
+        print(f"\nUploaded to id: {format(upload_id)}\n")
 
-def explainability(model, X_train, X_test):
+def explainability(model, X_train, X_test, runner):
     '''Generates explainer, uploads results to AML run explainability dashboard'''
 
     tabular_explainer = TabularExplainer(model,
@@ -222,9 +230,10 @@ def explainability(model, X_train, X_test):
     global_explanation = tabular_explainer.explain_global(X_test)
 
     # upload results to AML run
-    run = Run.get_context()
-    client = ExplanationClient.from_run(run)
-    client.upload_model_explanation(global_explanation, comment='global explanation: all features')
+    if runner == "CloudRunner":
+        run = Run.get_context()
+        client = ExplanationClient.from_run(run)
+        client.upload_model_explanation(global_explanation, comment='global explanation: all features')
 
 
 if __name__ == "__main__":
@@ -242,6 +251,6 @@ if __name__ == "__main__":
     for line in lines:
         print(line)
     
-    main(args.prepared_data, args.model_input, args.evaluation_output)
+    main(args.model_name, args.prepared_data, args.model_input, args.evaluation_output, args.runner)
 
     mlflow.end_run()
