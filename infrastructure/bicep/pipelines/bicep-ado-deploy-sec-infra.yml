@@ -1,14 +1,13 @@
 variables:
-  - name: ap_vm_image
-    value: 'ubuntu-latest'
-  - name: ado_service_connection_rg
-    value: 'Azure-Arm-Dev'
-  - name: location
-    value: westus
-  - name: nameSpace
-    value: 'seca8'
   - name: BASTION_PW
     value: $(bastionpw)
+
+  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      # 'main' branch: PRD environment
+      - template: ../../config-infra-prod.yml
+  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
+      # 'develop' or feature branches: DEV environment
+      - template: ../../config-infra-dev.yml
 
 trigger:
 - none
@@ -51,17 +50,17 @@ stages :
                 --name $(Build.DefinitionName) \
                 --template-file ./infrastructure/bicep/mainsec.bicep \
                 --location $(location) \
-                --parameters location=$(location) nameSpace=$(nameSpace) dsvmJumpboxUsername=tdadmin dsvmJumpboxPassword=$(BASTION_PW)
+                --parameters location=$(location) nameSpace=$(namespace) dsvmJumpboxUsername=tdadmin dsvmJumpboxPassword=$(BASTION_PW)
 
 
   - stage: CheckOutBicepAndDeploy
     displayName: Deploy AML Workspace
     jobs:
-    - deployment: DevDeployBicep
-      displayName: deploy to dev
+    - deployment: $(environment)DeployBicep
+      displayName: deploy to $(environment)
       pool:
         vmImage: $(ap_vm_image)
-      environment: dev
+      environment: $(environment)
       strategy:
         runOnce:
           deploy:
@@ -80,4 +79,4 @@ stages :
                     --name $(Build.DefinitionName) \
                     --location $(location) \
                     --template-file ./infrastructure/bicep/mainsec.bicep \
-                    --parameters location=$(location) location=$(location) nameSpace=$(nameSpace) dsvmJumpboxUsername=tdadmin dsvmJumpboxPassword=$(BASTION_PW)
+                    --parameters location=$(location) location=$(location) nameSpace=$(namespace) dsvmJumpboxUsername=tdadmin dsvmJumpboxPassword=$(BASTION_PW)
