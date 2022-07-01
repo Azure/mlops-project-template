@@ -5,7 +5,7 @@ description: Training Pipeline to train a model that predicts taxi fare price
 
 # <inputs_and_outputs>
 inputs:
-  input: #using local data, will crate an anonymous data asset
+  input: #using local data, will create an anonymous data asset
     type: uri_folder
     path: ../../../data/
 
@@ -13,6 +13,7 @@ outputs:
   prepared_data:
   trained_model:
   evaluation_output:
+  model_info_output_path:
 # </inputs_and_outputs>
 
 # <jobs>
@@ -77,10 +78,13 @@ jobs:
       --model_name ${{inputs.model_name}} 
       --model_path ${{inputs.model_path}} 
       --evaluation_output ${{inputs.evaluation_output}}
+      --model_info_output_path ${{outputs.model_info_output_path}}
     environment: azureml:taxi-train-env@latest
     inputs:
       model_name: "taxi-model"
       model_path: ${{parent.jobs.train_model.outputs.model_output}}
       evaluation_output: ${{parent.jobs.evaluate_model.outputs.evaluation_output}}
+    outputs:
+      model_info_output_path: ${{parent.outputs.model_info_output_path}}
 
 # </jobs>
