@@ -1,0 +1,83 @@
+variables:
+  - name: ap_vm_image
+    value: 'ubuntu-latest'
+  - name: ado_service_connection_rg
+    value: 'Azure-Arm-Dev'
+  - name: location
+    value: westus
+  - name: nameSpace
+    value: 'seca8'
+  - name: BASTION_PW
+    value: $(bastionpw)
+
+trigger:
+- none
+
+pr:
+- main
+- dev
+
+pool:
+  vmImage: $(ap_vm_image)
+
+
+stages :
+  - stage: Lint
+    displayName: Lint and Preflight check
+    jobs:
+    - job: LintBicep
+      displayName: Lint Bicep Code
+      steps:
+        - checkout: self
+        - script: |
+            az bicep build --file ./infrastructure/bicep/mainsec.bicep
+          name: LintBicepCode
+          displayName: Run Bicep Linter
+
+  - stage: PreflightValidation
+    jobs:
+    - job: ValidateBicepCode
+      displayName: Validate Bicep Code
+      steps:
+        - task: AzureCli@2
+          name: RunPreflightValidateion
+          displayName: Run Preflight Validation
+          inputs:
+            azureSubscription: $(ado_service_connection_rg)
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              az deployment sub validate \
+                --name $(Build.DefinitionName) \
+                --template-file ./infrastructure/bicep/mainsec.bicep \
+                --location $(location) \
+                --parameters location=$(location) nameSpace=$(nameSpace) dsvmJumpboxUsername=tdadmin dsvmJumpboxPassword=$(BASTION_PW)
+
+
+  - stage: CheckOutBicepAndDeploy
+    displayName: Deploy AML Workspace
+    jobs:
+    - deployment: DevDeployBicep
+      displayName: deploy to dev
+      pool:
+        vmImage: $(ap_vm_image)
+      environment: dev
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: self
+            - task: AzureCLI@2
+              displayName: Running Dev Deployment
+              inputs:
+                azureSubscription: $(ado_service_connection_rg)
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az --version
+                  echo "deploying bicep..."
+                  az deployment sub create \
+                    --name $(Build.DefinitionName) \
+                    --location $(location) \
+                    --template-file ./infrastructure/bicep/mainsec.bicep \
+                    --parameters location=$(location) location=$(location) nameSpace=$(nameSpace) dsvmJumpboxUsername=tdadmin dsvmJumpboxPassword=$(BASTION_PW)
