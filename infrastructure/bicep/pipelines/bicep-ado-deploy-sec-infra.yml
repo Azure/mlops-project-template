@@ -56,7 +56,7 @@ stages :
   - stage: CheckOutBicepAndDeploy
     displayName: Deploy AML Workspace
     jobs:
-    - deployment: $(environment)DeployBicep
+    - deployment: DeployBicep
       displayName: deploy to $(environment)
       pool:
         vmImage: $(ap_vm_image)
