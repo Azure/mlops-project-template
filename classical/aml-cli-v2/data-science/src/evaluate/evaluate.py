@@ -82,8 +82,6 @@ def main(args):
     X_test = test_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     # Load the model from input port
-    #with open((Path(args.model_input) / "model.pkl"), "rb") as infile:
-    #    model = pickle.load(infile)
     model =  mlflow.sklearn.load_model(args.model_input) 
 
     # ---------------- Model Evaluation ---------------- #

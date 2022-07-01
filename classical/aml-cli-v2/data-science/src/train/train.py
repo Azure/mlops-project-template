@@ -77,33 +77,33 @@ def parse_args():
 
     return args
 
-def main(prepared_data, model_output, params):
+def main(args):
     '''Read train dataset, train model, save trained model'''
 
     # Read train data
-    train_data = pd.read_csv((Path(prepared_data) / "train.csv"))
+    train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
 
     # Split the data into input(X) and output(y)
     y_train = train_data[TARGET_COL]
     X_train = train_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     # Train a Random Forest Regression Model with the training set
-    model = RandomForestRegressor(n_estimators = params["n_estimators"],
-                                  bootstrap = params["bootstrap"],
-                                  max_depth = params["max_depth"],
-                                  max_features = params["max_features"],
-                                  min_samples_leaf = params["min_samples_leaf"],
-                                  min_samples_split = params["min_samples_split"],
+    model = RandomForestRegressor(n_estimators = args.regressor__n_estimators,
+                                  bootstrap = args.regressor__bootstrap,
+                                  max_depth = args.regressor__max_depth,
+                                  max_features = args.regressor__max_features,
+                                  min_samples_leaf = args.regressor__min_samples_leaf,
+                                  min_samples_split = args.regressor__min_samples_split,
                                   random_state=0)
 
     # log model hyperparameters
     mlflow.log_param("model", "RandomForestRegressor")
-    mlflow.log_param("n_estimators", params["n_estimators"])
-    mlflow.log_param("bootstrap", params["bootstrap"])
-    mlflow.log_param("max_depth", params["max_depth"])
-    mlflow.log_param("max_features", params["max_features"])
-    mlflow.log_param("min_samples_leaf", params["min_samples_leaf"])
-    mlflow.log_param("min_samples_split", params["min_samples_split"])
+    mlflow.log_param("n_estimators", args.regressor__n_estimators)
+    mlflow.log_param("bootstrap", args.regressor__bootstrap)
+    mlflow.log_param("max_depth", args.regressor__max_depth)
+    mlflow.log_param("max_features", args.regressor__max_features)
+    mlflow.log_param("min_samples_leaf", args.regressor__min_samples_leaf)
+    mlflow.log_param("min_samples_split", args.regressor__min_samples_split)
 
     # Train model with the train set
     model.fit(X_train, y_train)
@@ -132,8 +132,7 @@ def main(prepared_data, model_output, params):
     mlflow.log_artifact("regression_results.png")
 
     # Save the model
-    with open((Path(model_output) / "model.pkl"), "wb") as outfile:
-        pickle.dump(model, outfile)
+    mlflow.sklearn.save_model(sk_model=model, path=args.model_output)
 
 
 if __name__ == "__main__":
@@ -148,21 +147,18 @@ if __name__ == "__main__":
     lines = [
         f"Data input path: {args.prepared_data}",
         f"Model output path: {args.model_output}",
+        f"n_estimators: {args.regressor__n_estimators}",
+        f"bootstrap: {args.regressor__bootstrap}",
+        f"max_depth: {args.regressor__max_depth}",
+        f"max_features: {args.regressor__max_features}",
+        f"min_samples_leaf: {args.regressor__min_samples_leaf}",
+        f"min_samples_split: {args.regressor__min_samples_split}"
     ]
 
     for line in lines:
         print(line)
 
-    params = {
-        "n_estimators": args.regressor__n_estimators,
-        "bootstrap": args.regressor__bootstrap,
-        "max_depth": args.regressor__max_depth,
-        "max_features": args.regressor__max_features,
-        "min_samples_leaf": args.regressor__min_samples_leaf,
-        "min_samples_split": args.regressor__min_samples_split
-    }
-    
-    main(args.prepared_data, args.model_output, params)
+    main(args)
 
     mlflow.end_run()
     
