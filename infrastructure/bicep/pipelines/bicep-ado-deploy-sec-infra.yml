@@ -29,7 +29,7 @@ stages :
       steps:
         - checkout: self
         - script: |
-            az bicep build --file ./infrastructure/bicep/mainsec.bicep
+            az bicep build --file ./infrastructure/mainsec.bicep
           name: LintBicepCode
           displayName: Run Bicep Linter
 
@@ -48,7 +48,7 @@ stages :
             inlineScript: |
               az deployment sub validate \
                 --name $(Build.DefinitionName) \
-                --template-file ./infrastructure/bicep/mainsec.bicep \
+                --template-file ./infrastructure/mainsec.bicep \
                 --location $(location) \
                 --parameters location=$(location) nameSpace=$(namespace) dsvmJumpboxUsername=tdadmin dsvmJumpboxPassword=$(BASTION_PW)
 
@@ -78,5 +78,5 @@ stages :
                   az deployment sub create \
                     --name $(Build.DefinitionName) \
                     --location $(location) \
-                    --template-file ./infrastructure/bicep/mainsec.bicep \
+                    --template-file ./infrastructure/mainsec.bicep \
                     --parameters location=$(location) location=$(location) nameSpace=$(namespace) dsvmJumpboxUsername=tdadmin dsvmJumpboxPassword=$(BASTION_PW)
