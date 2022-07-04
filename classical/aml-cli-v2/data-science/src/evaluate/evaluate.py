@@ -60,7 +60,8 @@ def parse_args():
     parser = argparse.ArgumentParser("predict")
     parser.add_argument("--model_name", type=str, help="Name of registered model")
     parser.add_argument("--model_input", type=str, help="Path of input model")
-    parser.add_argument("--prepared_data", type=str, help="Path to transformed data")
+    parser.add_argument("--train_data", type=str, help="Path to train dataset")
+    parser.add_argument("--test_data", type=str, help="Path to test dataset")
     parser.add_argument("--evaluation_output", type=str, help="Path of eval results")
     parser.add_argument("--runner", type=str, help="Local or Cloud Runner", default="CloudRunner")
 
@@ -72,8 +73,9 @@ def main(args):
     '''Read trained model and test dataset, evaluate model and save result'''
 
     # Load the train and test data
-    train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
-    test_data = pd.read_csv((Path(args.prepared_data) / "test.csv"))
+    train_data = pd.read_parquet(Path(args.train_data))
+    test_data = pd.read_parquet(Path(args.test_data))
+
 
     y_train = train_data[TARGET_COL]
     X_train = train_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
@@ -186,7 +188,8 @@ if __name__ == "__main__":
     lines = [
         f"Model name: {args.model_name}",
         f"Model path: {args.model_input}",
-        f"Test data path: {args.prepared_data}",
+        f"Train data path: {args.train_data}",
+        f"Test data path: {args.test_data}",
         f"Evaluation output path: {args.evaluation_output}",
     ]
 

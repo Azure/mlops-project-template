@@ -56,7 +56,7 @@ def parse_args():
     '''Parse input arguments'''
 
     parser = argparse.ArgumentParser("train")
-    parser.add_argument("--prepared_data", type=str, help="Path to training data")
+    parser.add_argument("--train_data", type=str, help="Path to train dataset")
     parser.add_argument("--model_output", type=str, help="Path of output model")
 
     # classifier specific arguments
@@ -81,7 +81,7 @@ def main(args):
     '''Read train dataset, train model, save trained model'''
 
     # Read train data
-    train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
+    train_data = pd.read_parquet(Path(args.train_data))
 
     # Split the data into input(X) and output(y)
     y_train = train_data[TARGET_COL]
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     lines = [
-        f"Data input path: {args.prepared_data}",
+        f"Train dataset input path: {args.train_data}",
         f"Model output path: {args.model_output}",
         f"n_estimators: {args.regressor__n_estimators}",
         f"bootstrap: {args.regressor__bootstrap}",
