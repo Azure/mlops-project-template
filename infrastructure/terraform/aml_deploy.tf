@@ -7,7 +7,7 @@ module "resource_group" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env = var.environment
+  env     = var.environment
 
   tags = local.tags
 }
@@ -22,7 +22,7 @@ module "aml_workspace" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env = var.environment
+  env     = var.environment
 
   storage_account_id      = module.storage_account_aml.id
   key_vault_id            = module.key_vault.id
@@ -45,7 +45,7 @@ module "storage_account_aml" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env = var.environment
+  env     = var.environment
 
   hns_enabled                         = false
   firewall_bypass                     = ["AzureServices"]
@@ -64,7 +64,7 @@ module "key_vault" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env = var.environment
+  env     = var.environment
 
   tags = local.tags
 }
@@ -79,7 +79,7 @@ module "application_insights" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env = var.environment
+  env     = var.environment
 
   tags = local.tags
 }
@@ -94,7 +94,7 @@ module "container_registry" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env = var.environment
+  env     = var.environment
 
   tags = local.tags
 }

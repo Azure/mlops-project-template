@@ -33,70 +33,27 @@ resource "azurerm_machine_learning_compute_cluster" "adl_aml_ws_compute_cluster"
   }
 }
 
-# # Datastore
+# Private Endpoint configuration
 
-# resource "azurerm_resource_group_template_deployment" "arm_aml_create_datastore" {
-#   name                = "arm_aml_create_datastore"
-#   resource_group_name = var.rg_name
-#   deployment_mode     = "Incremental"
-#   parameters_content = jsonencode({
-#     "WorkspaceName" = {
-#       value = azurerm_machine_learning_workspace.mlw.name
-#     },
-#     "StorageAccountName" = {
-#       value = var.storage_account_name
-#     }
-#   })
+resource "azurerm_private_endpoint" "mlw_pe" {
+  name                = "pe-${azurerm_machine_learning_workspace.mlw.name}-amlw"
+  location            = var.location
+  resource_group_name = var.rg_name
+  subnet_id           = var.subnet_id
 
-#   depends_on = [time_sleep.wait_30_seconds]
+  private_service_connection {
+    name                           = "psc-aml-${var.basename}"
+    private_connection_resource_id = azurerm_machine_learning_workspace.mlw.id
+    subresource_names              = ["amlworkspace"]
+    is_manual_connection           = false
+  }
 
-#   template_content = <<TEMPLATE
-# {
-#   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-#   "contentVersion": "1.0.0.0",
-#   "parameters": {
-#         "WorkspaceName": {
-#             "type": "String"
-#         },
-#         "StorageAccountName": {
-#             "type": "String"
-#         }
-#     },
-#   "resources": [
-#         {
-#             "type": "Microsoft.MachineLearningServices/workspaces/datastores",
-#             "apiVersion": "2021-03-01-preview",
-#             "name": "[concat(parameters('WorkspaceName'), '/default')]",
-#             "dependsOn": [],
-#             "properties": {
-#                 "contents": {
-#                     "accountName": "[parameters('StorageAccountName')]",
-#                     "containerName": "default",
-#                     "contentsType": "AzureBlob",
-#                     "credentials": {
-#                       "credentialsType": "None"
-#                     },
-#                     "endpoint": "core.windows.net",
-#                     "protocol": "https"
-#                   },
-#                   "description": "Default datastore for mlops-tabular",
-#                   "isDefault": false,
-#                   "properties": {
-#                     "ServiceDataAccessAuthIdentity": "None"
-#                   },
-#                   "tags": {}
-#                 }
-#         }
-#   ]
-# }
-# TEMPLATE
-# }
+  private_dns_zone_group {
+    name                 = "private-dns-zone-group-ws"
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
 
-# resource "time_sleep" "wait_30_seconds" {
+  count = var.enable_aml_secure_workspace ? 1 : 0
 
-#   depends_on = [
-#     azurerm_machine_learning_workspace.mlw
-#   ]
-
-#   create_duration = "30s"
-# }
+  tags = var.tags
+}

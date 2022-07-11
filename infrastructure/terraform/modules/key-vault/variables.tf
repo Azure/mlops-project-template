@@ -28,3 +28,7 @@ variable "env" {
   type        = string
   description = "Environment prefix"
 }
+
+variable "enable_aml_secure_workspace" {
+  description = "Variable to enable or disable AML secure workspace"
+}

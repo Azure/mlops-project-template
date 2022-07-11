@@ -58,3 +58,7 @@ variable "storage_account_name" {
   type        = string
   description = "The Name of the Storage Account linked to AML workspace"
 }
+
+variable "enable_aml_secure_workspace" {
+  description = "Variable to enable or disable AML secure workspace"
+}
