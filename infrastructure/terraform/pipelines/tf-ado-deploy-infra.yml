@@ -47,6 +47,7 @@ stages :
         path: s/
       - checkout: mlops-templates
         path: s/templates/
+      - template: templates/infra/create-sp-variables.yml@mlops-templates
       - template: templates/infra/install-terraform.yml@mlops-templates
       - template: templates/infra/run-terraform-init.yml@mlops-templates
       - template: templates/infra/run-terraform-validate.yml@mlops-templates

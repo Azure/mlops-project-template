@@ -98,3 +98,20 @@ module "container_registry" {
 
   tags = local.tags
 }
+
+module "data_explorer" {
+  source = "./modules/data-explorer"
+
+  rg_name  = module.resource_group.name
+  location = module.resource_group.location
+
+  prefix  = var.prefix
+  postfix = var.postfix
+  env = var.environment
+  key_vault_id      = module.key_vault.id
+  enable_monitoring = var.enable_monitoring
+
+  client_secret = var.client_secret
+
+  tags = local.tags
+}

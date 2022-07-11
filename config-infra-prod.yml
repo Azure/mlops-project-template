@@ -12,6 +12,7 @@ variables:
   location: westus
   environment: prod
   enable_aml_computecluster: true
+  enable_monitoring: true
 
   # Azure DevOps 
   ado_service_connection_rg: Azure-ARM-Prod
