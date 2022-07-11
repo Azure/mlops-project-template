@@ -32,6 +32,11 @@ module "aml_workspace" {
   enable_aml_computecluster = var.enable_aml_computecluster
   storage_account_name      = module.storage_account_aml.name
 
+  enable_aml_secure_workspace = var.enable_aml_secure_workspace
+  vnet_id                     = azurerm_virtual_network.vnet_default.id
+  subnet_default_id           = azurerm_subnet.snet_default.id
+  subnet_training_id          = azurerm_subnet.snet_training.id
+
   tags = local.tags
 }
 
@@ -51,6 +56,10 @@ module "storage_account_aml" {
   firewall_bypass                     = ["AzureServices"]
   firewall_virtual_network_subnet_ids = []
 
+  enable_aml_secure_workspace = var.enable_aml_secure_workspace
+  vnet_id                     = azurerm_virtual_network.vnet_default.id
+  subnet_id                   = azurerm_subnet.snet_default.id
+
   tags = local.tags
 }
 
@@ -65,6 +74,10 @@ module "key_vault" {
   prefix  = var.prefix
   postfix = var.postfix
   env     = var.environment
+
+  enable_aml_secure_workspace = var.enable_aml_secure_workspace
+  vnet_id                     = azurerm_virtual_network.vnet_default.id
+  subnet_id                   = azurerm_subnet.snet_default.id
 
   tags = local.tags
 }
@@ -95,6 +108,10 @@ module "container_registry" {
   prefix  = var.prefix
   postfix = var.postfix
   env     = var.environment
+
+  enable_aml_secure_workspace = var.enable_aml_secure_workspace
+  vnet_id                     = azurerm_virtual_network.vnet_default.id
+  subnet_id                   = azurerm_subnet.snet_default.id
 
   tags = local.tags
 }

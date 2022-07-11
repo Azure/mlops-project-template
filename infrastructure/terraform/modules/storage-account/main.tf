@@ -33,24 +33,60 @@ resource "azurerm_storage_account_network_rules" "firewall_rules" {
   bypass                     = var.firewall_bypass
 }
 
+# DNS Zones
+
+resource "azurerm_private_dns_zone" "st_zone_blob" {
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = var.rg_name
+
+  count = var.enable_aml_secure_workspace ? 1 : 0
+}
+
+resource "azurerm_private_dns_zone" "st_zone_file" {
+  name                = "privatelink.file.core.windows.net"
+  resource_group_name = var.rg_name
+
+  count = var.enable_aml_secure_workspace ? 1 : 0
+}
+
+# Linking of DNS zones to Virtual Network
+
+resource "azurerm_private_dns_zone_virtual_network_link" "st_zone_link_blob" {
+  name                  = "${var.prefix}${var.postfix}_link_st_blob"
+  resource_group_name   = var.rg_name
+  private_dns_zone_name = azurerm_private_dns_zone.st_zone_blob[0].name
+  virtual_network_id    = var.vnet_id
+
+  count = var.enable_aml_secure_workspace ? 1 : 0
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "st_zone_link_file" {
+  name                  = "${var.prefix}${var.postfix}_link_st_file"
+  resource_group_name   = var.rg_name
+  private_dns_zone_name = azurerm_private_dns_zone.st_zone_file[0].name
+  virtual_network_id    = var.vnet_id
+
+  count = var.enable_aml_secure_workspace ? 1 : 0
+}
+
 # Private Endpoint configuration
 
 resource "azurerm_private_endpoint" "st_pe_blob" {
-  name                = "pe-${azurerm_storage_account.adl_st[0].name}-blob"
+  name                = "pe-${azurerm_storage_account.st.name}-blob"
   location            = var.location
   resource_group_name = var.rg_name
   subnet_id           = var.subnet_id
 
   private_service_connection {
-    name                           = "psc-blob-${var.basename}"
-    private_connection_resource_id = azurerm_storage_account.adl_st[0].id
+    name                           = "psc-blob-${var.prefix}-${var.postfix}${var.env}"
+    private_connection_resource_id = azurerm_storage_account.st.id
     subresource_names              = ["blob"]
     is_manual_connection           = false
   }
 
   private_dns_zone_group {
     name                 = "private-dns-zone-group-blob"
-    private_dns_zone_ids = var.private_dns_zone_ids_blob
+    private_dns_zone_ids = [azurerm_private_dns_zone.st_zone_blob[0].id]
   }
 
   count = var.enable_aml_secure_workspace ? 1 : 0
@@ -59,21 +95,21 @@ resource "azurerm_private_endpoint" "st_pe_blob" {
 }
 
 resource "azurerm_private_endpoint" "st_pe_file" {
-  name                = "pe-${azurerm_storage_account.adl_st[0].name}-file"
+  name                = "pe-${azurerm_storage_account.st.name}-file"
   location            = var.location
   resource_group_name = var.rg_name
   subnet_id           = var.subnet_id
 
   private_service_connection {
-    name                           = "psc-file-${var.basename}"
-    private_connection_resource_id = azurerm_storage_account.adl_st[0].id
+    name                           = "psc-file-${var.prefix}-${var.postfix}${var.env}"
+    private_connection_resource_id = azurerm_storage_account.st.id
     subresource_names              = ["file"]
     is_manual_connection           = false
   }
 
   private_dns_zone_group {
     name                 = "private-dns-zone-group-file"
-    private_dns_zone_ids = var.private_dns_zone_ids_file
+    private_dns_zone_ids = [azurerm_private_dns_zone.st_zone_file[0].id]
   }
 
   count = var.enable_aml_secure_workspace ? 1 : 0
