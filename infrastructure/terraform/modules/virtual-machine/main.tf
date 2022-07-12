@@ -1,5 +1,5 @@
 resource "azurerm_virtual_machine" "vm" {
-  name                  = "wvm-${var.prefix}-${var.postfix}${var.env}"
+  name                  = "wvm-jumphost"
   location              = var.location
   resource_group_name   = var.rg_name
   network_interface_ids = [azurerm_network_interface.vm_nic[0].id]
