@@ -7,7 +7,6 @@ Saves predictions, evaluation results and deploy flag.
 
 import argparse
 from pathlib import Path
-import pickle
 
 import numpy as np
 import pandas as pd
@@ -60,7 +59,6 @@ def parse_args():
     parser = argparse.ArgumentParser("predict")
     parser.add_argument("--model_name", type=str, help="Name of registered model")
     parser.add_argument("--model_input", type=str, help="Path of input model")
-    parser.add_argument("--train_data", type=str, help="Path to train dataset")
     parser.add_argument("--test_data", type=str, help="Path to test dataset")
     parser.add_argument("--evaluation_output", type=str, help="Path of eval results")
     parser.add_argument("--runner", type=str, help="Local or Cloud Runner", default="CloudRunner")
@@ -72,14 +70,10 @@ def parse_args():
 def main(args):
     '''Read trained model and test dataset, evaluate model and save result'''
 
-    # Load the train and test data
-    train_data = pd.read_parquet(Path(args.train_data))
+    # Load the test data
     test_data = pd.read_parquet(Path(args.test_data))
 
-
-    y_train = train_data[TARGET_COL]
-    X_train = train_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
-
+    # Split the data into inputs and outputs
     y_test = test_data[TARGET_COL]
     X_test = test_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
@@ -188,7 +182,6 @@ if __name__ == "__main__":
     lines = [
         f"Model name: {args.model_name}",
         f"Model path: {args.model_input}",
-        f"Train data path: {args.train_data}",
         f"Test data path: {args.test_data}",
         f"Evaluation output path: {args.evaluation_output}",
     ]

@@ -65,14 +65,12 @@ jobs:
       python evaluate.py 
       --model_name ${{inputs.model_name}} 
       --model_input ${{inputs.model_input}} 
-      --train_data ${{inputs.train_data}} 
       --test_data ${{inputs.test_data}} 
       --evaluation_output ${{outputs.evaluation_output}}
     environment: azureml:taxi-train-env@latest
     inputs:
       model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
-      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
       test_data: ${{parent.jobs.prep_data.outputs.test_data}}
     outputs:
       evaluation_output: ${{parent.outputs.evaluation_output}}

@@ -7,8 +7,6 @@ Trains ML model using training dataset. Saves trained model.
 import argparse
 
 from pathlib import Path
-import os
-import pickle
 
 import numpy as np
 import pandas as pd

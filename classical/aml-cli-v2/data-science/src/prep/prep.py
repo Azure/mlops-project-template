@@ -90,7 +90,7 @@ def main(args):
     mlflow.log_metric('test size', test.shape[0])
 
     train.to_parquet((Path(args.train_data) / "train.parquet"))
-    val.to_parquet((Path(args.val_data) / "eval.parquet"))
+    val.to_parquet((Path(args.val_data) / "val.parquet"))
     test.to_parquet((Path(args.test_data) / "test.parquet"))
 
 

@@ -4,13 +4,13 @@ import pandas as pd
 
 def test_train_model():
     
-    prepared_data = "/tmp/prep"
-    model_output = "/tmp/train"
+    train_data = "/tmp/train"
+    model_output = "/tmp/model"
 
-    os.makedirs(prepared_data, exist_ok = True)
+    os.makedirs(train_data, exist_ok = True)
     os.makedirs(model_output, exist_ok = True)
 
-    train_data = {
+    data = {
         'cost': [4.5, 6.0, 9.5, 4.0, 6.0, 11.5, 25.0, 3.5, 5.0, 11.0, 7.5, 24.5, 9.5,
                 7.5, 6.0, 5.0, 9.0, 25.5, 17.5, 52.0],
         'distance': [0.83, 1.27, 1.8, 0.5, 0.9, 2.72, 6.83, 0.45, 0.77, 2.2, 1.5, 6.27,
@@ -74,10 +74,10 @@ def test_train_model():
         'vendor': [2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 1, 2, 2]
     }
 
-    train_df = pd.DataFrame(train_data)
-    train_df.to_csv(os.path.join(prepared_data, "train.csv"))
+    df = pd.DataFrame(data)
+    df.to_parquet(os.path.join(train_data, "train.parquet"))
 
-    cmd = f"python data-science/src/train/train.py --prepared_data={prepared_data} --model_output={model_output}"
+    cmd = f"python data-science/src/train/train.py --train_data={train_data} --model_output={model_output}"
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     out, err = p.communicate() 
     result = str(out).split('\\n')

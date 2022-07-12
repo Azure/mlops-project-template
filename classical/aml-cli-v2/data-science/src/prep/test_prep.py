@@ -5,9 +5,15 @@ import pandas as pd
 def test_prep_data():
     
     raw_data = "/tmp/raw"
-    prepared_data = "/tmp/prep"
+    train_data = "/tmp/train"
+    val_data = "/tmp/val"
+    test_data = "/tmp/test"
+
     os.makedirs(raw_data, exist_ok = True)
-    os.makedirs(prepared_data, exist_ok = True)
+    os.makedirs(train_data, exist_ok = True)
+    os.makedirs(val_data, exist_ok = True)
+    os.makedirs(test_data, exist_ok = True)
+
 
     data = {
         'cost': [4.5, 6.0, 9.5, 4.0, 6.0, 11.5, 25.0, 3.5, 5.0, 11.0, 7.5, 24.5, 9.5,
@@ -76,7 +82,7 @@ def test_prep_data():
     df = pd.DataFrame(data)
     df.to_csv(os.path.join(raw_data, "taxi-data.csv"))
     
-    cmd = f"python data-science/src/prep/prep.py --raw_data={raw_data} --prepared_data={prepared_data}"
+    cmd = f"python data-science/src/prep/prep.py --raw_data={raw_data} --train_data={train_data} --val_data={val_data} --test_data={test_data}"
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     out, err = p.communicate() 
     result = str(out).split('\\n')
@@ -84,9 +90,9 @@ def test_prep_data():
         if not lin.startswith('#'):
             print(lin)
 
-    assert os.path.exists(os.path.join(prepared_data, "train.csv"))
-    assert os.path.exists(os.path.join(prepared_data, "val.csv"))
-    assert os.path.exists(os.path.join(prepared_data, "test.csv"))
+    assert os.path.exists(os.path.join(train_data, "train.parquet"))
+    assert os.path.exists(os.path.join(val_data, "val.parquet"))
+    assert os.path.exists(os.path.join(test_data, "test.parquet"))
 
     print("¨Prep Data Unit Test Completed")
 
