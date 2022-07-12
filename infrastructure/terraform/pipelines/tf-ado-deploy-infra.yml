@@ -9,6 +9,14 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../../config-infra-dev.yml
 
+parameters:
+- name: jumphost_username
+  type: string
+  default: "azureuser"
+- name: jumphost_password
+  type: secret
+  default: "ThisIsNotVerySecure!"
+
 trigger:
 - none
 
