@@ -14,7 +14,7 @@ parameters:
   type: string
   default: "azureuser"
 - name: jumphost_password
-  type: secret
+  type: string
   default: "ThisIsNotVerySecure!"
 
 trigger:
