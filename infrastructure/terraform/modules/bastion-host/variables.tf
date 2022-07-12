@@ -33,3 +33,7 @@ variable "subnet_id" {
   type        = string
   description = "Subnet ID for the bastion"
 }
+
+variable "enable_aml_secure_workspace" {
+  description = "Variable to enable or disable AML secure workspace"
+}

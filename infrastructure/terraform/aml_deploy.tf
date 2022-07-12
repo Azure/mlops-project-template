@@ -33,9 +33,9 @@ module "aml_workspace" {
   storage_account_name      = module.storage_account_aml.name
 
   enable_aml_secure_workspace = var.enable_aml_secure_workspace
-  vnet_id                     = azurerm_virtual_network.vnet_default.id
-  subnet_default_id           = azurerm_subnet.snet_default.id
-  subnet_training_id          = azurerm_subnet.snet_training.id
+  vnet_id                     = var.enable_aml_secure_workspace ? azurerm_virtual_network.vnet_default[0].id : ""
+  subnet_default_id           = var.enable_aml_secure_workspace ? azurerm_subnet.snet_default[0].id : ""
+  subnet_training_id          = var.enable_aml_secure_workspace ? azurerm_subnet.snet_training[0].id : ""
 
   tags = local.tags
 }
@@ -57,8 +57,8 @@ module "storage_account_aml" {
   firewall_virtual_network_subnet_ids = []
 
   enable_aml_secure_workspace = var.enable_aml_secure_workspace
-  vnet_id                     = azurerm_virtual_network.vnet_default.id
-  subnet_id                   = azurerm_subnet.snet_default.id
+  vnet_id                     = var.enable_aml_secure_workspace ? azurerm_virtual_network.vnet_default[0].id : ""
+  subnet_id                   = var.enable_aml_secure_workspace ? azurerm_subnet.snet_default[0].id : ""
 
   tags = local.tags
 }
@@ -76,8 +76,8 @@ module "key_vault" {
   env     = var.environment
 
   enable_aml_secure_workspace = var.enable_aml_secure_workspace
-  vnet_id                     = azurerm_virtual_network.vnet_default.id
-  subnet_id                   = azurerm_subnet.snet_default.id
+  vnet_id                     = var.enable_aml_secure_workspace ? azurerm_virtual_network.vnet_default[0].id : ""
+  subnet_id                   = var.enable_aml_secure_workspace ? azurerm_subnet.snet_default[0].id : ""
 
   tags = local.tags
 }
@@ -110,8 +110,8 @@ module "container_registry" {
   env     = var.environment
 
   enable_aml_secure_workspace = var.enable_aml_secure_workspace
-  vnet_id                     = azurerm_virtual_network.vnet_default.id
-  subnet_id                   = azurerm_subnet.snet_default.id
+  vnet_id                     = var.enable_aml_secure_workspace ? azurerm_virtual_network.vnet_default[0].id : ""
+  subnet_id                   = var.enable_aml_secure_workspace ? azurerm_subnet.snet_default[0].id : ""
 
   tags = local.tags
 }

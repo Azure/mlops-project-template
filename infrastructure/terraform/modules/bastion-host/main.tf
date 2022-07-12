@@ -10,8 +10,10 @@ resource "azurerm_bastion_host" "bas" {
   ip_configuration {
     name                 = "configuration"
     subnet_id            = var.subnet_id
-    public_ip_address_id = azurerm_public_ip.pip.id
+    public_ip_address_id = azurerm_public_ip.pip[0].id
   }
+
+  count = var.enable_aml_secure_workspace ? 1 : 0
 
   tags = var.tags
 }
@@ -22,6 +24,8 @@ resource "azurerm_public_ip" "pip" {
   resource_group_name = var.rg_name
   allocation_method   = "Static"
   sku                 = "Standard"
+
+  count = var.enable_aml_secure_workspace ? 1 : 0
 
   tags = var.tags
 }

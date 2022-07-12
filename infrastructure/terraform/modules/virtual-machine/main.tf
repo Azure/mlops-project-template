@@ -2,7 +2,7 @@ resource "azurerm_virtual_machine" "vm" {
   name                  = "wvm-${var.prefix}-${var.postfix}${var.env}"
   location              = var.location
   resource_group_name   = var.rg_name
-  network_interface_ids = [azurerm_network_interface.vm_nic.id]
+  network_interface_ids = [azurerm_network_interface.vm_nic[0].id]
   vm_size               = "Standard_DS3_v2"
 
   delete_os_disk_on_termination    = true
@@ -37,6 +37,8 @@ resource "azurerm_virtual_machine" "vm" {
     managed_disk_type = "StandardSSD_LRS"
   }
 
+  count = var.enable_aml_secure_workspace ? 1 : 0
+
   tags = var.tags
 }
 
@@ -51,6 +53,8 @@ resource "azurerm_network_interface" "vm_nic" {
     subnet_id                     = var.subnet_id
     # public_ip_address_id          = azurerm_public_ip.vm_public_ip.id
   }
+
+  count = var.enable_aml_secure_workspace ? 1 : 0
 
   tags = var.tags
 }
@@ -72,16 +76,20 @@ resource "azurerm_network_security_group" "vm_nsg" {
     destination_address_prefix = "*"
   }
 
+  count = var.enable_aml_secure_workspace ? 1 : 0
+
   tags = var.tags
 }
 
 resource "azurerm_network_interface_security_group_association" "vm_nsg_association" {
-  network_interface_id      = azurerm_network_interface.vm_nic.id
-  network_security_group_id = azurerm_network_security_group.vm_nsg.id
+  network_interface_id      = azurerm_network_interface.vm_nic[0].id
+  network_security_group_id = azurerm_network_security_group.vm_nsg[0].id
+
+  count = var.enable_aml_secure_workspace ? 1 : 0
 }
 
 resource "azurerm_dev_test_global_vm_shutdown_schedule" "vm_schedule" {
-  virtual_machine_id = azurerm_virtual_machine.vm.id
+  virtual_machine_id = azurerm_virtual_machine.vm[0].id
   location           = var.location
   enabled            = true
 
@@ -91,4 +99,6 @@ resource "azurerm_dev_test_global_vm_shutdown_schedule" "vm_schedule" {
   notification_settings {
     enabled = false
   }
+
+  count = var.enable_aml_secure_workspace ? 1 : 0
 }
