@@ -36,6 +36,7 @@ jobs:
       --val_data ${{outputs.val_data}}
       --test_data ${{outputs.test_data}}
     environment: azureml:taxi-train-env@latest
+    compute: azureml:cpu-cluster
     inputs:
       raw_data: ${{parent.inputs.input}}
     outputs:
@@ -52,6 +53,7 @@ jobs:
       --train_data ${{inputs.train_data}} 
       --model_output ${{outputs.model_output}}
     environment: azureml:taxi-train-env@latest
+    compute: azureml:cpu-cluster
     inputs:
       train_data: ${{parent.jobs.prep_data.outputs.train_data}}
     outputs:
@@ -68,6 +70,7 @@ jobs:
       --test_data ${{inputs.test_data}} 
       --evaluation_output ${{outputs.evaluation_output}}
     environment: azureml:taxi-train-env@latest
+    compute: azureml:cpu-cluster
     inputs:
       model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
@@ -86,6 +89,7 @@ jobs:
       --evaluation_output ${{inputs.evaluation_output}}
       --model_info_output_path ${{outputs.model_info_output_path}}
     environment: azureml:taxi-train-env@latest
+    compute: azureml:cpu-cluster
     inputs:
       model_name: "taxi-model"
       model_path: ${{parent.jobs.train_model.outputs.model_output}}
@@ -96,6 +100,7 @@ jobs:
   create_rai_job:
     type: command
     component: azureml:rai_insights_constructor@latest
+    compute: azureml:cpu-cluster
     limits:
       timeout: 120
     inputs:
@@ -110,6 +115,7 @@ jobs:
   explain_01:
     type: command
     component: azureml:rai_insights_explanation@latest
+    compute: azureml:cpu-cluster
     limits:
       timeout: 120
     inputs:
@@ -119,6 +125,7 @@ jobs:
   causal_01:
     type: command
     component: azureml:rai_insights_causal@latest
+    compute: azureml:cpu-cluster
     limits:
       timeout: 120
     inputs:
@@ -129,6 +136,7 @@ jobs:
   counterfactual_01:
     type: command
     component: azureml:rai_insights_counterfactual@latest
+    compute: azureml:cpu-cluster
     limits:
       timeout: 600
     inputs:
@@ -140,6 +148,7 @@ jobs:
   error_analysis_01:
     type: command
     component: azureml:rai_insights_erroranalysis@latest
+    compute: azureml:cpu-cluster
     limits:
       timeout: 120
     inputs:
@@ -149,6 +158,7 @@ jobs:
   gather_01:
     type: command
     component: azureml:rai_insights_gather@latest
+    compute: azureml:cpu-cluster
     limits:
       timeout: 120
     inputs:
