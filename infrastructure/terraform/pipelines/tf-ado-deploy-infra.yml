@@ -59,4 +59,10 @@ stages :
       - template: templates/infra/run-terraform-init.yml@mlops-templates
       - template: templates/infra/run-terraform-validate.yml@mlops-templates
       - template: templates/infra/run-terraform-plan.yml@mlops-templates
+        parameters:
+          jumphost_username: ${{parameters.jumphost_username}}
+          jumphost_password: ${{parameters.jumphost_password}}
       - template: templates/infra/run-terraform-apply.yml@mlops-templates
+        parameters:
+            jumphost_username: ${{parameters.jumphost_username}}
+            jumphost_password: ${{parameters.jumphost_password}}
