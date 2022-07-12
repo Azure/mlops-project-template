@@ -1,5 +1,6 @@
 
 $schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
-name: nvidia_pytorch
+name: nlp_summarization_train
+version: dev1
 build:
   path: ../../../data-science/environment/
