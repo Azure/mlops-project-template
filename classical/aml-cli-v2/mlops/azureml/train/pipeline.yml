@@ -8,6 +8,7 @@ inputs:
   input: #using local data, will crate an anonymous data asset
     type: uri_folder
     path: ../../../data/
+  enable_monitoring: 'false'
 
 outputs: 
   prepared_data:
@@ -32,9 +33,11 @@ jobs:
       python prep.py 
       --raw_data ${{inputs.raw_data}} 
       --prepared_data ${{outputs.prepared_data}}
+      --enable_monitoring ${{inputs.enable_monitoring}}
     environment: azureml:taxi-train-env@latest
     inputs:
       raw_data: ${{parent.inputs.input}}
+      enable_monitoring: ${{parent.inputs.enable_monitoring}}
     outputs:
       prepared_data: ${{parent.outputs.prepared_data}}
 
