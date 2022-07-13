@@ -1,17 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
 experiment_name: text-summarization-pubmed-experiment
-description: A text summarization using pubmed dataset for fine-tuning
-
-# compute: azureml:gpu-cluster
-
-# task: text_classification
-# primary_metric: accuracy
-# log_verbosity: debug
-
-# limits:
-#   timeout_minutes: 60
-
+description: Train a text summarization model using PubMed dataset for fine-tuning
 
 # <inputs_and_outputs>
 inputs:
@@ -27,25 +17,25 @@ inputs:
     value: 0.00005
 
 outputs: 
-  generic_data_prepared:
-  trained_model:
-  predictions:
-  score_report:
-  deploy_flag:
+  prepared_data:
+  finetuned_model:
+  # predictions:
+  # score_report:
+  # deploy_flag:
 # </inputs_and_outputs>
 
 settings:
   default_datastore: azureml:workspaceblobstore
-  default_compute: azureml:cpu-cluster
+  default_compute: azureml:cpu-cluster-lg
   continue_on_step_failure: false
 
 jobs:
   prep_finetuning_dataset:
     name: prep_finetuning_dataset
-    display_name: "Prepare our domain-specific dataset for training"
+    display_name: "Prepare dataset for training"
     code: ../../../data-science/src
     command: >-
-      python data_prep.py 
+      python summarization/data_prep.py 
       --dataset_name ${{inputs.dataset_name}} 
       --dataset_config ${{inputs.dataset_config}} 
       --text_column ${{inputs.text_column}} 
@@ -70,14 +60,14 @@ jobs:
       pretrained_model_name: ${{parent.inputs.pretrained_model_name}}
       source_prefix: "summarize: "
     outputs:
-      encodings: ${{parent.outputs.large_dataset_preprocessed}}
+      encodings: ${{parent.outputs.prepared_data}}
 
   finetune_model:
     name: finetune_model
-    display_name: fine-tune a summarization model
+    display_name: Fine-tune summarization model
     code: ../../../data-science/src
     command: >-
-      python run_summarization.py 
+      python summarization/run.py 
       --preprocessed_datasets ${{inputs.preprocessed_datasets}} 
       --learning_rate ${{inputs.learning_rate}} 
       --per_device_train_batch_size ${{inputs.per_device_train_batch_size}} 
@@ -104,7 +94,7 @@ jobs:
       per_device_eval_batch_size: ${{parent.inputs.batch_size}}
       source_prefix: "summarize: "
     outputs:
-      trained_model: ${{parent.outputs.trained_model}}
+      trained_model: ${{parent.outputs.finetuned_model}}
     compute: azureml:gpu-cluster
     distribution:
       type: pytorch
@@ -114,21 +104,19 @@ jobs:
 
   evaluate_model:
     name: evaluate_model
-    display_name: evaluate-model
+    display_name: Evaluate model
     code: ../../../data-science/src
     command: >-
-      python run_summarization.py 
+      python summarization/run.py 
       --preprocessed_datasets ${{inputs.preprocessed_datasets}} 
       --max_samples ${{inputs.max_samples}} 
       --output_dir outputs 
       --model_path ${{inputs.model_path}} 
-      --trained_model_path ${{outputs.trained_model_path}} 
+      --trained_model_path ""
       --do_eval
     environment: azureml:nlp_summarization_train@latest
     inputs:
       preprocessed_datasets: ${{parent.jobs.prep_finetuning_dataset.outputs.encodings}}
-      registered_model_name: "t5-small-cnn-pubmed"
-      model_path: ${{parent.jobs.finetune_model.outputs.trained_model
+      model_path: ${{parent.jobs.finetune_model.outputs.trained_model}}
       max_samples: ${{parent.inputs.max_samples}}
-    outputs:
-       trained_model_path:
+      registered_model_name: "t5-small-cnn-pubmed"

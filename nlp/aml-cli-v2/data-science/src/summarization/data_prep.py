@@ -66,6 +66,17 @@ def main():
 
     logger.info(f"Running with arguments: {args}")
 
+    # get tokenizer ready
+    tokenizer = AutoTokenizer.from_pretrained(args.model_checkpoint)
+    logger.info(f"tokenizer: {tokenizer}")
+
+    prefix = args.source_prefix if args.source_prefix is not None else ""
+    if args.source_prefix is None and "t5" in args.model_checkpoint.lower():
+        logger.warning(
+            "You're running a t5 model but didn't provide a source prefix, which is the expected, e.g. with "
+            "`--source_prefix 'summarize: ' `"
+        )
+
     # Load dataset
     raw_dataset = load_dataset(args.dataset_name, args.dataset_config)
 
@@ -85,16 +96,6 @@ def main():
         )
         logger.info("sampled raw dataset:")
         logger.info(raw_dataset.num_rows)
-
-    tokenizer = AutoTokenizer.from_pretrained(args.model_checkpoint)
-    logger.info(f"tokenizer: {tokenizer}")
-
-    prefix = args.source_prefix if args.source_prefix is not None else ""
-    if args.source_prefix is None and "t5" in args.model_checkpoint.lower():
-        logger.warning(
-            "You're running a t5 model but didn't provide a source prefix, which is the expected, e.g. with "
-            "`--source_prefix 'summarize: ' `"
-        )
 
     def preprocess_function(examples):
         # remove pairs where at least one record is None

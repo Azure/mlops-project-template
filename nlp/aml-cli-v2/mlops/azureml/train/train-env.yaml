@@ -1,6 +1,6 @@
 
 $schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
 name: nlp_summarization_train
-version: dev1
+version: dev2
 build:
   path: ../../../data-science/environment/

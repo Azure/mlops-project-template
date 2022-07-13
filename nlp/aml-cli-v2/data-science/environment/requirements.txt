@@ -4,7 +4,7 @@ torch==1.11.0
 pytorch_lightning==1.6.4
 transformers==4.18.0
 datasets==2.0.0
-rouge_score==
+rouge_score==0.0.4
 
 # for metrics reporting/plotting
 mlflow==1.25.1
