@@ -18,7 +18,9 @@ inputs:
 
 outputs: 
   prepared_data:
+    type: uri_folder
   finetuned_model:
+    type: uri_folder
   # predictions:
   # score_report:
   # deploy_flag:
@@ -77,10 +79,10 @@ jobs:
       --registered_model_name ${{inputs.registered_model_name}} 
       --output_dir outputs 
       --num_train_epochs ${{inputs.num_train_epochs}} 
-      --trained_model_path ${{outputs.trained_model}} 
       --disable_tqdm True 
       --do_train --do_eval 
-      --source_prefix ${{inputs.source_prefix}}
+      --source_prefix ${{inputs.source_prefix}} 
+      --trained_model_path ${{outputs.trained_model}}
     environment: azureml:nlp_summarization_train@latest
     inputs:
       preprocessed_datasets: ${{parent.jobs.prep_finetuning_dataset.outputs.encodings}}
