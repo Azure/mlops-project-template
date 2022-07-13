@@ -38,3 +38,8 @@ variable "enable_monitoring" {
   description = "Variable to enable or disable AML compute cluster"
   default     = false
 }
+
+variable "client_secret" {
+  description = "client secret"
+  default     = false
+}
