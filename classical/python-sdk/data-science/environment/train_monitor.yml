@@ -1,4 +1,4 @@
-name: batch-monitoring
+name: train
 channels:
 - anaconda
 - conda-forge
@@ -15,15 +15,12 @@ dependencies:
     - dash==2.3.1
     - plotly==5.7.0
     - azureml-defaults==1.41.0
-    - pandas
-    - scikit-learn==1.0.2
+    - pandas==1.4.1
+    - scikit-learn==0.24.1
     - fairlearn==0.7.0
     - azureml-contrib-fairness==1.41.0
     - interpret-core==0.2.7
     - azureml-interpret==1.41.0
-    - --extra-index-url https://azuremlsdktestpypi.azureedge.net/sdk-cli-v2
-    - azure-ai-ml==0.0.62653692
     - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
     - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
-- matplotlib
-- pip < 20.3
+    - matplotlib=3.3.3
