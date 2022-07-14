@@ -1,9 +1,8 @@
 import os
 import argparse
-import pandas as pd
 import logging
 from datasets import load_dataset, DatasetDict
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import AutoTokenizer
 
 import mlflow
 
@@ -58,8 +57,6 @@ def main():
     )
 
     args = parser.parse_args()
-    max_input_length = args.max_input_length
-    max_target_length = args.max_target_length
 
     # Start Logging
     mlflow.start_run()

@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 from datasets import load_dataset, load_metric, load_from_disk
 from transformers import (
     AutoModelForSeq2SeqLM,
@@ -337,7 +336,6 @@ def main():
         )  # Only print gpu utilization if gpu is available
         if torch.cuda.is_available():
             print_summary(train_result)
-        metrics = train_result.metrics
 
         model_path = os.path.join(model_args.trained_model_path)
         os.makedirs(model_path, exist_ok=True)
@@ -348,7 +346,7 @@ def main():
         print("trained model saved locally")
         # Registering the model to the workspace
         if model_args.registered_model_name is not None and is_this_main_node:
-            model = Model.register(
+            Model.register(
                 run.experiment.workspace,
                 model_name=model_args.registered_model_name,
                 model_path=model_path,
@@ -363,6 +361,7 @@ def main():
                 if data_args.dataset_name is not None
                 else "Huggingface model finetuned for summarization",
             )
+
 
     if training_args.do_eval:
         logger.info("*** Evaluate ***")
