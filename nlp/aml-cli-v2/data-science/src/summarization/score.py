@@ -30,7 +30,7 @@ def run(raw_data):
     method and return the result back
     """
     logging.info("Request received")
-    article = json.loads(raw_data)["data"]
+    article = json.loads(raw_data)["input_data"]
     if "t5" in model.config.architectures[0].lower():
         article= "summarize:" + article
     

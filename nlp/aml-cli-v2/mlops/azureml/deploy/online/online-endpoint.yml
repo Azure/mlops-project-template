@@ -1,4 +1,4 @@
 $schema: https://azuremlschemas.azureedge.net/latest/managedOnlineEndpoint.schema.json
-name: dogs-classifier-online
-description: Stanford Dogs Classifier
+name: summarization-pubmed-online
+description: Summarization of medical text
 auth_mode: key
