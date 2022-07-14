@@ -1,25 +1,121 @@
-$schema: https://azuremlsdk2.blob.core.windows.net/preview/0.0.1/autoMLJob.schema.json
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: text-summarization-pubmed-experiment
+description: Train a text summarization model using PubMed dataset for fine-tuning
 
-type: automl
-experiment_name: automl-text-classification-newsgroup-experiment
-description: A text classification job using newsgroup dataset
+# <inputs_and_outputs>
+inputs:
+  max_samples:
+    value: 10000
+  pretrained_model_name:
+    value: "microsoft/ssr-base"
+  num_train_epochs:
+    value: 5
+  batch_size:
+    value: 8
+  learning_rate:
+    value: 0.00005
 
-compute: azureml:gpu-cluster
+outputs: 
+  prepared_data:
+    type: uri_folder
+  finetuned_model:
+    type: uri_folder
+  # predictions:
+  # score_report:
+  # deploy_flag:
+# </inputs_and_outputs>
 
-task: text_classification
-primary_metric: accuracy
-log_verbosity: debug
+settings:
+  default_datastore: azureml:workspaceblobstore
+  default_compute: azureml:cpu-cluster-lg
+  continue_on_step_failure: false
 
-limits:
-  timeout_minutes: 60
+jobs:
+  prep_finetuning_dataset:
+    name: prep_finetuning_dataset
+    display_name: "Prepare dataset for training"
+    code: ../../../data-science/src
+    command: >-
+      python summarization/data_prep.py 
+      --dataset_name ${{inputs.dataset_name}} 
+      --dataset_config ${{inputs.dataset_config}} 
+      --text_column ${{inputs.text_column}} 
+      --summary_column ${{inputs.summary_column}} 
+      --max_samples ${{inputs.max_samples}} 
+      --model_checkpoint ${{inputs.pretrained_model_name}} 
+      --max_input_length ${{inputs.max_input_length}} 
+      --max_target_length ${{inputs.max_target_length}} 
+      --padding ${{inputs.padding}} 
+      --encodings ${{outputs.encodings}}
+    environment: azureml:nlp_summarization_train@latest
+    compute: azureml:cpu-cluster-lg
+    inputs:
+      dataset_name: "ccdv/pubmed-summarization"
+      dataset_config: "section"
+      text_column: "article"
+      summary_column: "abstract"
+      max_samples: ${{parent.inputs.max_samples}}
+      max_input_length: 512
+      max_target_length: 40
+      padding: "max_length"
+      pretrained_model_name: ${{parent.inputs.pretrained_model_name}}
+    outputs:
+      encodings: ${{parent.outputs.prepared_data}}
 
-target_column_name: 'y'
-training_data:
-  type: mltable
-  path: azureml:training_data@latest
-validation_data:
-  type: mltable
-  path: azureml:validation_data@latest
+  finetune_model:
+    name: finetune_model
+    display_name: Fine-tune summarization model
+    code: ../../../data-science/src
+    command: >-
+      python summarization/run.py 
+      --preprocessed_datasets ${{inputs.preprocessed_datasets}} 
+      --learning_rate ${{inputs.learning_rate}} 
+      --per_device_train_batch_size ${{inputs.per_device_train_batch_size}} 
+      --per_device_eval_batch_size ${{inputs.per_device_eval_batch_size}} 
+      --max_samples ${{inputs.max_samples}} 
+      --model_name ${{inputs.pretrained_model_name}} 
+      --registered_model_name ${{inputs.registered_model_name}} 
+      --output_dir outputs 
+      --num_train_epochs ${{inputs.num_train_epochs}} 
+      --do_train --do_eval 
+      --trained_model_path ${{outputs.trained_model}}
+    environment: azureml:nlp_summarization_train@latest
+    inputs:
+      preprocessed_datasets: ${{parent.jobs.prep_finetuning_dataset.outputs.encodings}}
+      registered_model_name: "microsoft-ssr-base-cnn-pubmed"
+      #model_path: ${{parent.jobs.train_step.outputs.trained_model_path
+      pretrained_model_name: ${{parent.inputs.pretrained_model_name}}
+      max_samples: ${{parent.inputs.max_samples}}
+      learning_rate: ${{parent.inputs.learning_rate}}
+      num_train_epochs: ${{parent.inputs.num_train_epochs}}
+      per_device_train_batch_size: ${{parent.inputs.batch_size}}
+      per_device_eval_batch_size: ${{parent.inputs.batch_size}}
+    outputs:
+      trained_model: ${{parent.outputs.finetuned_model}}
+    compute: azureml:gpu-cluster
+    distribution:
+      type: pytorch
+      process_count_per_instance: 8 # number of gpus
+    resources:
+      instance_count: 1 # number of nodes
 
-featurization:
-  dataset_language: "eng"
+  evaluate_model:
+    name: evaluate_model
+    display_name: Evaluate model
+    code: ../../../data-science/src
+    command: >-
+      python summarization/run.py 
+      --preprocessed_datasets ${{inputs.preprocessed_datasets}} 
+      --max_samples ${{inputs.max_samples}} 
+      --output_dir outputs 
+      --model_path ${{inputs.model_path}} 
+      --trained_model_path ""
+      --do_eval
+    environment: azureml:nlp_summarization_train@latest
+    compute: azureml:gpu-cluster
+    inputs:
+      preprocessed_datasets: ${{parent.jobs.prep_finetuning_dataset.outputs.encodings}}
+      model_path: ${{parent.jobs.finetune_model.outputs.trained_model}}
+      max_samples: ${{parent.inputs.max_samples}}
+      registered_model_name: "microsoft/ssr-base-cnn-pubmed"
