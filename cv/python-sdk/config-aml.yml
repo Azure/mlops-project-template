@@ -1,0 +1,43 @@
+variables:
+
+  ap_vm_image: ubuntu-20.04
+
+## Training pipeline settings
+
+  # Training dataset settings
+  training_dataset_name: dogs-imgs
+  training_dataset_description: 'Stanford Dogs Dataset (http://vision.stanford.edu/aditya86/ImageNetDogs/)'
+  training_dataset_local_path: data/training-imgs/
+  training_dataset_path_on_datastore: dogs-imgs/
+  training_dataset_type: local
+  training_dataset_storage_url: 'http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar'
+
+  labels_dataset_name: dogs-labels
+  labels_dataset_description: 'Labels for Stanford Dogs Dataset (http://vision.stanford.edu/aditya86/ImageNetDogs/)'
+  labels_dataset_local_path: data/training/
+  labels_dataset_path_on_datastore: dogs-labels/
+  labels_dataset_type: local
+
+  # Training AzureML Environment settings
+  training_env_name: nvidia_pytorch
+  training_env_path: data-science/environment/training/
+
+  # Compute target for pipeline
+  training_target: gpu-cluster
+  training_target_sku: Standard_NC6
+  training_target_min_nodes: 0
+  training_target_max_nodes: 1
+
+  # Name for the training pipeline
+  training_pipeline_name: resnet-dogs-training-pipeline
+  training_experiment_name: resnet-dogs-training
+
+  # Training arguments specification
+  training_arguments: --epochs 2 --batch-size 64 --training-mode feature-extraction
+
+  # Training datasets specification
+  # Syntax: <name>:<version>:<mode>:<steps (names separated by +)>
+  training_datasets: dogs-labels:1:download:prep dogs-imgs:latest:mount:train+eval
+
+  # Name under which the model will be registered
+  model_name: resnet-dogs-classifier
