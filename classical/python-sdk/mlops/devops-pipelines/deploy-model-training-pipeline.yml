@@ -41,7 +41,8 @@ stages:
       - template: templates/${{ variables.version }}/create-environment.yml@mlops-templates
         parameters:
           environment_name: $(training_env_name)
-          environment_conda_yaml: $(training_env_conda_yaml)
+          build_type: 'conda'
+          environment_file: $(training_env_conda_yaml)
       - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
         parameters:
           data_type: training
