@@ -1,20 +1,18 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+"""
+Trains ML model using training dataset. Saves trained model.
+"""
 
 import argparse
 
 from pathlib import Path
-import os
-import pickle
 
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import ColumnTransformer
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 import mlflow
@@ -53,22 +51,23 @@ CAT_ORD_COLS = [
 
 
 def parse_args():
+    '''Parse input arguments'''
 
     parser = argparse.ArgumentParser("train")
-    parser.add_argument("--prepared_data", type=str, help="Path to training data")
+    parser.add_argument("--train_data", type=str, help="Path to train dataset")
     parser.add_argument("--model_output", type=str, help="Path of output model")
 
     # classifier specific arguments
     parser.add_argument('--regressor__n_estimators', type=int, default=500,
                         help='Number of trees')
     parser.add_argument('--regressor__bootstrap', type=int, default=1,
-                        help='Method of selecting samples for training each tree')   
+                        help='Method of selecting samples for training each tree')
     parser.add_argument('--regressor__max_depth', type=int, default=10,
                         help=' Maximum number of levels in tree')
     parser.add_argument('--regressor__max_features', type=str, default='auto',
-                        help='Number of features to consider at every split')    
+                        help='Number of features to consider at every split')
     parser.add_argument('--regressor__min_samples_leaf', type=int, default=4,
-                        help='Minimum number of samples required at each leaf node')    
+                        help='Minimum number of samples required at each leaf node')
     parser.add_argument('--regressor__min_samples_split', type=int, default=5,
                         help='Minimum number of samples required to split a node')
 
@@ -76,73 +75,17 @@ def parse_args():
 
     return args
 
-def main():
+def main(args):
+    '''Read train dataset, train model, save trained model'''
 
-    args = parse_args()
-    
-    lines = [
-        f"Training data path: {args.prepared_data}",
-        f"Model output path: {args.model_output}",
-    ]
-
-    for line in lines:
-        print(line)
-
-    print("mounted_path files: ")
-    arr = os.listdir(args.prepared_data)
-    print(arr)
-
-    train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
+    # Read train data
+    train_data = pd.read_parquet(Path(args.train_data))
 
     # Split the data into input(X) and output(y)
     y_train = train_data[TARGET_COL]
     X_train = train_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
-    # Train a Linear Regression Model with the train set
-
-    # numerical features
-    numeric_transformer = Pipeline(steps=[
-        ('standardscaler', StandardScaler())])
-
-    # ordinal features transformer
-    ordinal_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(missing_values=np.nan, strategy="most_frequent")),
-        ('minmaxscaler', MinMaxScaler())
-    ])
-
-    # nominal features transformer
-    nominal_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(missing_values=np.nan, strategy="most_frequent")),
-        ('onehot', OneHotEncoder(sparse=False))
-    ])
-
-    # imputer only for all other features
-    imputer_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(missing_values=np.nan, strategy="most_frequent"))
-    ])
-
-    # preprocessing pipeline
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('numeric', numeric_transformer, NUMERIC_COLS),
-           #('ordinal', ordinal_transformer, CAT_ORD_COLS),
-            ('nominal', nominal_transformer, CAT_NOM_COLS)], # other features are already binary
-            remainder="drop")
-
-    # append regressor to preprocessing pipeline.
-    # now we have a full prediction pipeline.
-    
-    #model = Pipeline(steps=[('preprocessor', preprocessor),
-    #                      ('regressor', RandomForestRegressor(
-    #                          n_estimators = args.regressor__n_estimators,
-    #                          bootstrap = args.regressor__bootstrap,
-    #                          max_depth = args.regressor__max_depth,
-    #                          max_features = args.regressor__max_features,
-    #                          min_samples_leaf = args.regressor__min_samples_leaf,
-    #                          min_samples_split = args.regressor__min_samples_split,
-    #                          random_state=0))])
-
-
+    # Train a Random Forest Regression Model with the training set
     model = RandomForestRegressor(n_estimators = args.regressor__n_estimators,
                                   bootstrap = args.regressor__bootstrap,
                                   max_depth = args.regressor__max_depth,
@@ -151,6 +94,7 @@ def main():
                                   min_samples_split = args.regressor__min_samples_split,
                                   random_state=0)
 
+    # log model hyperparameters
     mlflow.log_param("model", "RandomForestRegressor")
     mlflow.log_param("n_estimators", args.regressor__n_estimators)
     mlflow.log_param("bootstrap", args.regressor__bootstrap)
@@ -159,6 +103,7 @@ def main():
     mlflow.log_param("min_samples_leaf", args.regressor__min_samples_leaf)
     mlflow.log_param("min_samples_split", args.regressor__min_samples_split)
 
+    # Train model with the train set
     model.fit(X_train, y_train)
 
     # Predict using the Regression Model
@@ -169,7 +114,8 @@ def main():
     mse = mean_squared_error(y_train, yhat_train)
     rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_train, yhat_train)
-
+    
+    # log model performance metrics
     mlflow.log_metric("train r2", r2)
     mlflow.log_metric("train mse", mse)
     mlflow.log_metric("train rmse", rmse)
@@ -184,8 +130,33 @@ def main():
     mlflow.log_artifact("regression_results.png")
 
     # Save the model
-    pickle.dump(model, open((Path(args.model_output) / "model.pkl"), "wb"))
+    mlflow.sklearn.save_model(sk_model=model, path=args.model_output)
+
 
 if __name__ == "__main__":
-    main()
+    
+    mlflow.start_run()
+
+    # ---------- Parse Arguments ----------- #
+    # -------------------------------------- #
+
+    args = parse_args()
+
+    lines = [
+        f"Train dataset input path: {args.train_data}",
+        f"Model output path: {args.model_output}",
+        f"n_estimators: {args.regressor__n_estimators}",
+        f"bootstrap: {args.regressor__bootstrap}",
+        f"max_depth: {args.regressor__max_depth}",
+        f"max_features: {args.regressor__max_features}",
+        f"min_samples_leaf: {args.regressor__min_samples_leaf}",
+        f"min_samples_split: {args.regressor__min_samples_split}"
+    ]
+
+    for line in lines:
+        print(line)
+
+    main(args)
+
+    mlflow.end_run()
     

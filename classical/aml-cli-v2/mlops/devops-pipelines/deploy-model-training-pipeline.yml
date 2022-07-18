@@ -25,17 +25,23 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
+    - repository: rai-vnext-preview  # Template Repo
+      name: Azure/rai-vnext-preview # need to change org name from "Azure" to your own org
+      endpoint: github-connection # need to set up and hardcode
+      type: github
 
 stages:
 - stage: DeployTrainingPipeline
   displayName: Deploy Training Pipeline
   jobs:
     - job: DeployTrainingPipeline
+      timeoutInMinutes: 120 # how long to run the job before automatically cancelling
       steps:
       - checkout: self
         path: s/
       - checkout: mlops-templates
         path: s/templates/
+      - template: templates/tests/unit-tests.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
@@ -44,6 +50,13 @@ stages:
           build_type: conda
           environment_name: taxi-train-env
           environment_file: mlops/azureml/train/train-env.yml
+      - checkout: rai-vnext-preview
+        path: s/
+      - template: register-rai-components.yml
+      - checkout: self
+        path: s/
+      - checkout: mlops-templates
+        path: s/templates/
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
           pipeline_file: mlops/azureml/train/pipeline.yml
