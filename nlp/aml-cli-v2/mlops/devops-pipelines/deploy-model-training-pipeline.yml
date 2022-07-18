@@ -55,6 +55,11 @@ stages:
           min_instances: 0
           max_instances: 1
           cluster_tier: dedicated
+      - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
+        parameters:
+          build_type: conda
+          environment_name: nlp_summarization_train
+          environment_file: mlops/azureml/train/train-env.yml
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
           pipeline_file: nlp/aml-cli-v2/mlops/azureml/train/pipeline.yaml #TODO: need to change the path when merging into main branch
