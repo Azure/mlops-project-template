@@ -4,10 +4,10 @@
 variables:
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
-    - template: ../../config-infra-prod.yml
+    - template: ../../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../config-infra-dev.yml
+    - template: ../../../config-infra-dev.yml
 
 trigger:
 - none
@@ -47,6 +47,7 @@ stages :
         path: s/
       - checkout: mlops-templates
         path: s/templates/
+      - template: templates/infra/create-sp-variables.yml@mlops-templates
       - template: templates/infra/install-terraform.yml@mlops-templates
       - template: templates/infra/run-terraform-init.yml@mlops-templates
       - template: templates/infra/run-terraform-validate.yml@mlops-templates
