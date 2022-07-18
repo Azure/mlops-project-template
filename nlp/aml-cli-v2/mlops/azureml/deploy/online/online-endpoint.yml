@@ -1,4 +1,0 @@
-$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineEndpoint.schema.json
-name: summarization-pubmed-online
-description: Summarization of medical text
-auth_mode: key
