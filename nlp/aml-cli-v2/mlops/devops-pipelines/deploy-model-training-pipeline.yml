@@ -43,23 +43,19 @@ stages:
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
         parameters:
+          cluster_name: cpu-cluster
+          size: Standard_D14_v2
+          min_instances: 0
+          max_instances: 1
+          cluster_tier: dedicated
+      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+        parameters:
           cluster_name: gpu-cluster
           size: Standard_NC6
           min_instances: 0
           max_instances: 1
           cluster_tier: dedicated
-      - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
-        parameters:
-          data_type: training
-          file_type: mltable
-          dataset_name: training_data
-          environment_file: nlp/aml-cli-v2/data/training/.  #TODO: need to change the path when merging into main branch
-      - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
-        parameters:
-          data_type: validation
-          file_type: mltable
-          dataset_name: validation_data
-          environment_file: nlp/aml-cli-v2/data/validation/.  #TODO: need to change the path when merging into main branch
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
           pipeline_file: nlp/aml-cli-v2/mlops/azureml/train/pipeline.yaml #TODO: need to change the path when merging into main branch
+  
