@@ -24,7 +24,7 @@ def parse_args():
 def main():
     # Parse command-line arguments
     args = parse_args()
-    prepared_data_path = os.path.join(args.prepared_data_path, run.parent.id)
+    prepared_data_path = args.prepared_data_path
 
     # Make sure data output path exists
     if not os.path.exists(prepared_data_path):
