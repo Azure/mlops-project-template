@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 import os
 import sys
 import argparse
@@ -17,7 +20,7 @@ ws = run.experiment.workspace
 
 def parse_args():
     parser = argparse.ArgumentParser(description="UCI Credit example")
-    parser.add_argument("--data_path", type=str, default='data/', help="Directory path to training data")
+    parser.add_argument("--uci-credit", type=str, default='data/', help="Directory path to training data")
     parser.add_argument("--prepared_data_path", type=str, default='prepared_data/', help="prepared data directory")
     return parser.parse_args()
 
@@ -34,7 +37,7 @@ def main():
     mlflow.sklearn.autolog()
     
     # Read training data
-    df = pd.read_csv(os.path.join(args.data_path, 'credit.csv'))
+    df = pd.read_csv(os.path.join(args.uci_credit, 'credit.csv'))
 
     random_data = np.random.rand(len(df))
 
