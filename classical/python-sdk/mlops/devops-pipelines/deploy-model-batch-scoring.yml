@@ -42,7 +42,8 @@ stages:
       - template: templates/${{ variables.version }}/create-environment.yml@mlops-templates
         parameters:
           environment_name: $(batch_env_name)
-          environment_conda_yaml: $(batch_env_conda_yaml)
+          build_type: 'conda'
+          environment_file: $(batch_env_conda_yaml)
       - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
         parameters:
           data_type: scoring
