@@ -39,7 +39,7 @@ class DataArgs:
         metadata={"help": "maxi sequence length for target text after tokenization."},
     )
     limit_samples: Optional[int] = field(
-        default=None,
+        default=-1,
         metadata={"help": "limit the number of samples for faster run."},
     )
 
