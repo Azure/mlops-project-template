@@ -24,8 +24,8 @@ outputs:
   finetuned_model_metrics:
     type: uri_folder
   # predictions:
-  # score_report:
-  # deploy_flag:
+  score_report:
+  deploy_flag:
 # </inputs_and_outputs>
 
 settings:
@@ -143,3 +143,37 @@ jobs:
     outputs:
       metrics: 
 
+  compare_models:
+    name: compare_models
+    display_name: Compare finetuned to baseline
+    code: ../../../data-science/src
+    command: >-
+      python summarization/compare.py 
+      --baseline_metrics ${{inputs.baseline_metrics}} 
+      --candidate_metrics ${{inputs.candidate_metrics}} 
+      --reference_metric ${{inputs.reference_metric}} 
+      --deploy_flag ${{outputs.deploy_flag}}
+    environment: azureml:nlp_summarization_train@latest
+    compute: azureml:cpu-cluster
+    inputs:
+      baseline_metrics: ${{parent.jobs.evaluate_finetuned_model.outputs.metrics}}
+      candidate_metrics: ${{parent.jobs.evaluate_baseline_model.outputs.metrics}}
+      reference_metric: "predict_rougeLsum"
+    outputs:
+      deploy_flag: 
+
+  register_and_deploy:
+    name: register_and_deploy
+    display_name: Register model and deploy
+    code: ../../../data-science/src
+    command: >-
+      python summarization/register.py 
+      --model_path ${{inputs.model}} 
+      --deploy_flag ${{inputs.deploy_flag}} 
+      --register_as ${{inputs.model_registration_name}}
+    environment: azureml:nlp_summarization_train@latest
+    compute: azureml:cpu-cluster
+    inputs:
+      model: ${{parent.jobs.finetune_model.outputs.finetuned_model}}
+      deploy_flag: ${{parent.jobs.compare_models.outputs.deploy_flag}}
+      model_registration_name: "pubmed-summarization"
