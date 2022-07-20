@@ -23,9 +23,8 @@ outputs:
     type: uri_folder
   finetuned_model_metrics:
     type: uri_folder
-  # predictions:
-  score_report:
   deploy_flag:
+    type: uri_folder
 # </inputs_and_outputs>
 
 settings:
@@ -92,7 +91,7 @@ jobs:
       per_device_eval_batch_size: ${{parent.inputs.batch_size}}
     outputs:
       finetuned_model: ${{parent.outputs.finetuned_model}}
-    compute: azureml:gpu-nv6
+    compute: azureml:gpu-cluster
     distribution:
       type: pytorch
       process_count_per_instance: 1 # number of gpus
@@ -112,7 +111,7 @@ jobs:
       --max_target_length ${{inputs.max_target_length}} 
       --do_predict
     environment: azureml:nlp_summarization_train@latest
-    compute: azureml:gpu-nv6
+    compute: azureml:gpu-cluster
     inputs:
       preprocessed_datasets: ${{parent.jobs.prep_finetuning_dataset.outputs.encodings}}
       model_path: ${{parent.jobs.finetune_model.outputs.finetuned_model}}
@@ -134,7 +133,7 @@ jobs:
       --max_target_length ${{inputs.max_target_length}} 
       --do_predict
     environment: azureml:nlp_summarization_train@latest
-    compute: azureml:gpu-nv6
+    compute: azureml:gpu-cluster
     inputs:
       preprocessed_datasets: ${{parent.jobs.prep_finetuning_dataset.outputs.encodings}}
       model_name: ${{parent.inputs.pretrained_model_name}}
@@ -153,14 +152,14 @@ jobs:
       --candidate_metrics ${{inputs.candidate_metrics}} 
       --reference_metric ${{inputs.reference_metric}} 
       --deploy_flag ${{outputs.deploy_flag}}
-    environment: azureml:nlp_summarization_train@latest
+    environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
     compute: azureml:cpu-cluster
     inputs:
       baseline_metrics: ${{parent.jobs.evaluate_finetuned_model.outputs.metrics}}
       candidate_metrics: ${{parent.jobs.evaluate_baseline_model.outputs.metrics}}
       reference_metric: "predict_rougeLsum"
     outputs:
-      deploy_flag: 
+      deploy_flag: ${{parent.outputs.deploy_flag}}
 
   register_and_deploy:
     name: register_and_deploy
@@ -171,7 +170,7 @@ jobs:
       --model_folder ${{inputs.model}} 
       --deploy_flag ${{inputs.deploy_flag}} 
       --register_as ${{inputs.model_registration_name}}
-    environment: azureml:nlp_summarization_train@latest
+    environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
     compute: azureml:cpu-cluster
     inputs:
       model: ${{parent.jobs.finetune_model.outputs.finetuned_model}}
