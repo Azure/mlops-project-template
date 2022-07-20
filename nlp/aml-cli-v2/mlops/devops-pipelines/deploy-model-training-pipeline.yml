@@ -51,7 +51,7 @@ stages:
       - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
         parameters:
           cluster_name: gpu-cluster
-          size: Standard_NC6
+          size: Standard_NV6
           min_instances: 0
           max_instances: 1
           cluster_tier: dedicated
