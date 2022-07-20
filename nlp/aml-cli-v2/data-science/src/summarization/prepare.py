@@ -42,9 +42,9 @@ def main():
         "--padding", type=str, default="max_length", help="padding type"
     )
     parser.add_argument(
-        "--model_checkpoint",
+        "--model_arch",
         type=str,
-        help="name of the checkpointed model in HF model library",
+        help="name of the model in HF model library",
     )
     parser.add_argument(
         "--max_samples", type=int, default=-1, help="sample size from input dataset"
@@ -64,11 +64,11 @@ def main():
     logger.info(f"Running with arguments: {args}")
 
     # get tokenizer ready
-    tokenizer = AutoTokenizer.from_pretrained(args.model_checkpoint)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_arch)
     logger.info(f"tokenizer: {tokenizer}")
 
     prefix = args.source_prefix if args.source_prefix is not None else ""
-    if args.source_prefix is None and "t5" in args.model_checkpoint.lower():
+    if args.source_prefix is None and "t5" in args.model_arch.lower():
         logger.warning(
             "You're running a t5 model but didn't provide a source prefix, which is the expected, e.g. with "
             "`--source_prefix 'summarize: ' `"
