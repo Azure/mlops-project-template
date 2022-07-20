@@ -80,6 +80,8 @@ def main():
     logger.info(f"raw dataset length: {raw_dataset.num_rows}")
 
     mlflow.log_metric("train_samples", raw_dataset["train"].shape[0])
+    mlflow.log_metric("test_samples", raw_dataset["test"].shape[0])
+    mlflow.log_metric("validation_samples", raw_dataset["validation"].shape[0])
 
     if args.max_samples > 0:
         sample_sizes = {
