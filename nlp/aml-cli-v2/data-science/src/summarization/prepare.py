@@ -1,13 +1,14 @@
+"""
+This scripts prepares a HuggingFace dataset to be used
+for fine-tuning. It encodes the train/val/test tests and
+outputs as JSONL files.
+"""
 import os
 import argparse
 import logging
 from datasets import load_dataset, DatasetDict
 from transformers import AutoTokenizer
-
 import mlflow
-
-
-logger = logging.getLogger(__name__)
 
 
 def main():
@@ -44,10 +45,10 @@ def main():
     parser.add_argument(
         "--model_arch",
         type=str,
-        help="name of the model in HF model library",
+        help="name of the model to prepare for in HF model library",
     )
     parser.add_argument(
-        "--max_samples", type=int, default=-1, help="sample size from input dataset"
+        "--limit_samples", type=int, default=-1, help="sample size from input dataset"
     )
     parser.add_argument("--encodings", type=str, help="path to tokenized dataset")
     parser.add_argument(
@@ -74,18 +75,17 @@ def main():
             "`--source_prefix 'summarize: ' `"
         )
 
-    # Load dataset
+    # Load HuggingFace dataset
     raw_dataset = load_dataset(args.dataset_name, args.dataset_config)
 
     logger.info(f"raw dataset length: {raw_dataset.num_rows}")
-
     mlflow.log_metric("train_samples", raw_dataset["train"].shape[0])
     mlflow.log_metric("test_samples", raw_dataset["test"].shape[0])
     mlflow.log_metric("validation_samples", raw_dataset["validation"].shape[0])
 
-    if args.max_samples > 0:
+    if args.limit_samples > 0:
         sample_sizes = {
-            k: min(len(raw_dataset[k]), args.max_samples) for k in raw_dataset.keys()
+            k: min(len(raw_dataset[k]), args.limit_samples) for k in raw_dataset.keys()
         }
         raw_dataset = DatasetDict(
             {

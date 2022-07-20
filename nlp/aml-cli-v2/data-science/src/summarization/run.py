@@ -28,82 +28,33 @@ from azureml.core.model import Model
 # user args are also defined in dataclasses, we will then load arguments from a tuple of user defined and built-in dataclasses.
 @dataclass
 class DataArgs:
-    dataset_name: Optional[str] = field(
-        default=None, metadata={"help": "name of input HF dataset"}
-    )
-    dataset_config: Optional[str] = field(
-        default=None, metadata={"help": "config of input HF dataset"}
-    )
-    text_column: Optional[str] = field(
-        default=None, metadata={"help": "the key for text column"}
-    )
-    summary_column: Optional[str] = field(
-        default=None, metadata={"help": "the key for summary column"}
-    )
-    source_prefix: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "A prefix to add before every source text (useful for T5 models)."
-        },
-    )
-    preprocessed_datasets: Optional[str] = field(
+    # Inputs
+    preprocessed_datasets: str = field(
         default=None, metadata={"help": "path to preprocesed datasets"}
     )
-    train_file: Optional[str] = field(
-        default=None, metadata={"help": "path to train file(json)"}
-    )
-    validation_file: Optional[str] = field(
-        default=None, metadata={"help": "path to validation file(jsonl)"}
-    )
-    test_file: Optional[str] = field(
-        default=None, metadata={"help": "path to test file(jsonl)"}
-    )
-    max_input_length: Optional[int] = field(
-        default=1024,
-        metadata={"help": "max input sequence length after tokenization."},
-    )
+
+    # Processing parameters
     max_target_length: Optional[int] = field(
         default=128,
         metadata={"help": "maxi sequence length for target text after tokenization."},
     )
-    max_samples: Optional[int] = field(
+    limit_samples: Optional[int] = field(
         default=None,
         metadata={"help": "limit the number of samples for faster run."},
     )
-    num_beams: Optional[int] = field(
-        default=None,
-        metadata={"help": "limit the number of samples for faster run."},
-    )
-    padding: Optional[str] = field(
-        default="max_length", metadata={"help": "padding setting"}
-    )
-
-    def __post_init__(self):
-        if (
-            self.dataset_name is None
-            and self.preprocessed_datasets is None
-            and self.train_file is None
-            and self.validation_file is None
-        ):
-            raise ValueError(
-                "Need either a dataset name, preprocessed_datasets, or a training/validation file."
-            )
 
 
 @dataclass
 class ModelArgs:
-    trained_model_path: str
-    registered_model_name: Optional[str] = field(
-        default=None, metadata={"help": "registered model name"}
-    )
     model_name: Optional[str] = field(default=None, metadata={"help": "model name"})
     model_path: Optional[str] = field(
-        default=None, metadata={"help": "path to model file"}
+        default=None, metadata={"help": "path to existing model file to load"}
+    )
+    model_output: Optional[str] = field(
+        default=None, metadata={"help": "path to save the model"}
     )
 
 
-run = Run.get_context()
-logger = logging.getLogger(__name__)
 nltk.download("punkt")
 
 
@@ -118,6 +69,46 @@ def print_summary(result):
     print(f"Time: {result.metrics['train_runtime']:.2f}")
     print(f"Samples/second: {result.metrics['train_samples_per_second']:.2f}")
     print_gpu_utilization()
+
+
+def postprocess_text(preds, labels):
+    """Postprocess output for computing metrics"""
+    preds = [pred.strip() for pred in preds]
+    labels = [label.strip() for label in labels]
+
+    # rougeLSum expects newline after each sentence
+    preds = ["\n".join(nltk.sent_tokenize(pred)) for pred in preds]
+    labels = ["\n".join(nltk.sent_tokenize(label)) for label in labels]
+
+    return preds, labels
+
+
+def compute_metrics(eval_preds, tokenizer, metric):
+    """Compute metric based on predictions from evaluation"""
+    preds, labels = eval_preds
+    if isinstance(preds, tuple):
+        preds = preds[0]
+    decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
+
+    # Replace -100 in the labels as we can't decode them.
+    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+    decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+    # Some simple post-processing
+    decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
+
+    result = metric.compute(
+        predictions=decoded_preds, references=decoded_labels, use_stemmer=True
+    )
+    # Extract a few results from ROUGE
+    result = {key: value.mid.fmeasure * 100 for key, value in result.items()}
+
+    prediction_lens = [
+        np.count_nonzero(pred != tokenizer.pad_token_id) for pred in preds
+    ]
+    result["gen_len"] = np.mean(prediction_lens)
+    result = {k: round(v, 4) for k, v in result.items()}
+    return result
 
 
 def main():
@@ -140,26 +131,9 @@ def main():
     if is_this_main_node:
         logger.info("This is the main Node")
 
-    if data_args.dataset_name is not None:
-        # Downloading and loading a dataset from the hub.
-        input_datasets = load_dataset(data_args.dataset_name, data_args.dataset_config)
-        logger.info(f"dataset {data_args.dataset_name} is loaded")
-        preprocessed_flag = False
-    elif data_args.preprocessed_datasets is not None:
-        input_datasets = load_from_disk(data_args.preprocessed_datasets)
-        logger.info(f"preprocessed dataset is loaded")
-        preprocessed_flag = True
-    else:
-        data_files = {}
-        if data_args.train_file is not None:
-            data_files["train"] = data_args.train_file
-        if data_args.validation_file is not None:
-            data_files["validation"] = data_args.validation_file
-        if data_args.test_file is not None:
-            data_files["test"] = data_args.test_file
-        input_datasets = load_dataset("jsonl", data_files=data_files)
-        logger.info(f"dataset is loaded from files")
-        preprocessed_flag = False
+    input_datasets = load_from_disk(data_args.preprocessed_datasets)
+    logger.info(f"preprocessed dataset is loaded")
+    preprocessed_flag = True
 
     if model_args.model_path:
         logger.info("using a saved model")
@@ -170,88 +144,34 @@ def main():
         model = AutoModelForSeq2SeqLM.from_pretrained(model_args.model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_args.model_name)
 
-    prefix = data_args.source_prefix if data_args.source_prefix is not None else ""
-    if (
-        data_args.source_prefix is None
-        and "t5" in model.config.architectures[0].lower()
-    ):
-        logger.warning(
-            "You're running a t5 model but didn't provide a source prefix, which is the expected, e.g. with "
-            "`--source_prefix 'summarize: ' `"
-        )
-
-    def preprocess_function(examples):
-        # remove pairs where at least one record is None
-
-        inputs, targets = [], []
-        for i in range(len(examples[data_args.text_column])):
-            if (
-                examples[data_args.text_column][i] is not None
-                and examples[data_args.summary_column][i] is not None
-            ):
-                inputs.append(examples[data_args.text_column][i])
-                targets.append(examples[data_args.summary_column][i])
-
-        inputs = [prefix + inp for inp in inputs]
-        model_inputs = tokenizer(
-            inputs,
-            max_length=data_args.max_input_length,
-            padding=data_args.padding,
-            truncation=True,
-        )
-        # Set up the tokenizer for targets
-        with tokenizer.as_target_tokenizer():
-            labels = tokenizer(
-                examples[data_args.summary_column],
-                max_length=data_args.max_target_length,
-                padding=data_args.padding,
-                truncation=True,
-            )
-
-        # replace all tokenizer.pad_token_id in the labels by -100 to ignore padding in the loss.
-        if data_args.padding == "max_length":
-            labels["input_ids"] = [
-                [(l if l != tokenizer.pad_token_id else -100) for l in label]
-                for label in labels["input_ids"]
-            ]
-        model_inputs["labels"] = labels["input_ids"]
-        return model_inputs
-
-    if training_args.do_train:
-        if data_args.max_samples > 0:
-            max_train_samples = min(len(input_datasets["train"]), data_args.max_samples)
+    # Artificially limit the number of samples (for testing)
+    if training_args.do_train:  # if using --do-train from Seq2SeqTrainingArguments
+        if data_args.limit_samples > 0:
+            max_train_samples = min(len(input_datasets["train"]), data_args.limit_samples)
             train_dataset = input_datasets["train"].select(range(max_train_samples))
-            logger.info(f"making a {max_train_samples} sample of the data")
+            logger.info(f"train: making a {max_train_samples} sample of the data")
         else:
             train_dataset = input_datasets["train"]
 
-        if preprocessed_flag == False:
-            # with training_args.main_process_first(desc="train dataset map pre-processing"):
-            logger.info(f"tokenizing the train data")
-            train_dataset = train_dataset.map(
-                preprocess_function,
-                batched=True,
-                remove_columns=train_dataset.column_names,
-                desc="Running tokenizer on train dataset",
-            )
-
     if training_args.do_eval:
-        if data_args.max_samples > 0:
+        if data_args.limit_samples > 0:
             max_eval_samples = min(
-                len(input_datasets["validation"]), data_args.max_samples
+                len(input_datasets["validation"]), data_args.limit_samples
             )
             eval_dataset = input_datasets["validation"].select(range(max_eval_samples))
-            logger.info(f"making a {max_eval_samples} sample of the data")
+            logger.info(f"eval: making a {max_eval_samples} sample of the data")
         else:
             eval_dataset = input_datasets["validation"]
-        if preprocessed_flag == False:
-            logger.info(f"tokenizing the evale data")
-            eval_dataset = eval_dataset.map(
-                preprocess_function,
-                batched=True,
-                remove_columns=eval_dataset.column_names,
-                desc="Running tokenizer on validation dataset",
+
+    if training_args.do_predict:
+        if data_args.limit_samples > 0:
+            max_predict_samples = min(
+                len(input_datasets["test"]), data_args.limit_samples
             )
+            predict_dataset = input_datasets["test"].select(range(max_predict_samples))
+            logger.info(f"predict: making a {max_predict_samples} sample of the data")
+        else:
+            predict_dataset = input_datasets["test"]
 
     # Data collator
     label_pad_token_id = -100
@@ -268,38 +188,12 @@ def main():
     if training_args.do_train:
         logging_steps = len(train_dataset) // training_args.per_device_train_batch_size
         training_args.logging_steps = logging_steps
-    training_args.output_dir = "outputs"
+    #training_args.output_dir = "outputs"
     training_args.save_strategy = "epoch"
     training_args.evaluation_strategy = IntervalStrategy.EPOCH
     training_args.predict_with_generate = True
     training_args.report_to = ["mlflow"]
     logger.info(f"training args: {training_args}")
-
-    def compute_metrics(eval_preds):
-        preds, labels = eval_preds
-        if isinstance(preds, tuple):
-            preds = preds[0]
-        decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
-
-        # Replace -100 in the labels as we can't decode them.
-        labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
-        decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
-
-        # Some simple post-processing
-        decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
-
-        result = metric.compute(
-            predictions=decoded_preds, references=decoded_labels, use_stemmer=True
-        )
-        # Extract a few results from ROUGE
-        result = {key: value.mid.fmeasure * 100 for key, value in result.items()}
-
-        prediction_lens = [
-            np.count_nonzero(pred != tokenizer.pad_token_id) for pred in preds
-        ]
-        result["gen_len"] = np.mean(prediction_lens)
-        result = {k: round(v, 4) for k, v in result.items()}
-        return result
 
     # Initialize our Trainer
     trainer = Seq2SeqTrainer(
@@ -309,22 +203,12 @@ def main():
         eval_dataset=eval_dataset if training_args.do_eval else None,
         tokenizer=tokenizer,
         data_collator=data_collator,
-        compute_metrics=compute_metrics,
+        compute_metrics=lambda preds : compute_metrics(preds, tokenizer, metric),
     )
 
-    def postprocess_text(preds, labels):
-        preds = [pred.strip() for pred in preds]
-        labels = [label.strip() for label in labels]
-
-        # rougeLSum expects newline after each sentence
-        preds = ["\n".join(nltk.sent_tokenize(pred)) for pred in preds]
-        labels = ["\n".join(nltk.sent_tokenize(label)) for label in labels]
-
-        return preds, labels
-
-    # Training
+    # Start the actual training (to include evaluation use --do-eval)
     if training_args.do_train:
-        logger.info("start training")
+        logger.info("Start training")
         start = time.time()
         train_result = trainer.train()
 
@@ -337,43 +221,29 @@ def main():
         if torch.cuda.is_available():
             print_summary(train_result)
 
-        model_path = os.path.join(model_args.trained_model_path)
-        os.makedirs(model_path, exist_ok=True)
+    # Save the model as an output
+    if model_args.model_output and is_this_main_node:
+        logger.info(f"Saving the model at {model_args.model_output}")
+        os.makedirs(model_args.model_output, exist_ok=True)
+        trainer.save_model(model_args.model_output)
 
-        # saves final model
-        trainer.save_model(model_path)
-        logger.info(f"model is saved at {model_path}")
-        print("trained model saved locally")
-        # Registering the model to the workspace
-        if model_args.registered_model_name is not None and is_this_main_node:
-            Model.register(
-                run.experiment.workspace,
-                model_name=model_args.registered_model_name,
-                model_path=model_path,
-                tags={
-                    "type": "huggingface",
-                    "task": "summarization",
-                    "dataset": f"{data_args.dataset_name}",
-                }
-                if data_args.dataset_name is not None
-                else {"type": "huggingface", "task": "summarization"},
-                description=f"Hugingface model finetuned for summarization using {data_args.dataset_name} dataset"
-                if data_args.dataset_name is not None
-                else "Huggingface model finetuned for summarization",
-            )
-
-
-    if training_args.do_eval:
-        logger.info("*** Evaluate ***")
-        metrics = trainer.evaluate(
-            max_length=data_args.max_target_length,
-            num_beams=data_args.num_beams,
-            metric_key_prefix="eval",
+    # Just run the predictions
+    if training_args.do_predict:
+        logger.info("*** Predict ***")
+        max_length = (
+            training_args.generation_max_length
+            if training_args.generation_max_length is not None
+            else data_args.max_target_length
         )
-        metrics["eval_samples"] = len(eval_dataset)
 
-        trainer.log_metrics("eval", metrics)
-        trainer.save_metrics("eval", metrics)
+        predict_results = trainer.predict(
+            predict_dataset, metric_key_prefix="predict", max_length=max_length
+        )
+        metrics = predict_results.metrics
+        metrics["predict_samples"] = len(predict_dataset)
+
+        trainer.log_metrics("predict", metrics)
+        trainer.save_metrics("predict", metrics)
 
     # Stop Logging
     mlflow.end_run()
