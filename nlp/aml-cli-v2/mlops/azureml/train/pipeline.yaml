@@ -6,7 +6,7 @@ description: Train a text summarization model using PubMed dataset for fine-tuni
 # <inputs_and_outputs>
 inputs:
   limit_samples:
-    value: 0
+    value: 10000 # use -1 to run on the entire dataset
   pretrained_model_name:
     value: "t5-small"
   num_train_epochs:
