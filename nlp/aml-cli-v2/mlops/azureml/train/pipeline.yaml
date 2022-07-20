@@ -161,9 +161,9 @@ jobs:
     outputs:
       deploy_flag: ${{parent.outputs.deploy_flag}}
 
-  register_and_deploy:
-    name: register_and_deploy
-    display_name: Register model and deploy
+  register_model:
+    name: register_model
+    display_name: Register model
     code: ../../../data-science/src
     command: >-
       python summarization/register.py 
