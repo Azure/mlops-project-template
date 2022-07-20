@@ -168,7 +168,7 @@ jobs:
     code: ../../../data-science/src
     command: >-
       python summarization/register.py 
-      --model_path ${{inputs.model}} 
+      --model_folder ${{inputs.model}} 
       --deploy_flag ${{inputs.deploy_flag}} 
       --register_as ${{inputs.model_registration_name}}
     environment: azureml:nlp_summarization_train@latest
