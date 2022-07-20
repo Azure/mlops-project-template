@@ -6,7 +6,7 @@ description: Train a text summarization model using PubMed dataset for fine-tuni
 # <inputs_and_outputs>
 inputs:
   limit_samples:
-    value: 10000 # use -1 to run on the entire dataset
+    value: 1000 # use -1 to run on the entire dataset
   pretrained_model_name:
     value: "t5-small"
   num_train_epochs:
@@ -15,6 +15,8 @@ inputs:
     value: 8
   learning_rate:
     value: 0.00005
+  model_registration_name:
+    value: "pubmed-summarization"
 
 outputs: 
   prepared_data:
@@ -175,4 +177,4 @@ jobs:
     inputs:
       model: ${{parent.jobs.finetune_model.outputs.finetuned_model}}
       deploy_flag: ${{parent.jobs.compare_models.outputs.deploy_flag}}
-      model_registration_name: "pubmed-summarization"
+      model_registration_name: ${{parent.inputs.model_registration_name}}
