@@ -2,11 +2,9 @@ from azureml.core import Run
 from azureml.core.model import Model
 
 import os
-import sys
 import argparse
 import logging
 import mlflow
-import json
 
 
 def main():
@@ -62,7 +60,7 @@ def main():
         if run.__class__.__name__ == "_OfflineRun":
             raise Exception("You can't run this script locally, you will need to run it as an AzureML job.")
 
-        model = Model.register(
+        _ = Model.register(
             run.experiment.workspace,
             model_name=args.register_as,
             model_path=args.model_folder,

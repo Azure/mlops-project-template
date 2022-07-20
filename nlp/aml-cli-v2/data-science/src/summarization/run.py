@@ -1,6 +1,6 @@
 import logging
 import os
-from datasets import load_dataset, load_metric, load_from_disk
+from datasets import load_metric, load_from_disk
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
@@ -13,15 +13,12 @@ from transformers import (
 
 import torch
 import nltk
-from datasets import load_dataset
 from dataclasses import dataclass, field
 from typing import Optional
 import numpy as np
 import mlflow
 from pynvml import *
 import time
-from azureml.core import Run
-from azureml.core.model import Model
 
 
 # Input arguments are set with dataclass. Huggingface library stores the default training args in TrainingArguments dataclass
@@ -133,7 +130,6 @@ def main():
 
     input_datasets = load_from_disk(data_args.preprocessed_datasets)
     logger.info(f"preprocessed dataset is loaded")
-    preprocessed_flag = True
 
     if model_args.model_path:
         logger.info("using a saved model")
