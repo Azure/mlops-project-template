@@ -13,7 +13,7 @@ variables:
   environment: prod
   enable_aml_computecluster: true
   enable_monitoring: true
-
+  
   # Azure DevOps 
   ado_service_connection_rg: Azure-ARM-Prod
   ado_service_connection_aml_ws: Azure-ARM-Prod

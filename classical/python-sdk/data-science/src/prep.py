@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 import os
 import sys
 import argparse
@@ -17,7 +20,7 @@ ws = run.experiment.workspace
 
 def parse_args():
     parser = argparse.ArgumentParser(description="UCI Credit example")
-    parser.add_argument("--data_path", type=str, default='data/', help="Directory path to training data")
+    parser.add_argument("--uci-credit", type=str, default='data/', help="Directory path to training data")
     parser.add_argument("--prepared_data_path", type=str, default='prepared_data/', help="prepared data directory")
     parser.add_argument("--enabling_monitoring", type=str, default="false", help="enable logging to ADX")
     parser.add_argument("--table_name", type=str, default="mlmonitoring", help="Table name in ADX for logging")
@@ -32,7 +35,7 @@ def log_training_data(df, table_name):
 def main():
     # Parse command-line arguments
     args = parse_args()
-    prepared_data_path = os.path.join(args.prepared_data_path, run.parent.id)
+    prepared_data_path = args.prepared_data_path
 
     # Make sure data output path exists
     if not os.path.exists(prepared_data_path):
@@ -42,7 +45,7 @@ def main():
     mlflow.sklearn.autolog()
     
     # Read training data
-    df = pd.read_csv(os.path.join(args.data_path, 'credit.csv'))
+    df = pd.read_csv(os.path.join(args.uci_credit, 'credit.csv'))
 
     random_data = np.random.rand(len(df))
 

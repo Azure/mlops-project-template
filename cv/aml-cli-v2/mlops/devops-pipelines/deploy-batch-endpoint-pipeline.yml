@@ -28,6 +28,7 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
+      ref: main
 
 stages:
 - stage: CreateBatchEndpoint

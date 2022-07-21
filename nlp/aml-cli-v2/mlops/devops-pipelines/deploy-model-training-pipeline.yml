@@ -4,10 +4,12 @@
 variables:
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
-    - template: ../../config-infra-prod.yml
+    #TODO: need to change the path when merging into main branch
+    - template: ../../../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../config-infra-dev.yml
+    #TODO: need to change the path when merging into main branch
+    - template: ../../../../config-infra-dev.yml
 - name: version
   value: aml-cli-v2 
 
@@ -25,7 +27,6 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
-      ref: main
 
 stages:
 - stage: DeployTrainingPipeline
@@ -42,22 +43,31 @@ stages:
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
         parameters:
+          cluster_name: cpu-cluster
+          size: STANDARD_DS3_V2
+          min_instances: 0
+          max_instances: 1
+          cluster_tier: dedicated
+      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+        parameters:
+          cluster_name: cpu-cluster-lg
+          size: Standard_D14_v2
+          min_instances: 0
+          max_instances: 1
+          cluster_tier: dedicated
+      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+        parameters:
           cluster_name: gpu-cluster
-          size: Standard_NC6
+          size: Standard_NV6
           min_instances: 0
           max_instances: 1
           cluster_tier: dedicated
       - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
         parameters:
-          build_type: docker
-          environment_name: nvidia_pytorch # Not used for docker builds
-          environment_file: mlops/azureml/train/train-env.yaml        
-      - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
-        parameters:
-          data_type: training
-          environment_file: mlops/azureml/train/create_stanford_dogs_dataset.yaml      
+          build_type: conda
+          environment_name: nlp_summarization_train
+          environment_file: mlops/azureml/train/train-env.yml
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
-          pipeline_file: mlops/azureml/train/pipeline.yaml
-          experiment_name: $(environment)_cv_train_$(Build.SourceBranchName)
-          display_name: $(environment)_cv_run_$(Build.BuildID)
+          pipeline_file: nlp/aml-cli-v2/mlops/azureml/train/pipeline.yaml #TODO: need to change the path when merging into main branch
+  
