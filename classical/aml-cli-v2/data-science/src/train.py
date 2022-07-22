@@ -3,7 +3,8 @@ import argparse
 
 from pathlib import Path
 import os
-import pickle
+import shutil
+import tempfile
 
 import numpy as np
 import pandas as pd
@@ -92,7 +93,7 @@ def main():
     arr = os.listdir(args.prepared_data)
     print(arr)
 
-    train_data = pd.read_csv((Path(args.prepared_data) / "train.csv"))
+    train_data = pd.read_parquet(Path(args.prepared_data))
 
     # Split the data into input(X) and output(y)
     y_train = train_data[TARGET_COL]
@@ -183,8 +184,21 @@ def main():
     plt.savefig("regression_results.png")
     mlflow.log_artifact("regression_results.png")
 
-    # Save the model
-    pickle.dump(model, open((Path(args.model_output) / "model.pkl"), "wb"))
+    # Saving model with mlflow
+    with tempfile.TemporaryDirectory() as td:
+        print("Saving model with MLFlow to temporary directory")
+        tmp_output_dir = os.path.join(td, "my_model_dir")
+        mlflow.sklearn.save_model(sk_model=model, path=tmp_output_dir)
+
+        print("Copying MLFlow model to output path")
+        for file_name in os.listdir(tmp_output_dir):
+            print("  Copying: ", file_name)
+            # As of Python 3.8, copytree will acquire dirs_exist_ok as
+            # an option, removing the need for listdir
+            shutil.copy2(
+                src=os.path.join(tmp_output_dir, file_name),
+                dst=os.path.join(args.model_output, file_name),
+            )
 
 if __name__ == "__main__":
     main()
