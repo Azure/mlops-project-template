@@ -17,4 +17,6 @@ code_configuration:
   scoring_script: score.py
 
 # custom scoring environment
-environment: azureml:nlp_summarization_inference@latest
+environment: 
+  conda_file: ../../../../data-science/environments/inference/conda_env.yml
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.0.3-cudnn8-ubuntu18.04
