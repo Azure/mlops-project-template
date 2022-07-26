@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
 
 # reference to the endpoint
-name: green
+name: red
 endpoint_name: nlp-summarize-online
 
 # compute
@@ -19,4 +19,4 @@ code_configuration:
 # custom scoring environment
 environment: 
   conda_file: ../../../../data-science/environments/inference/conda_env.yml
-  image: mcr.microsoft.com/azureml/minimal-ubuntu18.04-py37-cpu-inference:latest
+  image: mcr.microsoft.com/azureml/openmpi3.1.2-ubuntu18.04:20210727.v1
