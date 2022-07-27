@@ -25,6 +25,7 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
+      ref: main
 
 stages:
 - stage: DeployTrainingPipeline
@@ -57,4 +58,6 @@ stages:
           environment_file: mlops/azureml/train/create_stanford_dogs_dataset.yaml      
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
-          pipeline_file: mlops/azureml/train/pipeline.yaml 
+          pipeline_file: mlops/azureml/train/pipeline.yaml
+          experiment_name: $(environment)_cv_train_$(Build.SourceBranchName)
+          display_name: $(environment)_cv_run_$(Build.BuildID)

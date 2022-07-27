@@ -37,3 +37,11 @@ variable "jumphost_password" {
   description = "VM password"
   default     = "ThisIsNotVerySecure!"
 }
+
+variable "enable_monitoring" {
+  description = "Variable to enable or disable Monitoring"
+}
+
+variable "client_secret" {
+  description = "Service Principal Secret"
+}

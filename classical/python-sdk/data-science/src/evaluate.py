@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 import os
 import sys
 import argparse
@@ -40,10 +43,10 @@ def parse_args():
 def main():
     # Parse command-line arguments
     args = parse_args()
-    prepared_data_path = os.path.join(args.prepared_data_path, run.parent.id)
-    model_path = os.path.join(args.model_path, run.parent.id)
-    explainer_path = os.path.join(args.explainer_path, run.parent.id)
-    evaluation_path = os.path.join(args.evaluation_path, run.parent.id)
+    prepared_data_path = args.prepared_data_path
+    model_path = args.model_path
+    explainer_path = args.explainer_path
+    evaluation_path = args.evaluation_path
 
     # Make sure evaluation output path exists
     if not os.path.exists(evaluation_path):
