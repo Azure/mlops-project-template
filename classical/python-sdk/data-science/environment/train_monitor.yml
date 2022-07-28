@@ -23,4 +23,4 @@ dependencies:
     - azureml-interpret==1.41.0
     - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
     - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
-    - matplotlib=3.3.3
+    - matplotlib==3.3.3
