@@ -10,7 +10,7 @@ variables:
   # Training dataset settings
   training_dataset_name: uci-credit
   training_dataset_description: uci_credit
-  training_dataset_local_path: classical/python-sdk/data/training/
+  training_dataset_local_path: data/training/
   training_dataset_path_on_datastore: data/training/
   training_dataset_type: local
   training_dataset_storage_url: 'https://azureaidemostorage.blob.core.windows.net/data/'

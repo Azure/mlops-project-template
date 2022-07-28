@@ -17,3 +17,15 @@ trigger:
 
 pool:
   vmImage: $(ap_vm_image)
+
+stages:
+- stage: DeployDriftJob
+  displayName: Deploy Drift Job
+  jobs:
+    - job: DeployDriftJob
+      steps:
+      - checkout: self
+        path: s/
+      - checkout: mlops-templates
+        path: s/templates/
+      - template: templates/${{ variables.version }}/deploy-drift-detection.yml@mlops-templates
