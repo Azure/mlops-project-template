@@ -4,12 +4,10 @@
 variables:
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
-    #TODO: need to change the path when merging into main branch
-    - template: ../../../../config-infra-prod.yml
+    - template: ../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    #TODO: need to change the path when merging into main branch
-    - template: ../../../../config-infra-dev.yml
+    - template: ../../config-infra-dev.yml
 - name: version
   value: aml-cli-v2 
 
@@ -27,6 +25,7 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
+      ref: main
 
 stages:
 - stage: DeployTrainingPipeline
@@ -69,5 +68,6 @@ stages:
           environment_file: mlops/azureml/train/train-env.yml
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
-          pipeline_file: nlp/aml-cli-v2/mlops/azureml/train/pipeline.yaml #TODO: need to change the path when merging into main branch
-  
+          pipeline_file: mlops/azureml/train/pipeline.yaml
+          experiment_name: $(environment)_nlp_summarization_$(Build.SourceBranchName)
+          display_name: $(environment)_nlp_summarization_$(Build.BuildID)  
