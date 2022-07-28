@@ -70,4 +70,4 @@ stages:
         parameters: 
           pipeline_file: mlops/azureml/train/pipeline.yaml
           experiment_name: $(environment)_nlp_summarization_$(Build.SourceBranchName)
-          display_name: $(environment)_nlp_summarization_$(Build.BuildID)  
+          display_name: $(environment)_nlp_summarization_$(Build.BuildID)
