@@ -5,10 +5,10 @@ variables:
 - template: ../../config-aml.yml
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
-    - template: ../../../../config-infra-prod.yml
+    - template: ../../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../../../config-infra-dev.yml
+    - template: ../../../config-infra-dev.yml
 - name: version
   value: python-sdk
 
@@ -43,7 +43,7 @@ stages:
         parameters:
           environment_name: $(training_env_name)
           build_type: 'conda'
-          environment_file: $(training_env_conda_yaml)
+          environment_file: ../$(training_env_conda_yaml)
           enable_monitoring: $(enable_monitoring)
       - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
         parameters:
