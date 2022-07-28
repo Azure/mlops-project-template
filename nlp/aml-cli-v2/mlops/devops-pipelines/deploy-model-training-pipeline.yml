@@ -68,6 +68,6 @@ stages:
           environment_file: mlops/azureml/train/train-env.yml
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
-          pipeline_file: mlops/azureml/train/pipeline.yaml
+          pipeline_file: mlops/azureml/train/pipeline.yml
           experiment_name: $(environment)_nlp_summarization_$(Build.SourceBranchName)
           display_name: $(environment)_nlp_summarization_$(Build.BuildID)
