@@ -24,7 +24,7 @@ resources:
       name: Azure/mlops-templates # need to change org name from Azure when pulling the template
       endpoint: github-connection # need to set up and hardcode
       type: github
-      ref: monitoring
+      ref: main
 
 stages:
 - stage: DeployTrainingPipeline
