@@ -21,7 +21,7 @@ resources:
       name: Azure/mlops-templates 
       endpoint: github-connection
       type: github
-      ref: monitoring #branch name
+      ref: main #branch name
 
 stages :
   - stage: CreateStorageAccountForTerraformState
