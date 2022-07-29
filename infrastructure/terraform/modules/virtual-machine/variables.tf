@@ -29,16 +29,21 @@ variable "env" {
   description = "Environment prefix"
 }
 
-variable "enable_aml_secure_workspace" {
-  description = "Variable to enable or disable AML secure workspace"
+variable "jumphost_username" {
+  type        = string
+  description = "VM username"
 }
 
-variable "vnet_id" {
+variable "jumphost_password" {
   type        = string
-  description = "The ID of the vnet that should be linked to the DNS zone"
+  description = "VM password"
 }
 
 variable "subnet_id" {
   type        = string
-  description = "The ID of the subnet from which private IP addresses will be allocated for this Private Endpoint"
+  description = "Subnet ID for the virtual machine"
+}
+
+variable "enable_aml_secure_workspace" {
+  description = "Variable to enable or disable AML secure workspace"
 }

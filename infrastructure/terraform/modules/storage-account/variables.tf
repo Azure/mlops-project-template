@@ -42,3 +42,17 @@ variable "firewall_virtual_network_subnet_ids" {
 variable "firewall_bypass" {
   default = ["None"]
 }
+
+variable "enable_aml_secure_workspace" {
+  description = "Variable to enable or disable AML secure workspace"
+}
+
+variable "vnet_id" {
+  type        = string
+  description = "The ID of the vnet that should be linked to the DNS zone"
+}
+
+variable "subnet_id" {
+  type        = string
+  description = "The ID of the subnet from which private IP addresses will be allocated for this Private Endpoint"
+}
