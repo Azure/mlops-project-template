@@ -44,9 +44,12 @@ stages:
           environment_name: $(batch_env_name)
           build_type: 'conda'
           environment_file: $(batch_env_conda_yaml)
+          enable_monitoring: $(enable_monitoring)
       - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
         parameters:
           data_type: scoring
       - template: templates/${{ variables.version }}/deploy-batch-scoring-pipeline.yml@mlops-templates
+        parameters:
+          enable_monitoring: $(enable_monitoring)
       - template: templates/${{ variables.version }}/add-pipeline-to-endpoint.yml@mlops-templates
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates

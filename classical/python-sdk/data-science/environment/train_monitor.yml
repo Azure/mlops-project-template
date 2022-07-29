@@ -1,0 +1,26 @@
+name: train
+channels:
+- anaconda
+- conda-forge
+dependencies:
+- python=3.8.1
+- pip:
+    - azureml-core==1.41.0
+    - azureml-mlflow==1.41.0
+    - azure-identity==1.9.0
+    - azure-mgmt-kusto==2.2.0
+    - azure-kusto-data==3.1.2
+    - azure-kusto-ingest==3.1.2
+    - jupyter-dash==0.4.2
+    - dash==2.3.1
+    - plotly==5.7.0
+    - azureml-defaults==1.41.0
+    - pandas==1.4.1
+    - scikit-learn==0.24.1
+    - fairlearn==0.7.0
+    - azureml-contrib-fairness==1.41.0
+    - interpret-core==0.2.7
+    - azureml-interpret==1.41.0
+    - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
+    - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
+    - matplotlib==3.3.3

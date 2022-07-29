@@ -1,0 +1,16 @@
+name: batch-monitoring
+channels:
+- anaconda
+- conda-forge
+dependencies:
+- python=3.8.1
+- pip:
+    - azureml-defaults==1.41.0
+    - azureml-mlflow==1.41.0
+    - azureml-sdk==1.41.0
+    - azureml-interpret==1.41.0
+    - scikit-learn==0.24.1
+    - pandas==1.4.1
+    - joblib==1.0.0
+    - matplotlib==3.3.3
+    - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector

@@ -80,3 +80,7 @@ variables:
   batch_process_count_per_node: 1
   batch_node_count: 1
 
+  # Monitoring settings
+  scoring_table_name: scoringdata
+  training_table_name: mlmonitoring
+
