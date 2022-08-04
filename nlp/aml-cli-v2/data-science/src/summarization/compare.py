@@ -38,7 +38,7 @@ def main():
         help="name of reference metric for shipping flag (default: predict_rougeLsum)",
     )
     parser.add_argument(
-        "--force_comparison", type=strtobool, help="set to True to bypass comparison and set --deploy_flag to True"
+        "--force_comparison", type=strtobool, default=False, help="set to True to bypass comparison and set --deploy_flag to True"
     )
     parser.add_argument(
         "--deploy_flag", type=str, help="a deploy flag whether to deploy or not"
