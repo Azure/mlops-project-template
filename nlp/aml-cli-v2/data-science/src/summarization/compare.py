@@ -3,7 +3,7 @@ import argparse
 import logging
 import mlflow
 import json
-
+from distutils.util import strtobool
 
 def main():
     """Main function of the script."""
@@ -38,6 +38,9 @@ def main():
         help="name of reference metric for shipping flag (default: predict_rougeLsum)",
     )
     parser.add_argument(
+        "--force_comparison", type=strtobool, default=False, help="set to True to bypass comparison and set --deploy_flag to True"
+    )
+    parser.add_argument(
         "--deploy_flag", type=str, help="a deploy flag whether to deploy or not"
     )
 
@@ -55,16 +58,21 @@ def main():
         candidate_metrics = json.loads(in_file.read())
 
     # should we ship or not?
-    deploy_flag = (
-        candidate_metrics[args.reference_metric]
-        > baseline_metrics[args.reference_metric]
-    )
-    logger.info("baseline_metrics[{}]={}, candidate_metrics[{}]={}, deploy_flag={}".format(
+    if args.force_comparison:
+        deploy_flag = True
+    else:
+        deploy_flag = (
+            candidate_metrics[args.reference_metric]
+            > baseline_metrics[args.reference_metric]
+        )
+
+    logger.info("baseline_metrics[{}]={}, candidate_metrics[{}]={}, deploy_flag={} (force_comparison={})".format(
         args.reference_metric,
         baseline_metrics[args.reference_metric],
         args.reference_metric,
         candidate_metrics[args.reference_metric],
-        deploy_flag
+        deploy_flag,
+        args.force_comparison
     ))
 
     # save deploy_flag as a file
