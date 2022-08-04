@@ -153,7 +153,8 @@ jobs:
       --baseline_metrics ${{inputs.baseline_metrics}} 
       --candidate_metrics ${{inputs.candidate_metrics}} 
       --reference_metric ${{inputs.reference_metric}} 
-      --deploy_flag ${{outputs.deploy_flag}}
+      --deploy_flag ${{outputs.deploy_flag}} 
+      --force_comparison
     environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
     compute: azureml:cpu-cluster
     inputs:
