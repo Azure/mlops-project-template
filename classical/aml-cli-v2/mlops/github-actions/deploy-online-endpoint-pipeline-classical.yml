@@ -14,7 +14,7 @@ jobs:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
         endpoint_file: classical/aml-cli-v2/mlops/azureml/deploy/online/online-endpoint.yml
-        endpoint_name: eptest-online
+        endpoint_name: ${{ format('taxi-online-{0}', needs.get-config.outputs.oep) }}
         endpoint_type: online
       secrets:
         creds: ${{secrets.AZURE_CREDENTIALS}}
@@ -25,7 +25,7 @@ jobs:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
         endpoint_file: classical/aml-cli-v2/mlops/azureml/deploy/online/online-deployment.yml
-        endpoint_name: eptest-online
+        endpoint_name: ${{ format('taxi-online-{0}', needs.get-config.outputs.oep) }}
         endpoint_type: online
         deployment_name: taxi-online-dp
       secrets:
@@ -37,6 +37,6 @@ jobs:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
         traffic_allocation: taxi-online-dp=100
-        endpoint_name: eptest-online
+        endpoint_name: ${{ format('taxi-online-{0}', needs.get-config.outputs.oep) }}
       secrets:
         creds: ${{secrets.AZURE_CREDENTIALS}}

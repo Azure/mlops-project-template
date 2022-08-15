@@ -26,7 +26,7 @@ jobs:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
         endpoint_file: classical/aml-cli-v2/mlops/azureml/deploy/batch/batch-endpoint.yml
-        endpoint_name: eptest
+        endpoint_name:  ${{ format('taxi-batch-{0}', needs.get-config.outputs.bep) }} 
         endpoint_type: batch
       secrets:
         creds: ${{secrets.AZURE_CREDENTIALS}}
@@ -37,7 +37,7 @@ jobs:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
         endpoint_file: classical/aml-cli-v2/mlops/azureml/deploy/batch/batch-deployment.yml
-        endpoint_name: eptest
+        endpoint_name: ${{ format('taxi-batch-{0}', needs.get-config.outputs.bep) }} 
         endpoint_type: batch
         deployment_name: eptestdeploy
       secrets:
