@@ -1,4 +1,4 @@
 $schema: https://azuremlschemas.azureedge.net/latest/managedOnlineEndpoint.schema.json
-name: dogs-classifier-online
+name: dogs-classifier-ol
 description: Stanford Dogs Classifier
 auth_mode: key
