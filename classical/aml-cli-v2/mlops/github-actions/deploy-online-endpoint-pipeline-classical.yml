@@ -13,7 +13,7 @@ jobs:
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
-        endpoint_file: classical/aml-cli-v2/mlops/azureml/deploy/online/online-endpoint.yml
+        endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
         endpoint_name: ${{ format('taxi-online-{0}', needs.get-config.outputs.oep) }}
         endpoint_type: online
       secrets:
@@ -24,7 +24,7 @@ jobs:
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
-        endpoint_file: classical/aml-cli-v2/mlops/azureml/deploy/online/online-deployment.yml
+        endpoint_file: mlops/azureml/deploy/online/online-deployment.yml
         endpoint_name: ${{ format('taxi-online-{0}', needs.get-config.outputs.oep) }}
         endpoint_type: online
         deployment_name: taxi-online-dp
