@@ -25,7 +25,7 @@ jobs:
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
-        environment_file: cv/aml-cli-v2/mlops/azureml/train/train-env.yaml 
+        environment_file: mlops/azureml/train/train-env.yaml 
       secrets:
         creds: ${{secrets.AZURE_CREDENTIALS}}
   register-dataset:
@@ -34,7 +34,7 @@ jobs:
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
-        data_file: cv/aml-cli-v2/mlops/azureml/train/create_stanford_dogs_dataset.yaml
+        data_file: mlops/azureml/train/create_stanford_dogs_dataset.yaml
         file_type: Training
         name: stanford_dogs
       secrets:
@@ -45,7 +45,7 @@ jobs:
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
-        parameters-file:  cv/aml-cli-v2/mlops/azureml/train/pipeline.yaml
+        parameters-file:  mlops/azureml/train/pipeline.yaml
         job-name: cv-train
       secrets:
           creds: ${{secrets.AZURE_CREDENTIALS}}
