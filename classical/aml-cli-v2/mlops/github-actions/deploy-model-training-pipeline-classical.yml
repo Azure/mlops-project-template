@@ -13,8 +13,8 @@ jobs:
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
-        environment_file:  classical/aml-cli-v2/mlops/azureml/train/train-env.yml
-        conda_file: classical/aml-cli-v2/data-science/environment/train-conda.yml
+        environment_file:  mlops/azureml/train/train-env.yml
+        conda_file: data-science/environment/train-conda.yml
       secrets:
           creds: ${{secrets.AZURE_CREDENTIALS}}
   run-pipeline:
@@ -23,7 +23,7 @@ jobs:
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
-        parameters-file:  classical/aml-cli-v2/mlops/azureml/train/pipeline.yml
+        parameters-file:  mlops/azureml/train/pipeline.yml
         job-name: test
       secrets:
           creds: ${{secrets.AZURE_CREDENTIALS}}
