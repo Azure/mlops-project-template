@@ -1,9 +1,3 @@
-parameters:
-- name: resource_group
-  type: string
-- name: aml_workspace
-  type: string
-
 steps:
   - task: RegisterRAI
     displayName: 'Register Responsible AI Components'
@@ -13,4 +7,4 @@ steps:
       scriptLocation: inlineScript
       inlineScript: |
         subscription_id=$(az account get-access-token --query tenant --output tsv)
-        ./quick-setup.bash $subscription_id $${{ parameters.resource_group }} $${{ parameters.aml_workspace }}
+        ./quick-setup.bash $subscription_id $$(resource_group) $$(aml_workspace)
