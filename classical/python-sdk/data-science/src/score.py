@@ -27,7 +27,10 @@ def init():
     
     model_path = Model.get_model_path(args.model_name)
     print(f"Model path: {model_path}")
-    model = joblib.load(os.path.join(model_path, 'model.pkl'))
+    if 'model.pkl' in model_path:
+        model = joblib.load(model_path)
+    else:
+        model = joblib.load(os.path.join(model_path, 'model.pkl'))
 
         # load the explainer
     explainer_path = os.path.join(Model.get_model_path(args.model_name), "explainer")
