@@ -22,7 +22,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="UCI Credit example")
     parser.add_argument("--uci-credit", type=str, default='data/', help="Directory path to training data")
     parser.add_argument("--prepared_data_path", type=str, default='prepared_data/', help="prepared data directory")
-    parser.add_argument("--enable_monitoring", type=str, default="false", help="enable logging to ADX")
+    parser.add_argument("--enabling_monitoring", type=str, default="false", help="enable logging to ADX")
     parser.add_argument("--table_name", type=str, default="mlmonitoring", help="Table name in ADX for logging")
     return parser.parse_args()
 
