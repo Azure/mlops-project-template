@@ -29,6 +29,7 @@ def parse_args():
 def log_training_data(df, table_name):
     from obs.collector import Online_Collector
     from datetime import timedelta
+    print("If there is an Authorization error, check your Azure KeyVault secret named kvmonitoringspkey. Terraform might put single quotation marks around the secret. Remove the single quotes and the secret should work.")
     collector = Online_Collector(table_name)
     df["timestamp"] = [pd.to_datetime('now') - timedelta(days=x) for x in range(len(df))]
     collector.batch_collect(df)
