@@ -8,7 +8,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import joblib
-
+from datetime import timedelta
 from azureml.core.model import Model
 
 model = None
@@ -27,6 +27,7 @@ def init():
     
     model_path = Model.get_model_path(args.model_name)
     print(f"Model path: {model_path}")
+
     if 'model.pkl' in model_path:
         model = joblib.load(model_path)
     else:
@@ -36,7 +37,7 @@ def init():
     explainer_path = os.path.join(Model.get_model_path(args.model_name), "explainer")
     #explainer = joblib.load(explainer_path)
 
-    if (args.enable_monitoring.lower == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower == 'yes'):
+    if (args.enable_monitoring.lower() == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower() == 'yes'):
         from obs.collector import Online_Collector
         collector = Online_Collector(args.table_name)
         
@@ -72,6 +73,7 @@ def run(file_list):
 
     if collector:
         full_results = pd.concat(all_results)
+        full_results["timestamp"] = [pd.to_datetime('now') - timedelta(days=x) for x in range(len(full_results))]
         collector.batch_collect(full_results)
 
     return results

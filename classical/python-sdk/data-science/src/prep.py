@@ -24,17 +24,19 @@ def parse_args():
     parser.add_argument("--prepared_data_path", type=str, default='prepared_data/', help="prepared data directory")
     parser.add_argument("--enable_monitoring", type=str, default="false", help="enable logging to ADX")
     parser.add_argument("--table_name", type=str, default="mlmonitoring", help="Table name in ADX for logging")
-    return parser.parse_args()
+    return parser.parse_known_args()
 
 def log_training_data(df, table_name):
     from obs.collector import Online_Collector
+    from datetime import timedelta
     collector = Online_Collector(table_name)
+    df["timestamp"] = [pd.to_datetime('now') - timedelta(days=x) for x in range(len(df))]
     collector.batch_collect(df)
 
 
 def main():
     # Parse command-line arguments
-    args = parse_args()
+    args, unknown = parse_args()
     prepared_data_path = args.prepared_data_path
 
     # Make sure data output path exists
@@ -73,7 +75,7 @@ def main():
     val.to_csv(VAL_PATH, index=False)
     test.to_csv(TEST_PATH, index=False)
 
-    if (args.enable_monitoring.lower == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower == 'yes'):
+    if (args.enable_monitoring.lower() == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower() == 'yes'):
         log_training_data(df, args.table_name)
     
 if __name__ == '__main__':
