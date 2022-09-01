@@ -33,7 +33,7 @@ def init():
     explainer_path = os.path.join(Model.get_model_path(args.model_name), "explainer")
     #explainer = joblib.load(explainer_path)
 
-    if (args.enable_monitoring.lower == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower == 'yes'):
+    if (args.enable_monitoring.lower() == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower() == 'yes'):
         from obs.collector import Online_Collector
         collector = Online_Collector(args.table_name)
         
