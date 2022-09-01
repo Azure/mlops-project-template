@@ -28,7 +28,9 @@ def parse_args():
 
 def log_training_data(df, table_name):
     from obs.collector import Online_Collector
+    from datetime import timedelta
     collector = Online_Collector(table_name)
+    df["timestamp"] = [pd.to_datetime('now') - timedelta(days=x) for x in range(len(df))]
     collector.batch_collect(df)
 
 
