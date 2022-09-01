@@ -1,4 +1,4 @@
-ame: batch-monitoring
+name: batch-monitoring
 channels:
   - defaults
   - anaconda
