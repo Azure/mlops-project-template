@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 import os
 import sys
 import argparse
@@ -40,10 +43,10 @@ def parse_args():
 def main():
     # Parse command-line arguments
     args = parse_args()
-    prepared_data_path = os.path.join(args.prepared_data_path, run.parent.id)
-    model_path = os.path.join(args.model_path, run.parent.id)
-    explainer_path = os.path.join(args.explainer_path, run.parent.id)
-    evaluation_path = os.path.join(args.evaluation_path, run.parent.id)
+    prepared_data_path = args.prepared_data_path
+    model_path = args.model_path
+    explainer_path = args.explainer_path
+    evaluation_path = args.evaluation_path
 
     # Make sure evaluation output path exists
     if not os.path.exists(evaluation_path):
@@ -111,7 +114,11 @@ def main():
     for model_run in Model.list(ws):
         if model_run.name == args.model_name:
             mdl_path = Model.download(model_run, exist_ok=True)
-            mdl = joblib.load(os.path.join(mdl_path, 'model.pkl'))
+
+            if 'model.pkl' in mdl_path:
+                mdl = joblib.load(mdl_path)
+            else:
+                mdl = joblib.load(os.path.join(mdl_path, 'model.pkl'))
             
             test_accuracies[model_run.id] = mdl.score(X_test, y_test)
             test_predictions[model_run.id] = [labels_dict[x] for x in mdl.predict(X_test)]

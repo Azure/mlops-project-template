@@ -10,10 +10,7 @@ variables:
     - template: ../../config-infra-dev.yml
 - name: version
   value: aml-cli-v2 
-- name: endpoint_name
-  value: taxi-fare-batch
-- name: endpoint_type
-  value: batch
+
 
 trigger:
 - none
@@ -28,12 +25,13 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
+      ref: main
 
 stages:
-- stage: CreateBatchEndpoint
-  displayName: Create/Update Batch Endpoint 
+- stage: DeployTrainingPipeline
+  displayName: Deploy Training Pipeline
   jobs:
-    - job: DeployBatchEndpoint
+    - job: DeployTrainingPipeline
       steps:
       - checkout: self
         path: s/
@@ -44,19 +42,32 @@ stages:
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
         parameters:
-          cluster_name: batch-cluster # name must match cluster name in deployment file below
+          cluster_name: cpu-cluster
+          size: STANDARD_DS3_V2
           min_instances: 0
-          max_instances: 5
-      - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
+          max_instances: 1
+          cluster_tier: dedicated
+      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+        parameters:
+          cluster_name: cpu-cluster-lg
+          size: Standard_D14_v2
+          min_instances: 0
+          max_instances: 1
+          cluster_tier: dedicated
+      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+        parameters:
+          cluster_name: gpu-cluster
+          size: Standard_NV6
+          min_instances: 0
+          max_instances: 1
+          cluster_tier: dedicated
+      - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
+        parameters:
+          build_type: conda
+          environment_name: nlp_summarization_train
+          environment_file: mlops/azureml/train/train-env.yml
+      - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
-          endpoint_file: mlops/azureml/deploy/batch/batch-endpoint.yml
-      - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
-        parameters:
-          deployment_name: taxi-batch-dp
-          deployment_file: mlops/azureml/deploy/batch/batch-deployment.yml      
-      - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
-        parameters:
-          deployment_name: taxi-batch-dp
-          sample_request: data/taxi-batch.csv
-          request_type: uri_file #either uri_folder or uri_file 
-
+          pipeline_file: mlops/azureml/train/pipeline.yml
+          experiment_name: $(environment)_nlp_summarization_$(Build.SourceBranchName)
+          display_name: $(environment)_nlp_summarization_$(Build.BuildID)

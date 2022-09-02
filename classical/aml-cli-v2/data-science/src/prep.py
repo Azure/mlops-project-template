@@ -13,10 +13,16 @@ def parse_args():
     parser = argparse.ArgumentParser("prep")
     parser.add_argument("--raw_data", type=str, help="Path to raw data")
     parser.add_argument("--prepared_data", type=str, help="Path of prepared data")
-
+    parser.add_argument("--enable_monitoring", type=str, help="enable logging to ADX")
+    parser.add_argument("--table_name", type=str, default="mlmonitoring", help="Table name in ADX for logging")
     args = parser.parse_args()
 
     return args
+
+def log_training_data(df, table_name):
+    from obs.collector import Online_Collector
+    collector = Online_Collector(table_name)
+    collector.batch_collect(df)
 
 def main():
 
@@ -64,6 +70,9 @@ def main():
     train.to_csv((Path(args.prepared_data) / "train.csv"))
     val.to_csv((Path(args.prepared_data) / "val.csv"))
     test.to_csv((Path(args.prepared_data) / "test.csv"))
+
+    if (args.enable_monitoring.lower == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower == 'yes'):
+        log_training_data(data, args.table_name)
 
 if __name__ == "__main__":
     main()

@@ -5,9 +5,17 @@ variables:
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
     - template: ../../config-infra-prod.yml
-- ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
+- ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
+
+parameters:
+- name: jumphost_username
+  type: string
+  default: "azureuser"
+- name: jumphost_password
+  type: string
+  default: "ThisIsNotVerySecure!"
 
 trigger:
 - none
@@ -17,8 +25,8 @@ pool:
 
 resources:
   repositories:
-    - repository: mlops-templates 
-      name: Azure/mlops-templates 
+    - repository: mlops-templates
+      name: Azure/mlops-templates
       endpoint: github-connection
       type: github
       ref: main #branch name
@@ -51,4 +59,10 @@ stages :
       - template: templates/infra/run-terraform-init.yml@mlops-templates
       - template: templates/infra/run-terraform-validate.yml@mlops-templates
       - template: templates/infra/run-terraform-plan.yml@mlops-templates
+        parameters:
+          jumphost_username: ${{parameters.jumphost_username}}
+          jumphost_password: ${{parameters.jumphost_password}}
       - template: templates/infra/run-terraform-apply.yml@mlops-templates
+        parameters:
+            jumphost_username: ${{parameters.jumphost_username}}
+            jumphost_password: ${{parameters.jumphost_password}}
