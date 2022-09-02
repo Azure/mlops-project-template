@@ -15,7 +15,7 @@ variables:
   enable_aml_secure_workspace: true
   enable_monitoring: false
 
-  # Azure DevOps 
+  # Azure DevOps
   ado_service_connection_rg: Azure-ARM-Dev
   ado_service_connection_aml_ws: Azure-ARM-Dev
 
@@ -23,7 +23,7 @@ variables:
 
   # For pipeline reference
   resource_group: rg-$(namespace)-$(postfix)$(environment)
-  aml_workspace: mlw-$(namespace)-$(postfix)$(environment) 
+  aml_workspace: mlw-$(namespace)-$(postfix)$(environment)
   application_insights: mlw-$(namespace)-$(postfix)$(environment)
   key_vault: kv-$(namespace)-$(postfix)$(environment)
   container_registry: cr$(namespace)$(postfix)$(environment)
