@@ -219,7 +219,7 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=lambda preds : compute_metrics(preds, tokenizer, metric),
-        callbacks=[CustomMetricCallback]
+        callbacks=[CustomCallback]
     )
 
     # Start the actual training (to include evaluation use --do-eval)
