@@ -25,14 +25,12 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
-<<<<<<< HEAD
+      ref: main
     - repository: rai-vnext-preview  # Template Repo
       name: Azure/rai-vnext-preview # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
-=======
       ref: main
->>>>>>> main
 
 stages:
 - stage: DeployTrainingPipeline
