@@ -1,0 +1,83 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+# <inputs_and_outputs>
+inputs:
+  training_images:
+    type: uri_folder
+    mode: download # pick ro_mount, rw_mount or download
+    path: azureml://datastores/workspaceblobstore/paths/azureml-vision-datasets/dogs/**
+    # path: azureml://datastores/workspaceblobstore/paths/azureml-vision-datasets/places2/train//**
+  validation_images: #TODO: Use different datasets for validation
+    type: uri_folder
+    mode: download # pick ro_mount, rw_mount or download
+    path: azureml://datastores/workspaceblobstore/paths/azureml-vision-datasets/dogs/**
+    # path: azureml://datastores/workspaceblobstore/paths/azureml-vision-datasets/places2/valid/**
+# </inputs_and_outputs>
+
+# <jobs>
+settings:
+  default_datastore: azureml:workspaceblobstore
+  continue_on_step_failure: true
+
+jobs:
+  train:
+    type: command
+    component: file:train.yaml
+    compute: azureml:gpu-cluster
+    resources:
+      instance_count: 1 # number of nodes
+    distribution:
+      type: pytorch
+      process_count_per_instance: 1 # number of gpus
+
+    # NOTE: set env var if needed
+    environment_variables:
+      NCCL_DEBUG: "INFO" # adjusts the level of info from NCCL tests
+
+      # NCCL_TOPO_FILE: "/opt/microsoft/ndv4-topo.xml" # Use specific topology file for A100
+
+      # NCCL_IB_PCI_RELAXED_ORDERING: "1" # Relaxed Ordering can greatly help the performance of Infiniband networks in virtualized environments.
+      # NCCL_IB_DISABLE: "1" # force disable infiniband (if set to "1")
+      # NCCL_NET_PLUGIN: "none" # to force NET/Plugin off (no rdma/sharp plugin at all)
+      # NCCL_NET: "Socket" # to force node-to-node comm to use Socket (slow)
+      # NCCL_SOCKET_IFNAME: "eth0" # to force Socket comm to use eth0 (use NCCL_NET=Socket)
+
+      # UCX_IB_PCI_RELAXED_ORDERING: "on"
+      # UCX_TLS: "tcp"
+      # UCX_NET_DEVICES: "eth0" # if you have Error: Failed to resolve UCX endpoint...
+
+      # CUDA_DEVICE_ORDER: "PCI_BUS_ID" # ordering of gpus
+
+      # TORCH_DISTRIBUTED_DEBUG: "DETAIL"
+
+    inputs:
+      # data inputs
+      train_images: ${{parent.inputs.training_images}}
+      valid_images: ${{parent.inputs.validation_images}}
+
+      # data loading
+      batch_size: 64
+      num_workers: 5
+      prefetch_factor: 4
+      persistent_workers: true
+      pin_memory: true
+      non_blocking: false
+
+      # model
+      model_arch: "resnet18"
+      model_arch_pretrained: true
+
+      # training
+      num_epochs: 1
+      learning_rate: 0.001
+      momentum: 0.9
+
+      # profiling
+      enable_profiling: false
+      # multiprocessing_sharing_strategy: "file_system" # WARNING: this can cause hang at job completion
+
+      # Model Registrataion
+      register_model_as: "resnet-dogs-classifier"
+
+# </jobs>

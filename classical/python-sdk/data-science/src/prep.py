@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 import os
 import sys
 import argparse
@@ -17,14 +20,25 @@ ws = run.experiment.workspace
 
 def parse_args():
     parser = argparse.ArgumentParser(description="UCI Credit example")
-    parser.add_argument("--data_path", type=str, default='data/', help="Directory path to training data")
+    parser.add_argument("--uci-credit", type=str, default='data/', help="Directory path to training data")
     parser.add_argument("--prepared_data_path", type=str, default='prepared_data/', help="prepared data directory")
-    return parser.parse_args()
+    parser.add_argument("--enable_monitoring", type=str, default="false", help="enable logging to ADX")
+    parser.add_argument("--table_name", type=str, default="mlmonitoring", help="Table name in ADX for logging")
+    return parser.parse_known_args()
+
+def log_training_data(df, table_name):
+    from obs.collector import Online_Collector
+    from datetime import timedelta
+    print("If there is an Authorization error, check your Azure KeyVault secret named kvmonitoringspkey. Terraform might put single quotation marks around the secret. Remove the single quotes and the secret should work.")
+    collector = Online_Collector(table_name)
+    df["timestamp"] = [pd.to_datetime('now') - timedelta(days=x) for x in range(len(df))]
+    collector.batch_collect(df)
+
 
 def main():
     # Parse command-line arguments
-    args = parse_args()
-    prepared_data_path = os.path.join(args.prepared_data_path, run.parent.id)
+    args, unknown = parse_args()
+    prepared_data_path = args.prepared_data_path
 
     # Make sure data output path exists
     if not os.path.exists(prepared_data_path):
@@ -34,7 +48,7 @@ def main():
     mlflow.sklearn.autolog()
     
     # Read training data
-    df = pd.read_csv(os.path.join(args.data_path, 'credit.csv'))
+    df = pd.read_csv(os.path.join(args.uci_credit, 'credit.csv'))
 
     random_data = np.random.rand(len(df))
 
@@ -61,6 +75,9 @@ def main():
     train.to_csv(TRAIN_PATH, index=False)
     val.to_csv(VAL_PATH, index=False)
     test.to_csv(TEST_PATH, index=False)
+
+    if (args.enable_monitoring.lower() == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower() == 'yes'):
+        log_training_data(df, args.table_name)
     
 if __name__ == '__main__':
     main()

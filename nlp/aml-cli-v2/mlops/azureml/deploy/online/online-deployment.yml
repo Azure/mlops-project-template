@@ -1,0 +1,22 @@
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
+
+# reference to the endpoint
+name: green
+endpoint_name: nlp-summarize-online
+
+# compute
+instance_type: STANDARD_DS5_V2
+instance_count: 1
+
+# model
+model: azureml:pubmed-summarization@latest
+
+# scoring code
+code_configuration:
+  code: ../../../../data-science/src/summarization/
+  scoring_script: score.py
+
+# custom scoring environment
+environment: 
+  conda_file: ../../../../data-science/environments/inference/conda_env.yml
+  image: mcr.microsoft.com/azureml/minimal-ubuntu18.04-py37-cpu-inference:latest

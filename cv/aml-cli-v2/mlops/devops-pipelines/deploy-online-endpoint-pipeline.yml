@@ -1,0 +1,61 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+variables:
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    # 'main' branch: PRD environment
+    - template: ../../config-infra-prod.yml
+- ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
+    # 'develop' or feature branches: DEV environment
+    - template: ../../config-infra-dev.yml
+- name: version
+  value: aml-cli-v2 
+- name: endpoint_name
+  value: dogs-online-$(namespace)$(postfix)$(environment)
+- name: endpoint_type
+  value: online
+
+
+trigger:
+- none
+
+pool:
+  vmImage: ubuntu-20.04
+
+
+resources:
+  repositories:
+    - repository: mlops-templates  # Template Repo
+      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
+      endpoint: github-connection # need to set up and hardcode
+      type: github
+      ref: main
+
+stages:
+- stage: CreateOnlineEndpoint
+  displayName: Create/Update Online Endpoint 
+  jobs:
+    - job: DeployOnlineEndpoint
+      steps:
+      - checkout: self
+        path: s/
+      - checkout: mlops-templates
+        path: s/templates/
+      - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
+      - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
+      - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
+      - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
+        parameters:
+          endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
+      - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
+        parameters:
+          deployment_name: dogs-online-dp
+          deployment_file: mlops/azureml/deploy/online/online-deployment.yml 
+      - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
+        parameters:
+          traffic_allocation: dogs-online-dp=100
+      - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
+        parameters:
+          deployment_name: dogs-online-dp
+          sample_request: data/sample-request.json
+          request_type: json

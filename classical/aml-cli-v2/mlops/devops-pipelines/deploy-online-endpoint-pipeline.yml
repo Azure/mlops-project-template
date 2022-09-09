@@ -7,11 +7,11 @@ variables:
     - template: ../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../config-infra-dev.yml
+    - template: ../../../../config-infra-dev.yml
 - name: version
   value: aml-cli-v2 
 - name: endpoint_name
-  value: taxi-fare-online
+  value: taxi-online-$(namespace)$(postfix)$(environment)
 - name: endpoint_type
   value: online
 
@@ -29,6 +29,7 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
+      ref: main
 
 stages:
 - stage: CreateOnlineEndpoint

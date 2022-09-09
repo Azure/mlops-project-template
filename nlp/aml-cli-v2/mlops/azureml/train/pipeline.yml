@@ -1,0 +1,181 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: text-summarization-pubmed-experiment
+description: Train a text summarization model using PubMed dataset for fine-tuning
+
+# <inputs_and_outputs>
+inputs:
+  limit_samples:
+    value: 1000 # use -1 to run on the entire dataset
+  pretrained_model_name:
+    value: "t5-small"
+  num_train_epochs:
+    value: 5
+  batch_size:
+    value: 8
+  learning_rate:
+    value: 0.00005
+  model_registration_name:
+    value: "pubmed-summarization"
+
+outputs: 
+  prepared_data:
+    type: uri_folder
+  finetuned_model:
+    type: uri_folder
+  finetuned_model_metrics:
+    type: uri_folder
+  deploy_flag:
+    type: uri_folder
+# </inputs_and_outputs>
+
+settings:
+  default_datastore: azureml:workspaceblobstore
+  default_compute: azureml:cpu-cluster
+  continue_on_step_failure: false
+
+jobs:
+  prep_finetuning_dataset:
+    name: prep_finetuning_dataset
+    display_name: "Prepare dataset for training"
+    code: ../../../data-science/src
+    command: >-
+      python summarization/prepare.py 
+      --dataset_name ${{inputs.dataset_name}} 
+      --dataset_config ${{inputs.dataset_config}} 
+      --text_column ${{inputs.text_column}} 
+      --summary_column ${{inputs.summary_column}} 
+      --limit_samples ${{inputs.limit_samples}} 
+      --model_arch ${{inputs.pretrained_model_name}} 
+      --max_input_length ${{inputs.max_input_length}} 
+      --max_target_length ${{inputs.max_target_length}} 
+      --padding ${{inputs.padding}} 
+      --encodings ${{outputs.encodings}}
+    environment: azureml:nlp_summarization_train@latest
+    compute: azureml:cpu-cluster-lg
+    inputs:
+      dataset_name: "ccdv/pubmed-summarization"
+      dataset_config: "section"
+      text_column: "article"
+      summary_column: "abstract"
+      limit_samples: ${{parent.inputs.limit_samples}}
+      max_input_length: 512
+      max_target_length: 40
+      padding: "max_length"
+      pretrained_model_name: ${{parent.inputs.pretrained_model_name}}
+    outputs:
+      encodings: ${{parent.outputs.prepared_data}}
+
+  finetune_model:
+    name: finetune_model
+    display_name: Fine-tune summarization model
+    code: ../../../data-science/src
+    command: >-
+      python summarization/run.py 
+      --preprocessed_datasets ${{inputs.preprocessed_datasets}} 
+      --learning_rate ${{inputs.learning_rate}} 
+      --per_device_train_batch_size ${{inputs.per_device_train_batch_size}} 
+      --per_device_eval_batch_size ${{inputs.per_device_eval_batch_size}} 
+      --limit_samples ${{inputs.limit_samples}} 
+      --model_name ${{inputs.pretrained_model_name}} 
+      --model_output ${{outputs.finetuned_model}}
+      --output_dir outputs 
+      --num_train_epochs ${{inputs.num_train_epochs}} 
+      --do_train --do_eval 
+    environment: azureml:nlp_summarization_train@latest
+    inputs:
+      preprocessed_datasets: ${{parent.jobs.prep_finetuning_dataset.outputs.encodings}}
+      pretrained_model_name: ${{parent.inputs.pretrained_model_name}}
+      limit_samples: ${{parent.inputs.limit_samples}}
+      learning_rate: ${{parent.inputs.learning_rate}}
+      num_train_epochs: ${{parent.inputs.num_train_epochs}}
+      per_device_train_batch_size: ${{parent.inputs.batch_size}}
+      per_device_eval_batch_size: ${{parent.inputs.batch_size}}
+    outputs:
+      finetuned_model: ${{parent.outputs.finetuned_model}}
+    compute: azureml:gpu-cluster
+    distribution:
+      type: pytorch
+      process_count_per_instance: 1 # number of gpus
+    resources:
+      instance_count: 1 # number of nodes
+
+  evaluate_finetuned_model:
+    name: evaluate_finetuned_model
+    display_name: Run eval on finetuned model
+    code: ../../../data-science/src
+    command: >-
+      python summarization/run.py 
+      --preprocessed_datasets ${{inputs.preprocessed_datasets}} 
+      --limit_samples ${{inputs.limit_samples}} 
+      --output_dir ${{outputs.metrics}} 
+      --model_path ${{inputs.model_path}} 
+      --max_target_length ${{inputs.max_target_length}} 
+      --do_predict
+    environment: azureml:nlp_summarization_train@latest
+    compute: azureml:gpu-cluster
+    inputs:
+      preprocessed_datasets: ${{parent.jobs.prep_finetuning_dataset.outputs.encodings}}
+      model_path: ${{parent.jobs.finetune_model.outputs.finetuned_model}}
+      limit_samples: ${{parent.inputs.limit_samples}}
+      max_target_length: 40
+    outputs:
+      metrics: ${{parent.outputs.finetuned_model_metrics}}
+
+  evaluate_baseline_model:
+    name: evaluate_baseline_model
+    display_name: Run eval on baseline model
+    code: ../../../data-science/src
+    command: >-
+      python summarization/run.py 
+      --preprocessed_datasets ${{inputs.preprocessed_datasets}} 
+      --limit_samples ${{inputs.limit_samples}} 
+      --output_dir ${{outputs.metrics}} 
+      --model_name ${{inputs.model_name}} 
+      --max_target_length ${{inputs.max_target_length}} 
+      --do_predict
+    environment: azureml:nlp_summarization_train@latest
+    compute: azureml:gpu-cluster
+    inputs:
+      preprocessed_datasets: ${{parent.jobs.prep_finetuning_dataset.outputs.encodings}}
+      model_name: ${{parent.inputs.pretrained_model_name}}
+      limit_samples: ${{parent.inputs.limit_samples}}
+      max_target_length: 40
+    outputs:
+      metrics: 
+
+  compare_models:
+    name: compare_models
+    display_name: Compare finetuned to baseline
+    code: ../../../data-science/src
+    command: >-
+      python summarization/compare.py 
+      --baseline_metrics ${{inputs.baseline_metrics}} 
+      --candidate_metrics ${{inputs.candidate_metrics}} 
+      --reference_metric ${{inputs.reference_metric}} 
+      --deploy_flag ${{outputs.deploy_flag}} 
+      --force_comparison True
+    environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
+    compute: azureml:cpu-cluster
+    inputs:
+      baseline_metrics: ${{parent.jobs.evaluate_finetuned_model.outputs.metrics}}
+      candidate_metrics: ${{parent.jobs.evaluate_baseline_model.outputs.metrics}}
+      reference_metric: "predict_rougeLsum"
+    outputs:
+      deploy_flag: ${{parent.outputs.deploy_flag}}
+
+  register_model:
+    name: register_model
+    display_name: Register model
+    code: ../../../data-science/src
+    command: >-
+      python summarization/register.py 
+      --model_folder ${{inputs.model}} 
+      --deploy_flag ${{inputs.deploy_flag}} 
+      --register_as ${{inputs.model_registration_name}}
+    environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
+    compute: azureml:cpu-cluster
+    inputs:
+      model: ${{parent.jobs.finetune_model.outputs.finetuned_model}}
+      deploy_flag: ${{parent.jobs.compare_models.outputs.deploy_flag}}
+      model_registration_name: ${{parent.inputs.model_registration_name}}

@@ -8,6 +8,8 @@ inputs:
   input: #using local data, will create an anonymous data asset
     type: uri_folder
     path: ../../../data/
+  enable_monitoring: 
+  table_name: 'taximonitoring'
 
 outputs: 
   train_data:
@@ -35,9 +37,12 @@ jobs:
       --train_data ${{outputs.train_data}}
       --val_data ${{outputs.val_data}}
       --test_data ${{outputs.test_data}}
+      --enable_monitoring ${{inputs.enable_monitoring}}
     environment: azureml:taxi-train-env@latest
     inputs:
       raw_data: ${{parent.inputs.input}}
+      enable_monitoring: ${{parent.inputs.enable_monitoring}}
+      table_name: ${{parent.inputs.table_name}}
     outputs:
       train_data: ${{parent.outputs.train_data}}
       val_data: ${{parent.outputs.val_data}}

@@ -1,0 +1,21 @@
+$schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
+name: nvidia_pytorch
+build:
+  path: ../../../data-science/environment/
+tags:
+  os: ubuntu
+  os_version: 20.04
+  hpcx: 2.10
+  mpi: openmpi
+  mpi_version: 4.1.2rc4
+  ucx: 1.12.0
+  cuda: 11.6.2
+  cudnn: 8.4.0.27
+  nccl: 2.12.10
+  rdma_core: 36.0
+  nsight_compute: 2022.1.1.2
+  nsight_systems: "2022.2.1.31-5fe97ab"
+  nccl_test: 2.11.0
+  azureml-defaults: 1.41.0
+  mlflow: 1.25.1
+  transformers: 4.18.0
