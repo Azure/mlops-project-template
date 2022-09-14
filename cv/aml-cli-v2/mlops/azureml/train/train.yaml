@@ -101,22 +101,22 @@ command: >-
   python train.py
   --train_images ${{inputs.train_images}}
   --valid_images ${{inputs.valid_images}}
-  [--batch_size ${{inputs.batch_size}}]
-  [--num_workers ${{inputs.num_workers}}]
-  [--prefetch_factor ${{inputs.prefetch_factor}}]
-  [--persistent_workers ${{inputs.persistent_workers}}]
-  [--pin_memory ${{inputs.pin_memory}}]
-  [--non_blocking ${{inputs.non_blocking}}]
-  [--model_arch ${{inputs.model_arch}}]
-  [--model_arch_pretrained ${{inputs.model_arch_pretrained}}]
-  [--num_epochs ${{inputs.num_epochs}}]
-  [--learning_rate ${{inputs.learning_rate}}]
-  [--momentum ${{inputs.momentum}}]
+  $[[--batch_size ${{inputs.batch_size}}]]
+  $[[--num_workers ${{inputs.num_workers}}]]
+  $[[--prefetch_factor ${{inputs.prefetch_factor}}]]
+  $[[--persistent_workers ${{inputs.persistent_workers}}]]
+  $[[--pin_memory ${{inputs.pin_memory}}]]
+  $[[--non_blocking ${{inputs.non_blocking}}]]
+  $[[--model_arch ${{inputs.model_arch}}]]
+  $[[--model_arch_pretrained ${{inputs.model_arch_pretrained}}]]
+  $[[--num_epochs ${{inputs.num_epochs}}]]
+  $[[--learning_rate ${{inputs.learning_rate}}]]
+  $[[--momentum ${{inputs.momentum}}]]
   --model_output ${{outputs.trained_model}}
   --checkpoints ${{outputs.checkpoints}}
-  [--register_model_as ${{inputs.register_model_as}}]
+  $[[--register_model_as ${{inputs.register_model_as}}]]
   --enable_profiling ${{inputs.enable_profiling}}
-  [--multiprocessing_sharing_strategy ${{inputs.multiprocessing_sharing_strategy}}]
+  $[[--multiprocessing_sharing_strategy ${{inputs.multiprocessing_sharing_strategy}}]]
 distribution:
   # NOTE: using type:pytorch will use all the right env variables for pytorch init_process_group
   type: pytorch
