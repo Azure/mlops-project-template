@@ -61,7 +61,7 @@ stages :
             steps:
             - checkout: self
             - task: AzureCLI@2
-              displayName: Running Dev Deployment
+              displayName: Running ${{ variables.environment }} Deployment
               inputs:
                 azureSubscription: $(ado_service_connection_rg)
                 scriptType: bash
