@@ -50,9 +50,6 @@ CAT_NOM_COLS = [
 CAT_ORD_COLS = [
 ]
 
-SENSITIVE_COLS = ["vendor"] # for fairlearn dashborad
-
-
 def parse_args():
     '''Parse input arguments'''
 
