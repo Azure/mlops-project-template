@@ -1,0 +1,13 @@
+steps:
+  - task: AzureCLI@2
+    displayName: Register RAI components
+    continueOnError: true
+    inputs: 
+      azureSubscription: $(ado_service_connection_rg) #needs to have access at the RG level 
+      scriptType: bash
+      workingDirectory: $(System.DefaultWorkingDirectory)
+      scriptLocation: inlineScript
+      inlineScript: |
+        subscription_id=$(az account list --query "[?isDefault].id | [0]" --output tsv)
+        chmod u+x quick-setup.bash
+        bash quick-setup.bash conda-env $subscription_id $(resource_group) $(aml_workspace)

@@ -26,17 +26,24 @@ resources:
       endpoint: github-connection # need to set up and hardcode
       type: github
       ref: main
+    - repository: rai-vnext-preview  # Template Repo
+      name: Azure/rai-vnext-preview # need to change org name from "Azure" to your own org
+      endpoint: github-connection # need to set up and hardcode
+      type: github
+      ref: main
 
 stages:
 - stage: DeployTrainingPipeline
   displayName: Deploy Training Pipeline
   jobs:
     - job: DeployTrainingPipeline
+      timeoutInMinutes: 120 # how long to run the job before automatically cancelling
       steps:
       - checkout: self
         path: s/
       - checkout: mlops-templates
         path: s/templates/
+      - template: templates/tests/unit-tests.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
@@ -46,8 +53,16 @@ stages:
           environment_name: taxi-train-env
           environment_file: mlops/azureml/train/train-env.yml
           enable_monitoring: $(enable_monitoring)
+      - checkout: rai-vnext-preview
+        path: s/
+      - template: register-rai-components.yml
+      - checkout: self
+        path: s/
+      - checkout: mlops-templates
+        path: s/templates/
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
           pipeline_file: mlops/azureml/train/pipeline.yml
           experiment_name: $(environment)_taxi_fare_train_$(Build.SourceBranchName)
           display_name: $(environment)_taxi_fare_run_$(Build.BuildID)
+          enable_monitoring: $(enable_monitoring)
