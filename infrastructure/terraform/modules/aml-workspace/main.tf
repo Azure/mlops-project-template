@@ -6,6 +6,7 @@ resource "azurerm_machine_learning_workspace" "mlw" {
   key_vault_id            = var.key_vault_id
   storage_account_id      = var.storage_account_id
   container_registry_id   = var.container_registry_id
+  public_network_access_enabled = true
 
   sku_name = "Basic"
 
@@ -22,7 +23,7 @@ resource "azurerm_machine_learning_compute_cluster" "mlw_compute_cluster" {
   name                          = "cpu-cluster"
   location                      = var.location
   vm_priority                   = "LowPriority"
-  vm_size                       = "Standard_DS3_v2"
+  vm_size                       = "STANDARD_DS3_V2"
   machine_learning_workspace_id = azurerm_machine_learning_workspace.mlw.id
   subnet_resource_id            = var.enable_aml_secure_workspace ? var.subnet_training_id : ""
 
@@ -31,7 +32,7 @@ resource "azurerm_machine_learning_compute_cluster" "mlw_compute_cluster" {
   scale_settings {
     min_node_count                       = 0
     max_node_count                       = 4
-    scale_down_nodes_after_idle_duration = "PT120S" # 120 seconds
+    scale_down_nodes_after_idle_duration = "PT2M" # 120 seconds
   }
 }
 
