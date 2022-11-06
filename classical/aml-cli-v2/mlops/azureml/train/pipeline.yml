@@ -5,9 +5,9 @@ description: Training Pipeline to train a model that predicts taxi fare price
 
 # <inputs_and_outputs>
 inputs:
-  input: #using local data, will create an anonymous data asset
-    type: uri_folder
-    path: ../../../data/
+  input:
+    type: uri_file
+    path: azureml:taxi-data@latest
   enable_monitoring: "true"
   table_name: 'taximonitoring'
 
