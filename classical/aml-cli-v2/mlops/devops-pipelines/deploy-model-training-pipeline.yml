@@ -25,7 +25,12 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
-      ref: main-jul31
+      ref: main
+    - repository: rai-vnext-preview  
+      name: Azure/rai-vnext-preview 
+      endpoint: github-connection 
+      type: github
+      ref: main
 
 stages:
 - stage: DeployTrainingPipeline
@@ -51,3 +56,4 @@ stages:
           pipeline_file: mlops/azureml/train/pipeline.yml
           experiment_name: $(environment)_taxi_fare_train_$(Build.SourceBranchName)
           display_name: $(environment)_taxi_fare_run_$(Build.BuildID)
+          enable_monitoring: $(enable_monitoring)
