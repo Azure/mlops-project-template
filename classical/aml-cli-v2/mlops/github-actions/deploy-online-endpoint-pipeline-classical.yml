@@ -9,7 +9,7 @@ jobs:
         file_name: config-infra-prod.yml
   create-endpoint:
       needs: get-config
-      uses: Azure/mlops-templates/.github/workflows/create-endpoint.yml@main
+      uses: Azure/mlops-templates/.github/workflows/cli-v2-create-endpoint.yml@main
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
@@ -19,7 +19,7 @@ jobs:
       secrets:
         creds: ${{secrets.AZURE_CREDENTIALS}}
   create-deployment:
-      uses: Azure/mlops-templates/.github/workflows/create-deployment.yml@main
+      uses: Azure/mlops-templates/.github/workflows/cli-v2-create-deployment.yml@main
       needs: [get-config,create-endpoint]
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
@@ -31,7 +31,7 @@ jobs:
       secrets:
         creds: ${{secrets.AZURE_CREDENTIALS}}
   allocate-traffic:
-      uses: Azure/mlops-templates/.github/workflows/allocate-traffic.yml@main
+      uses: Azure/mlops-templates/.github/workflows/cli-v2-allocate-traffic.yml@main
       needs: [get-config,create-deployment]
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}

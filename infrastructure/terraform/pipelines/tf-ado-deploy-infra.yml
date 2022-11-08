@@ -9,6 +9,7 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 
+# used for secure workspaces implementation only, do not worry about if implementing vanilla AML spin-up
 parameters:
 - name: jumphost_username
   type: string
@@ -42,9 +43,9 @@ stages :
         path: s/
       - checkout: mlops-templates
         path: s/templates/
-      - template: templates/infra/create-resource-group.yml@mlops-templates
-      - template: templates/infra/create-storage-account.yml@mlops-templates
-      - template: templates/infra/create-storage-container.yml@mlops-templates
+      - template: templates/infra/terraform/create-resource-group.yml@mlops-templates
+      - template: templates/infra/terraform/create-storage-account.yml@mlops-templates
+      - template: templates/infra/terraform/create-storage-container.yml@mlops-templates
   - stage: DeployAzureMachineLearningRG
     displayName: Deploy AML Workspace
     jobs:
@@ -55,14 +56,14 @@ stages :
         path: s/
       - checkout: mlops-templates
         path: s/templates/
-      - template: templates/infra/install-terraform.yml@mlops-templates
-      - template: templates/infra/run-terraform-init.yml@mlops-templates
-      - template: templates/infra/run-terraform-validate.yml@mlops-templates
-      - template: templates/infra/run-terraform-plan.yml@mlops-templates
+      - template: templates/infra/terraform/install-terraform.yml@mlops-templates
+      - template: templates/infra/terraform/run-terraform-init.yml@mlops-templates
+      - template: templates/infra/terraform/run-terraform-validate.yml@mlops-templates
+      - template: templates/infra/terraform/run-terraform-plan.yml@mlops-templates
         parameters:
           jumphost_username: ${{parameters.jumphost_username}}
           jumphost_password: ${{parameters.jumphost_password}}
-      - template: templates/infra/run-terraform-apply.yml@mlops-templates
+      - template: templates/infra/terraform/run-terraform-apply.yml@mlops-templates
         parameters:
             jumphost_username: ${{parameters.jumphost_username}}
             jumphost_password: ${{parameters.jumphost_password}}
