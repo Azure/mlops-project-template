@@ -9,6 +9,7 @@ from azure.ai.ml import MLClient
 from azure.ai.ml.entities import Environment, BuildContext
 from azure.core.exceptions import ResourceExistsError
 
+
 def get_config_parger(parser: argparse.ArgumentParser = None):
     """Builds the argument parser for the script."""
     if parser is None:
@@ -51,7 +52,14 @@ def get_config_parger(parser: argparse.ArgumentParser = None):
     )
     parser.add_argument(
         "--environment_context_path",
-        default=os.path.join(os.path.dirname(__file__), "..", "..", "data-science", "environments", "training"),
+        default=os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "data-science",
+            "environments",
+            "training",
+        ),
         type=str,
     )
     return parser
@@ -109,7 +117,6 @@ def main():
         print(f"Failed to create environment: {traceback.format_exc()}")
         if not args.exists_ok:
             raise
-
 
 
 if __name__ == "__main__":
