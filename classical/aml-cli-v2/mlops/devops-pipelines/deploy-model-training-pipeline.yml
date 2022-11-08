@@ -26,9 +26,9 @@ resources:
       endpoint: github-connection # need to set up and hardcode
       type: github
       ref: main
-    - repository: rai-vnext-preview  # Template Repo
-      name: Azure/rai-vnext-preview # need to change org name from "Azure" to your own org
-      endpoint: github-connection # need to set up and hardcode
+    - repository: rai-vnext-preview  
+      name: Azure/rai-vnext-preview 
+      endpoint: github-connection 
       type: github
       ref: main
 
