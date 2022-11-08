@@ -26,11 +26,6 @@ resources:
       endpoint: github-connection # need to set up and hardcode
       type: github
       ref: main
-    - repository: rai-vnext-preview  
-      name: Azure/rai-vnext-preview 
-      endpoint: github-connection 
-      type: github
-      ref: main
 
 stages:
 - stage: DeployTrainingPipeline
