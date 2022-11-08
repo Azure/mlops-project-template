@@ -11,7 +11,7 @@ variables:
 - name: version
   value: aml-cli-v2 
 - name: endpoint_name
-  value: taxi2-batch-$(namespace)$(postfix)$(environment)
+  value: taxi-batch-$(namespace)$(postfix)$(environment)
 - name: endpoint_type
   value: batch
 
@@ -28,7 +28,7 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
-      ref: main-jul31
+      ref: main
       
 
 stages:

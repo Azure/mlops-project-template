@@ -1,0 +1,166 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: taxi-fare-training
+description: Training Pipeline to train a model that predicts taxi fare price
+
+# <inputs_and_outputs>
+inputs:
+  input: #using local data, will create an anonymous data asset
+    type: uri_folder
+    path: ../../../data/
+  enable_monitoring: "true"
+  table_name: 'taximonitoring'
+
+outputs: 
+  train_data:
+  val_data:
+  test_data:
+  trained_model:
+  evaluation_output:
+  model_info_output_path:
+# </inputs_and_outputs>
+
+# <jobs>
+settings:
+  default_datastore: azureml:workspaceblobstore
+  default_compute: azureml:cpu-cluster
+  continue_on_step_failure: false
+
+jobs:
+  prep_data:
+    name: prep_data
+    display_name: prep-data
+    code: ../../../data-science/src/prep
+    command: >-
+      python prep.py 
+      --raw_data ${{inputs.raw_data}} 
+      --train_data ${{outputs.train_data}}
+      --val_data ${{outputs.val_data}}
+      --test_data ${{outputs.test_data}}
+      --enable_monitoring ${{inputs.enable_monitoring}}
+      --table_name ${{inputs.table_name}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      raw_data: ${{parent.inputs.input}}
+      enable_monitoring: ${{parent.inputs.enable_monitoring}}
+      table_name: ${{parent.inputs.table_name}}
+    outputs:
+      train_data: ${{parent.outputs.train_data}}
+      val_data: ${{parent.outputs.val_data}}
+      test_data: ${{parent.outputs.test_data}}
+
+  train_model:
+    name: train_model
+    display_name: train-model
+    code: ../../../data-science/src/train
+    command: >-
+      python train.py 
+      --train_data ${{inputs.train_data}} 
+      --model_output ${{outputs.model_output}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
+    outputs:
+      model_output: ${{parent.outputs.trained_model}}
+  
+  evaluate_model:
+    name: evaluate_model
+    display_name: evaluate-model
+    code: ../../../data-science/src/evaluate
+    command: >-
+      python evaluate.py 
+      --model_name ${{inputs.model_name}} 
+      --model_input ${{inputs.model_input}} 
+      --test_data ${{inputs.test_data}} 
+      --evaluation_output ${{outputs.evaluation_output}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      model_name: "taxi-model"
+      model_input: ${{parent.jobs.train_model.outputs.model_output}}
+      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
+    outputs:
+      evaluation_output: ${{parent.outputs.evaluation_output}}
+
+  register_model:
+    name: register_model
+    display_name: register-model
+    code: ../../../data-science/src/register
+    command: >-
+      python register.py 
+      --model_name ${{inputs.model_name}} 
+      --model_path ${{inputs.model_path}} 
+      --evaluation_output ${{inputs.evaluation_output}}
+      --model_info_output_path ${{outputs.model_info_output_path}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      model_name: "taxi-model"
+      model_path: ${{parent.jobs.train_model.outputs.model_output}}
+      evaluation_output: ${{parent.jobs.evaluate_model.outputs.evaluation_output}}
+    outputs:
+      model_info_output_path: ${{parent.outputs.model_info_output_path}}
+
+  create_rai_job:
+    type: command
+    component: azureml:rai_insights_constructor@latest
+    limits:
+      timeout: 120
+    inputs:
+      title: Responsible AI for Taxi Fare Prediction
+      task_type: regression
+      model_info_path: ${{parent.jobs.register_model.outputs.model_info_output_path}}
+      train_dataset: ${{parent.jobs.prep_data.outputs.train_data}}
+      test_dataset: ${{parent.jobs.prep_data.outputs.test_data}}
+      target_column_name: "cost"
+      categorical_column_names: '["store_forward", "vendor"]'
+
+  explain_01:
+    type: command
+    component: azureml:rai_insights_explanation@latest
+    limits:
+      timeout: 120
+    inputs:
+      comment: Some random string
+      rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+
+  causal_01:
+    type: command
+    component: azureml:rai_insights_causal@latest
+    limits:
+      timeout: 120
+    inputs:
+      rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+      treatment_features: '["distance", "passengers"]'
+      heterogeneity_features: '["store_forward", "vendor"]'
+
+  counterfactual_01:
+    type: command
+    component: azureml:rai_insights_counterfactual@latest
+    limits:
+      timeout: 600
+    inputs:
+      rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+      total_CFs: 10
+      desired_range: '[16, 30]'
+      feature_importance: True
+
+  error_analysis_01:
+    type: command
+    component: azureml:rai_insights_erroranalysis@latest
+    limits:
+      timeout: 120
+    inputs:
+      rai_insights_dashboard: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+      filter_features: '["distance", "passengers"]'
+
+  gather_01:
+    type: command
+    component: azureml:rai_insights_gather@latest
+    limits:
+      timeout: 120
+    inputs:
+      constructor: ${{parent.jobs.create_rai_job.outputs.rai_insights_dashboard}}
+      insight_1: ${{parent.jobs.causal_01.outputs.causal}}
+      insight_2: ${{parent.jobs.counterfactual_01.outputs.counterfactual}}
+      insight_3: ${{parent.jobs.error_analysis_01.outputs.error_analysis}}
+      insight_4: ${{parent.jobs.explain_01.outputs.explanation}}
+# </jobs>
