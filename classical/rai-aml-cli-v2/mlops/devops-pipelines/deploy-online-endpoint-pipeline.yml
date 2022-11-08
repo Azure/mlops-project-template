@@ -9,7 +9,11 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 - name: version
-  value: aml-cli-v2
+  value: aml-cli-v2 
+- name: endpoint_name
+  value: taxi-online-$(namespace)$(postfix)$(environment)
+- name: endpoint_type
+  value: online
 
 
 trigger:
@@ -25,13 +29,13 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
-      ref: main-jul31
+      ref: main
 
 stages:
-- stage: DeployTrainingPipeline
-  displayName: Deploy Training Pipeline
+- stage: CreateOnlineEndpoint
+  displayName: Create/Update Online Endpoint 
   jobs:
-    - job: DeployTrainingPipeline
+    - job: DeployOnlineEndpoint
       steps:
       - checkout: self
         path: s/
@@ -40,14 +44,18 @@ stages:
       - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
-      - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
+      - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
         parameters:
-          build_type: conda
-          environment_name: taxi-train-env
-          environment_file: mlops/azureml/train/train-env.yml
-          enable_monitoring: $(enable_monitoring)
-      - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
-        parameters: 
-          pipeline_file: mlops/azureml/train/pipeline.yml
-          experiment_name: $(environment)_taxi_fare_train_$(Build.SourceBranchName)
-          display_name: $(environment)_taxi_fare_run_$(Build.BuildID)
+          endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
+      - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
+        parameters:
+          deployment_name: taxi-online-dp
+          deployment_file: mlops/azureml/deploy/online/online-deployment.yml 
+      - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
+        parameters:
+          traffic_allocation: taxi-online-dp=100
+      - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
+        parameters:
+          deployment_name: taxi-online-dp
+          sample_request: data/taxi-request.json
+          request_type: json
