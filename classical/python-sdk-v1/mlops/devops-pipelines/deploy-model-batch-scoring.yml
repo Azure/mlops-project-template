@@ -10,7 +10,7 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 - name: version
-  value: python-sdk
+  value: python-sdk-v1
 
 trigger:
 - none

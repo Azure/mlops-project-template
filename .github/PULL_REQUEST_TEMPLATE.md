@@ -1,4 +1,4 @@
-# PR into Azure/mlops-v2
+# PR into Azure/mlops-project-template
 
 ## Checklist
 

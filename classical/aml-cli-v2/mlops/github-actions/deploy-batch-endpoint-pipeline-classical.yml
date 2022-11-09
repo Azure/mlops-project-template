@@ -9,7 +9,7 @@ jobs:
         file_name: config-infra-prod.yml
   create-compute:
       needs: get-config
-      uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
+      uses: Azure/mlops-templates/.github/workflows/cli-v2-create-compute.yml@main
       with:
         cluster_name: batch-cluster
         size: STANDARD_DS3_V2
@@ -21,23 +21,23 @@ jobs:
           creds: ${{secrets.AZURE_CREDENTIALS}}
   create-endpoint:
       needs: [get-config,create-compute]
-      uses: Azure/mlops-templates/.github/workflows/create-endpoint.yml@main
+      uses: Azure/mlops-templates/.github/workflows/cli-v2-create-endpoint.yml@main
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
         endpoint_file: mlops/azureml/deploy/batch/batch-endpoint.yml
-        endpoint_name:  ${{ format('taxi-batch-{0}', needs.get-config.outputs.bep) }} 
+        endpoint_name:  ${{ format('taxi-gha-{0}', needs.get-config.outputs.bep) }} 
         endpoint_type: batch
       secrets:
         creds: ${{secrets.AZURE_CREDENTIALS}}
   create-deployment:
-      uses: Azure/mlops-templates/.github/workflows/create-deployment.yml@main
+      uses: Azure/mlops-templates/.github/workflows/cli-v2-create-deployment.yml@main
       needs: [get-config,create-endpoint]
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
         endpoint_file: mlops/azureml/deploy/batch/batch-deployment.yml
-        endpoint_name: ${{ format('taxi-batch-{0}', needs.get-config.outputs.bep) }} 
+        endpoint_name: ${{ format('taxi-gha-{0}', needs.get-config.outputs.bep) }} 
         endpoint_type: batch
         deployment_name: eptestdeploy
       secrets:

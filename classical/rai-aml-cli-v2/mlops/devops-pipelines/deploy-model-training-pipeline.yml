@@ -2,7 +2,6 @@
 # Licensed under the MIT License.
 
 variables:
-- template: ../../config-aml.yml
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
     - template: ../../config-infra-prod.yml
@@ -10,18 +9,25 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 - name: version
-  value: python-sdk
+  value: aml-cli-v2
+
 
 trigger:
 - none
 
 pool:
-  vmImage: $(ap_vm_image)
+  vmImage: ubuntu-20.04
+
 
 resources:
   repositories:
     - repository: mlops-templates  # Template Repo
-      name: Azure/mlops-templates # need to change org name from Azure when pulling the template
+      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
+      endpoint: github-connection # need to set up and hardcode
+      type: github
+      ref: main
+    - repository: rai-vnext-preview  # Template Repo
+      name: Azure/rai-vnext-preview # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
       ref: main
@@ -31,28 +37,32 @@ stages:
   displayName: Deploy Training Pipeline
   jobs:
     - job: DeployTrainingPipeline
+      timeoutInMinutes: 120 # how long to run the job before automatically cancelling
       steps:
       - checkout: self
         path: s/
       - checkout: mlops-templates
         path: s/templates/
+      - template: templates/tests/unit-tests.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
       - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
-      - template: templates/${{ variables.version }}/create-environment.yml@mlops-templates
+      - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
         parameters:
-          environment_name: $(training_env_name)
-          build_type: 'conda'
-          environment_file: $(training_env_conda_yaml)
+          build_type: conda
+          environment_name: taxi-train-env
+          environment_file: mlops/azureml/train/train-env.yml
           enable_monitoring: $(enable_monitoring)
-      - template: templates/${{ variables.version }}/register-dataset.yml@mlops-templates
-        parameters:
-          data_type: training
-      - template: templates/${{ variables.version }}/get-compute.yml@mlops-templates
-        parameters:
-          compute_type: training
-      - template: templates/${{ variables.version }}/deploy-training-pipeline.yml@mlops-templates
-        parameters:
-          enable_monitoring: $(enable_monitoring)
-      - template: templates/${{ variables.version }}/add-pipeline-to-endpoint.yml@mlops-templates
+      - checkout: rai-vnext-preview
+        path: s/
+      - template: register-rai-components.yml
+      - checkout: self
+        path: s/
+      - checkout: mlops-templates
+        path: s/templates/
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
+        parameters: 
+          pipeline_file: mlops/azureml/train/pipeline.yml
+          experiment_name: $(environment)_taxi_fare_train_$(Build.SourceBranchName)
+          display_name: $(environment)_taxi_fare_run_$(Build.BuildID)
+          enable_monitoring: $(enable_monitoring)
