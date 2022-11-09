@@ -1,6 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-experiment_name: taxi-fare-training-gha
+experiment_name: taxi-fare-training
 description: Training Pipeline to train a model that predicts taxi fare price
 
 # <inputs_and_outputs>
@@ -69,7 +69,7 @@ jobs:
       --deploy_flag ${{outputs.deploy_flag}}
     environment: azureml:taxi-train-env@latest
     inputs:
-      model_name: "taxi-model-gha"
+      model_name: "taxi-model"
       model_input: ${{parent.jobs.train_model.outputs.model_output}}
       prepared_data: ${{parent.jobs.prep_data.outputs.prepared_data}}
     outputs:
