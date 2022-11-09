@@ -32,6 +32,7 @@ stages:
   displayName: Deploy Training Pipeline
   jobs:
     - job: DeployTrainingPipeline
+      timeoutInMinutes: 120 # how long to run the job before automatically cancelling
       steps:
       - checkout: self
         path: s/
