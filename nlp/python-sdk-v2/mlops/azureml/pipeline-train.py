@@ -1,18 +1,12 @@
 """MLOps v2 NLP Python SDK training submission script."""
 import os
 import argparse
-import traceback
-import time
 
 # Azure ML sdk v2 imports
 from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential
 from azure.ai.ml import MLClient
 from azure.ai.ml import command
 from azure.ai.ml import Input, Output
-from azure.ai.ml.constants import AssetTypes
-from azure.ai.ml.dsl import pipeline
-from azure.ai.ml import load_component
-from azure.ai.ml.entities import Environment
 from azure.ai.ml import dsl, Input, Output
 
 
@@ -129,7 +123,7 @@ def connect_to_aml(args):
     # Get a handle to workspace
     try:
         # ml_client to connect using local config.json
-        ML_CLIENT = MLClient.from_config(credential=credential)
+        ml_client = MLClient.from_config(credential=credential)
 
     except Exception as ex:
         print(

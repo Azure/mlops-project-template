@@ -78,7 +78,7 @@ def connect_to_aml(args):
     # Get a handle to workspace
     try:
         # ml_client to connect using local config.json
-        ML_CLIENT = MLClient.from_config(credential=credential)
+        ml_client = MLClient.from_config(credential=credential)
 
     except Exception as ex:
         print(
