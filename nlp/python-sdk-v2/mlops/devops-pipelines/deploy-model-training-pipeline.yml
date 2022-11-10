@@ -9,7 +9,7 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 - name: version
-  value: aml-cli-v2 
+  value: python-sdk 
 
 
 trigger:
