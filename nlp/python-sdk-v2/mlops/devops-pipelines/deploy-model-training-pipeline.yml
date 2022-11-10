@@ -9,7 +9,7 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 - name: version
-  value: python-sdk 
+  value: python-sdk-v2 
 
 
 trigger:
@@ -22,10 +22,10 @@ pool:
 resources:
   repositories:
     - repository: mlops-templates  # Template Repo
-      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
+      name: jomedinagomez/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
-      ref: main
+      ref: main-dec31
 
 stages:
 - stage: DeployTrainingPipeline
