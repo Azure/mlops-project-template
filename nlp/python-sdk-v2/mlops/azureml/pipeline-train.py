@@ -19,19 +19,19 @@ def get_config_parger(parser: argparse.ArgumentParser = None):
     group.add_argument(
         "--subscription_id",
         type=str,
-        required=True,
+        required=False,
         help="Subscription ID",
     )
     group.add_argument(
         "--resource_group",
         type=str,
-        required=True,
+        required=False,
         help="Resource group name",
     )
     group.add_argument(
         "--workspace_name",
         type=str,
-        required=True,
+        required=False,
         help="Workspace name",
     )
     group.add_argument(
@@ -128,14 +128,6 @@ def connect_to_aml(args):
     except Exception as ex:
         print(
             "Could not find config.json, using config.yaml refs to Azure ML workspace instead."
-        )
-
-        # tries to connect using cli args if provided else using config.yaml
-        ml_client = MLClient(
-            subscription_id=args.subscription_id,
-            resource_group_name=args.resource_group,
-            workspace_name=args.workspace_name,
-            credential=credential,
         )
     return ml_client
 
