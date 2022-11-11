@@ -143,7 +143,7 @@ def connect_to_aml(args):
 def build_components(args):
     """Builds the components for the pipeline."""
     DATA_SCIENCE_FOLDER = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "..", "data-science", "src"
+        os.path.dirname(os.path.abspath(__file__)), "..","..", "..", "data-science", "src"
     )
 
     prep_finetuning_dataset = command(
