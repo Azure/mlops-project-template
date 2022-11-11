@@ -70,3 +70,6 @@ stages:
         parameters: 
           pipeline_file: mlops/azureml/train/pipeline-train.py
           experiment_name: $(environment)_nlp_summarization_$(Build.SourceBranchName)
+          resource_group: $(resource_group)
+          workspace_name: $(aml_workspace)
+          subscription_id: $(ado_service_connection_aml_ws)
