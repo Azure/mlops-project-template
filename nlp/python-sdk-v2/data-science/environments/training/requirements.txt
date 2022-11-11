@@ -16,3 +16,6 @@ psutil==5.9.0
 
 # for unit testing
 pytest==7.1.2
+
+# for azure ml SDK v2
+azure-ai-ml==1.1.0
