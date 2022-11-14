@@ -20,23 +20,25 @@ variable "postfix" {
 
 variable "enable_aml_computecluster" {
   description = "Variable to enable or disable AML compute cluster"
+  default = true
 }
 
 variable "enable_aml_secure_workspace" {
   description = "Variable to enable or disable AML secure workspace"
+  default = false
 }
 
-variable "jumphost_username" {
-  type        = string
-  description = "VM username"
-  default     = "azureuser"
-}
+# variable "jumphost_username" {
+#   type        = string
+#   description = "VM username"
+#   default     = "azureuser"
+# }
 
-variable "jumphost_password" {
-  type        = string
-  description = "VM password"
-  default     = "ThisIsNotVerySecure!"
-}
+# variable "jumphost_password" {
+#   type        = string
+#   description = "VM password"
+#   default     = "ThisIsNotVerySecure!"
+# }
 
 variable "enable_monitoring" {
   description = "Variable to enable or disable Monitoring"
