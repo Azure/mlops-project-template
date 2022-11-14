@@ -9,7 +9,7 @@ jobs:
         file_name: config-infra-prod.yml
   register-environment:
       needs: get-config
-      uses: Azure/mlops-templates/.github/workflows/cli-v2-register-environment.yml@main
+      uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
@@ -19,7 +19,7 @@ jobs:
           creds: ${{secrets.AZURE_CREDENTIALS}}
   run-pipeline:
       needs: [get-config,register-environment]
-      uses: Azure/mlops-templates/.github/workflows/cli-v2-run-pipeline.yml@main
+      uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
