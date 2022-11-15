@@ -58,22 +58,3 @@ variable "storage_account_name" {
   type        = string
   description = "The Name of the Storage Account linked to AML workspace"
 }
-
-variable "enable_aml_secure_workspace" {
-  description = "Variable to enable or disable AML secure workspace"
-}
-
-variable "vnet_id" {
-  type        = string
-  description = "The ID of the vnet that should be linked to the DNS zone"
-}
-
-variable "subnet_default_id" {
-  type        = string
-  description = "The ID of the subnet from which private IP addresses will be allocated for this Private Endpoint"
-}
-
-variable "subnet_training_id" {
-  type        = string
-  description = "The ID of the subnet from which private IP addresses will be allocated for this Private Endpoint"
-}
