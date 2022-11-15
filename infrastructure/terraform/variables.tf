@@ -23,10 +23,10 @@ variable "enable_aml_computecluster" {
   default = true
 }
 
-variable "enable_aml_secure_workspace" {
-  description = "Variable to enable or disable AML secure workspace"
-  default = false
-}
+# variable "enable_aml_secure_workspace" {
+#   description = "Variable to enable or disable AML secure workspace"
+#   default = false
+# }
 
 # variable "jumphost_username" {
 #   type        = string
