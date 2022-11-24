@@ -49,8 +49,8 @@ stages:
         parameters:
           dataAssetName: taxi-data
           dataAssetDescription: taxi-training-data
-          dataAssetLocalPath: classical/python-sdk-v2/data/taxi-data.csv
-          dataAssetType: uri_file
+          dataAssetLocalPath: classical/python-sdk-v2/data/
+          dataAssetType: uri_folder
       - template: templates/python-sdk-v2/run-pipeline.yml@mlops-templates
         parameters: 
           enable_monitoring: $(enable_monitoring)
