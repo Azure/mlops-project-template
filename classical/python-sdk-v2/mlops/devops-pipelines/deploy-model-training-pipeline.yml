@@ -49,7 +49,7 @@ stages:
         parameters:
           dataAssetName: taxi-data
           dataAssetDescription: taxi-training-data
-          dataAssetLocalPath: data/taxi-data.csv
+          dataAssetLocalPath: /classical/python-sdk-v2/data/taxi-data.csv
           dataAssetType: uri_file
       # - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
       #   parameters: 
