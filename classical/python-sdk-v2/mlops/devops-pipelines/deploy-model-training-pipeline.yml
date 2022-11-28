@@ -4,12 +4,20 @@
 variables:
 - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     # 'main' branch: PRD environment
-    - template: ../../../../config-infra-prod.yml
+    - template: ../../config-infra-prod.yml
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
-    - template: ../../../../config-infra-dev.yml
+    - template: ../../config-infra-dev.yml
 - name: version
   value: aml-cli-v2
+
+
+trigger:
+- none
+
+pool:
+  vmImage: ubuntu-20.04
+
 
 resources:
   repositories:
@@ -18,12 +26,6 @@ resources:
       endpoint: github-connection # need to set up and hardcode
       type: github
       ref: feature/sdkv2-samer
-      
-trigger:
-- none
-
-pool:
-  vmImage: ubuntu-20.04
 
 stages:
 - stage: DeployTrainingPipeline
@@ -43,14 +45,24 @@ stages:
         parameters:
           build_type: conda
           environment_name: taxi-train-env
-          environment_file: classical/python-sdk-v2/mlops/azureml/train/train-env.yml
+          environment_file: mlops/azureml/train/train-env.yml
           enable_monitoring: $(enable_monitoring)
+      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+        parameters:
+          cluster_name: $(training_target)
+          size: $(training_target_sku)
+          min_instances: ${{ variables.training_target_min_nodes }}
+          max_instances: ${{ variables.training_target_max_nodes }}
+          cluster_tier: $(cluster_tier)          
       - template: templates/python-sdk-v2/register-data-asset.yml@mlops-templates
         parameters:
-          dataAssetName: taxi-data-sdkv2
-          dataAssetDescription: taxi-training-data
-          dataAssetLocalPath: classical/python-sdk-v2/data/
-          dataAssetType: uri_folder
+          dataAssetName: $(training_dataset_name)
+          dataAssetDescription: $(training_dataset_description)
+          dataAssetLocalPath: $(training_dataset_local_path)
+          dataAssetType: $(training_dataset_type)
       - template: templates/python-sdk-v2/run-pipeline.yml@mlops-templates
         parameters: 
+          dataAssetName: $(training_dataset_name)
+          cluster_name: $(training_target)
           enable_monitoring: $(enable_monitoring)
+

@@ -19,6 +19,20 @@ variables:
   ado_service_connection_rg: Azure-ARM-Dev
   ado_service_connection_aml_ws: Azure-ARM-Dev
 
+  # Compute target for pipeline
+  training_target: cpu-cluster
+  training_target_sku: STANDARD_D2_V2
+  training_target_min_nodes: 0
+  training_target_max_nodes: 4
+
+  # Training dataset settings
+  training_dataset_name: taxi-data-sdkv2
+  training_dataset_description: taxi-training-data
+  training_dataset_local_path: data/
+  training_dataset_type: uri_folder
+  cluster_tier: LowPriority
+
+
   # DO NOT TOUCH
 
   # For pipeline reference
