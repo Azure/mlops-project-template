@@ -101,8 +101,8 @@ def main(args):
     val.to_parquet((Path(args.val_data) / "val.parquet"))
     test.to_parquet((Path(args.test_data) / "test.parquet"))
 
-    if (args.enable_monitoring.lower == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower == 'yes'):
-        log_training_data(data, args.table_name)
+    if (args.enable_monitoring.lower() == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower() == 'yes'):
+        log_training_data(df, args.table_name)
 
 
 if __name__ == "__main__":
