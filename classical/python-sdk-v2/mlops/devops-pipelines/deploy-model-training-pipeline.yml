@@ -8,8 +8,6 @@ variables:
 - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
-- name: version
-  value: aml-cli-v2
 
 
 trigger:
@@ -38,31 +36,32 @@ stages:
         path: s/
       - checkout: mlops-templates
         path: s/templates/
-      - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
-      - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
-      - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
-      - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
+      - template: templates/aml-cli-v2/install-az-cli.yml@mlops-templates
+      - template: templates/aml-cli-v2/install-aml-cli.yml@mlops-templates
+      - template: templates/aml-cli-v2/connect-to-workspace.yml@mlops-templates
+      - template: templates/aml-cli-v2/register-environment.yml@mlops-templates
         parameters:
           build_type: conda
           environment_name: taxi-train-env
           environment_file: mlops/azureml/train/train-env.yml
           enable_monitoring: $(enable_monitoring)
-      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+      - template: templates/aml-cli-v2/create-compute.yml@mlops-templates
         parameters:
-          cluster_name: $(training_target)
-          size: $(training_target_sku)
-          min_instances: ${{ variables.training_target_min_nodes }}
-          max_instances: ${{ variables.training_target_max_nodes }}
-          cluster_tier: $(cluster_tier)          
+          cluster_name: cpu-cluster
+          size: Standard_DS3_v2
+          min_instances: 0
+          max_instances: 4
+          cluster_tier: LowPriority
       - template: templates/python-sdk-v2/register-data-asset.yml@mlops-templates
         parameters:
-          dataAssetName: $(training_dataset_name)
-          dataAssetDescription: $(training_dataset_description)
-          dataAssetLocalPath: $(training_dataset_local_path)
-          dataAssetType: $(training_dataset_type)
+          data_name: taxi-data
+          data_description: taxi-training-dataset
+          data_path: data/
+          data_type: uri_folder
       - template: templates/python-sdk-v2/run-pipeline.yml@mlops-templates
         parameters: 
-          dataAssetName: $(training_dataset_name)
-          cluster_name: $(training_target)
+          pipeline_path: mlops/azureml/train/run_pipeline.py
+          data_name: taxi-data
+          cluster_name: cpu-cluster
           enable_monitoring: $(enable_monitoring)
 
