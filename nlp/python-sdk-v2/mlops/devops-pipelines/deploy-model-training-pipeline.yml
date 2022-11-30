@@ -37,9 +37,9 @@ stages:
         path: s/
       - checkout: mlops-templates
         path: s/templates/
-      - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
-      - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
-      - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
+      - template: templates/aml-cli-v2/install-az-cli.yml@mlops-templates
+      - template: templates/aml-cli-v2/install-aml-cli.yml@mlops-templates
+      - template: templates/aml-cli-v2/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
         parameters:
           cluster_name: cpu-cluster
