@@ -8,8 +8,6 @@ from azure.ai.ml import MLClient
 from azure.ai.ml import command
 from azure.ai.ml import Input, Output
 from azure.ai.ml import dsl, Input, Output
-import json
-
 
 def get_config_parger(parser: argparse.ArgumentParser = None):
     """Builds the argument parser for the script."""
