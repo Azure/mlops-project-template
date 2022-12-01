@@ -1,0 +1,76 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+variables:
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    # 'main' branch: PRD environment
+    - template: ../../config-infra-prod.yml
+- ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
+    # 'develop' or feature branches: DEV environment
+    - template: ../../config-infra-dev.yml
+
+trigger:
+- none
+
+pool:
+  vmImage: $(ap_vm_image)
+
+stages :
+  - stage: Lint
+    displayName: Lint and Preflight check
+    jobs:
+    - job: LintBicep
+      displayName: Lint Bicep Code
+      steps:
+        - checkout: self
+        - script: |
+            az bicep build --file ./infrastructure/main.bicep
+          name: LintBicepCode
+          displayName: Run Bicep Linter
+
+  - stage: PreflightValidation
+    jobs:
+    - job: ValidateBicepCode
+      displayName: Validate Bicep Code
+      steps:
+        - task: AzureCli@2
+          name: RunPreflightValidateion
+          displayName: Run Preflight Validation
+          inputs:
+            azureSubscription: $(ado_service_connection_rg)
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              az deployment sub validate \
+                --name $(Build.DefinitionName) \
+                --template-file ./infrastructure/main.bicep \
+                --location $(location) \
+                --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)
+
+  - stage: CheckOutBicepAndDeploy
+    displayName: Deploy AML Workspace
+    jobs:
+    - deployment: DevDeployBicep
+      displayName: Deploy Bicep
+      pool:
+        vmImage: $(ap_vm_image)
+      environment: $(environment)
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: self
+            - task: AzureCLI@2
+              displayName: Running ${{ variables.environment }} Deployment
+              inputs:
+                azureSubscription: $(ado_service_connection_rg)
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az --version
+                  echo "deploying bicep..."
+                  az deployment sub create \
+                    --name $(Build.DefinitionName) \
+                    --location $(location) \
+                    --template-file ./infrastructure/main.bicep \
+                    --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)
