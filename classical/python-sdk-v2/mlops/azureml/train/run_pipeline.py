@@ -102,7 +102,7 @@ def main():
 
 
     pipeline_job = taxi_training_pipeline(
-        Input(type=AssetTypes.URI_FOLDER, path=args.d + "@latest"), "false", "taximonitoring"
+        Input(type=AssetTypes.URI_FOLDER, path=args.d + "@latest"), args.m, "taximonitoring"
     )
 
     # set pipeline level compute
@@ -114,8 +114,8 @@ def main():
         pipeline_job, experiment_name="taxi-train-pipeline"
     )
 
-    print(pipeline_job)
-
+    pipeline_job
+    ml_client.jobs.stream(pipeline_job.name)
 
     
 if __name__ == "__main__":
