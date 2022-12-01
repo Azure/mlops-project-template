@@ -128,7 +128,7 @@ def connect_to_aml(args):
     # Get a handle to workspace
     try:
         # ml_client to connect using local config.json
-        ml_client = ml_client = MLClient.from_config(credential, path='config.json')
+        ml_client = MLClient.from_config(credential, path='config.json')
 
     except Exception as ex:
         print(
