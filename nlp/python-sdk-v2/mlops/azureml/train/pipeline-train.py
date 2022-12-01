@@ -9,7 +9,6 @@ from azure.ai.ml import command
 from azure.ai.ml import Input, Output
 from azure.ai.ml import dsl, Input, Output
 
-
 def get_config_parger(parser: argparse.ArgumentParser = None):
     """Builds the argument parser for the script."""
     if parser is None:
@@ -17,21 +16,27 @@ def get_config_parger(parser: argparse.ArgumentParser = None):
 
     group = parser.add_argument_group("Azure ML references")
     group.add_argument(
+        "--config_location",
+        type=str,
+        required=False,
+        help="Subscription ID",
+    )
+    group.add_argument(
         "--subscription_id",
         type=str,
-        required=True,
+        required=False,
         help="Subscription ID",
     )
     group.add_argument(
         "--resource_group",
         type=str,
-        required=True,
+        required=False,
         help="Resource group name",
     )
     group.add_argument(
         "--workspace_name",
         type=str,
-        required=True,
+        required=False,
         help="Workspace name",
     )
     group.add_argument(
@@ -123,7 +128,7 @@ def connect_to_aml(args):
     # Get a handle to workspace
     try:
         # ml_client to connect using local config.json
-        ml_client = MLClient.from_config(credential=credential)
+        ml_client = ml_client = MLClient.from_config(credential, path='config.json')
 
     except Exception as ex:
         print(
@@ -143,7 +148,7 @@ def connect_to_aml(args):
 def build_components(args):
     """Builds the components for the pipeline."""
     DATA_SCIENCE_FOLDER = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "..", "data-science", "src"
+        os.path.dirname(os.path.abspath(__file__)), "..","..", "..", "data-science", "src"
     )
 
     prep_finetuning_dataset = command(
