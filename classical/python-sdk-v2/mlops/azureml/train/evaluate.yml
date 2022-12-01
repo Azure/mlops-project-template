@@ -1,0 +1,26 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: evaluate_model
+display_name: Evaluate Model
+description: Evaluate Model Component
+version: 5
+inputs:
+  model_name: 
+    type: string
+    default: "taxi-model"
+  model_input: 
+    type: uri_folder    
+  test_data: 
+    type: uri_folder
+outputs:
+  evaluation_output:
+    type: uri_folder
+code: ../../../data-science/src
+environment: azureml:taxi-train-env@latest
+command: >-
+  python evaluate.py 
+  --model_name ${{inputs.model_name}} 
+  --model_input ${{inputs.model_input}} 
+  --test_data ${{inputs.test_data}} 
+  --evaluation_output ${{outputs.evaluation_output}}

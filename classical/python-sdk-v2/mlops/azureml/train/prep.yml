@@ -1,0 +1,33 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: prep_data
+display_name: Prep Data
+description: Data prep component
+version: 1
+inputs:
+  raw_data: 
+    type: uri_folder
+  enable_monitoring:
+    type: string
+    default: false
+  table_name: 
+    type: string
+    default: 'taximonitoring'
+outputs:
+  train_data:
+    type: uri_folder
+  val_data:
+    type: uri_folder
+  test_data:
+    type: uri_folder
+code: ../../../data-science/src
+environment: azureml:taxi-train-env@latest
+command: >-
+  python prep.py 
+  --raw_data ${{inputs.raw_data}} 
+  --train_data ${{outputs.train_data}}
+  --val_data ${{outputs.val_data}}
+  --test_data ${{outputs.test_data}}
+  --enable_monitoring ${{inputs.enable_monitoring}}
+  --table_name ${{inputs.table_name}}
