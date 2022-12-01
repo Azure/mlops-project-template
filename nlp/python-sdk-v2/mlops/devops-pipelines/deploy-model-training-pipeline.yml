@@ -22,10 +22,10 @@ pool:
 resources:
   repositories:
     - repository: mlops-templates  # Template Repo
-      name: jomedinagomez/mlops-templates # need to change org name from "Azure" to your own org
+      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
-      ref: nlp-dec31
+      ref: main-dec31 #use in reference 
 
 stages:
 - stage: DeployTrainingPipeline
