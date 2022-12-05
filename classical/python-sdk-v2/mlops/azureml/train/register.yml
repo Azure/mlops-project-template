@@ -1,0 +1,27 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: register_model
+display_name: Register Model
+description: Register Model Component
+version: 1
+inputs:
+  model_name: 
+    type: string
+    default: "taxi-model"
+  model_path: 
+    type: uri_folder    
+  evaluation_output: 
+    type: uri_folder
+outputs:
+  model_info_output_path:
+    type: uri_folder
+code: ../../../data-science/src
+environment: azureml:taxi-train-env@latest
+command: >-
+  python register.py 
+  --model_name ${{inputs.model_name}} 
+  --model_path ${{inputs.model_path}} 
+  --evaluation_output ${{inputs.evaluation_output}}
+  --model_info_output_path ${{outputs.model_info_output_path}}
+

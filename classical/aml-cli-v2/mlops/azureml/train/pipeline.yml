@@ -8,7 +8,7 @@ inputs:
   input: #using local data, will create an anonymous data asset
     type: uri_folder
     path: ../../../data/
-  enable_monitoring: "true"
+  enable_monitoring: 'false'
   table_name: 'taximonitoring'
 
 outputs: 
