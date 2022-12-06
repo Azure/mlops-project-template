@@ -51,6 +51,18 @@ stages:
         parameters:
           environment_name: taxi-train-env
           environment_file: mlops/azureml/train/train-env.yml
+      - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+        parameters:
+          cluster_name: cpu-cluster
+          size: Standard_DS3_v2
+          min_instances: 0
+          max_instances: 4
+          cluster_tier: LowPriority
+      - template: templates/${{ variables.version }}/register-data.yml@mlops-templates
+        parameters:
+          data_type: uri_file
+          data_name: taxi-data
+          data_file: mlops/azureml/train/data.yml
       - checkout: rai-vnext-preview
         path: s/
       - template: register-rai-components.yml

@@ -75,7 +75,7 @@ def main(args):
     arr = os.listdir(args.raw_data)
     print(arr)
 
-    data = pd.read_csv((Path(args.raw_data) / 'taxi-data.csv'))
+    data = pd.read_csv((Path(args.raw_data)))
     data = data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS + [TARGET_COL]]
 
     # ------------- Split Data ------------- #
