@@ -7,7 +7,7 @@ module "resource_group" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env     = var.environment
+  env = var.environment
 
   tags = local.tags
 }
@@ -22,7 +22,7 @@ module "aml_workspace" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env     = var.environment
+  env = var.environment
 
   storage_account_id      = module.storage_account_aml.id
   key_vault_id            = module.key_vault.id
@@ -31,11 +31,6 @@ module "aml_workspace" {
 
   enable_aml_computecluster = var.enable_aml_computecluster
   storage_account_name      = module.storage_account_aml.name
-
-  enable_aml_secure_workspace = var.enable_aml_secure_workspace
-  vnet_id                     = var.enable_aml_secure_workspace ? azurerm_virtual_network.vnet_default[0].id : ""
-  subnet_default_id           = var.enable_aml_secure_workspace ? azurerm_subnet.snet_default[0].id : ""
-  subnet_training_id          = var.enable_aml_secure_workspace ? azurerm_subnet.snet_training[0].id : ""
 
   tags = local.tags
 }
@@ -50,15 +45,11 @@ module "storage_account_aml" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env     = var.environment
+  env = var.environment
 
   hns_enabled                         = false
   firewall_bypass                     = ["AzureServices"]
   firewall_virtual_network_subnet_ids = []
-
-  enable_aml_secure_workspace = var.enable_aml_secure_workspace
-  vnet_id                     = var.enable_aml_secure_workspace ? azurerm_virtual_network.vnet_default[0].id : ""
-  subnet_id                   = var.enable_aml_secure_workspace ? azurerm_subnet.snet_default[0].id : ""
 
   tags = local.tags
 }
@@ -73,11 +64,7 @@ module "key_vault" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env     = var.environment
-
-  enable_aml_secure_workspace = var.enable_aml_secure_workspace
-  vnet_id                     = var.enable_aml_secure_workspace ? azurerm_virtual_network.vnet_default[0].id : ""
-  subnet_id                   = var.enable_aml_secure_workspace ? azurerm_subnet.snet_default[0].id : ""
+  env = var.environment
 
   tags = local.tags
 }
@@ -92,7 +79,7 @@ module "application_insights" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env     = var.environment
+  env = var.environment
 
   tags = local.tags
 }
@@ -107,11 +94,7 @@ module "container_registry" {
 
   prefix  = var.prefix
   postfix = var.postfix
-  env     = var.environment
-
-  enable_aml_secure_workspace = var.enable_aml_secure_workspace
-  vnet_id                     = var.enable_aml_secure_workspace ? azurerm_virtual_network.vnet_default[0].id : ""
-  subnet_id                   = var.enable_aml_secure_workspace ? azurerm_subnet.snet_default[0].id : ""
+  env = var.environment
 
   tags = local.tags
 }

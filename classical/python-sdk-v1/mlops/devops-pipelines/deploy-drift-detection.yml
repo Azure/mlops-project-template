@@ -1,0 +1,31 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+variables:
+- template: ../../config-aml.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    # 'main' branch: PRD environment
+    - template: ../../config-infra-prod.yml
+- ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  
+    # 'develop' or feature branches: DEV environment
+    - template: ../../config-infra-dev.yml
+- name: version
+  value: python-sdk-v1
+
+trigger:
+- none
+
+pool:
+  vmImage: $(ap_vm_image)
+
+stages:
+- stage: DeployDriftJob
+  displayName: Deploy Drift Job
+  jobs:
+    - job: DeployDriftJob
+      steps:
+      - checkout: self
+        path: s/
+      - checkout: mlops-templates
+        path: s/templates/
+      - template: templates/${{ variables.version }}/deploy-drift-detection.yml@mlops-templates
