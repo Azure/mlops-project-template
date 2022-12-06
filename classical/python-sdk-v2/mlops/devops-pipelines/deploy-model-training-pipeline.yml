@@ -51,18 +51,16 @@ stages:
         parameters:
           environment_name: taxi-train-env
           environment_description: "Training Environment for Taxi Pipeline"
-          environment_file: mlops/azureml/train/train-env.yml
+          environment_file: data-science/environment/train-conda.yml
       - template: templates/${{ variables.version }}/register-data-asset.yml@mlops-templates
         parameters:
           data_name: taxi-data
           data_description: taxi-training-dataset
-          data_path: data/
-          data_type: uri_folder
+          data_path: data/taxi-data.csv
+          data_type: uri_file
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
           pipeline_path: mlops/azureml/train/run_pipeline.py
           data_name: taxi-data
           cluster_name: cpu-cluster
           enable_monitoring: $(enable_monitoring)
-          
-

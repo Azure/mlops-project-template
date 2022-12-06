@@ -15,7 +15,6 @@ variables:
 - name: endpoint_type
   value: online
 
-
 trigger:
 - none
 
@@ -46,16 +45,16 @@ stages:
       - template: templates/aml-cli-v2/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-online-endpoint.yml@mlops-templates
         parameters:
-          endpoint_name: "taxi-online-endpoint"
+          endpoint_name: "${{ variables.endpoint_name }}"
           endpoint_description: "Taxi Online Endpoint"
           endpoint_auth: "aml_token"
       - template: templates/${{ variables.version }}/create-online-deployment.yml@mlops-templates
         parameters:
           deployment_name: taxi-online-dp
-          endpoint_name: "taxi-online-endpoint"
+          endpoint_name: "${{ variables.endpoint_name }}"
           model_name: "taxi-model@latest"
           traffic: 100
-      - template: templates/${{ variables.version }}/test-online-deployment.yml@mlops-templates
+      - template: templates/${{ variables.version }}/test-online-endpoint.yml@mlops-templates
         parameters:
-          endpoint_name: "taxi-online-endpoint"
+          endpoint_name: "${{ variables.endpoint_name }}"
           sample_request: data/taxi-request.json
