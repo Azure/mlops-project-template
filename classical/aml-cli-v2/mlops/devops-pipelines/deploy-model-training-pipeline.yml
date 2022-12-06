@@ -26,11 +26,6 @@ resources:
       endpoint: github-connection # need to set up and hardcode
       type: github
       ref: main
-    - repository: rai-vnext-preview  # Template Repo
-      name: Azure/rai-vnext-preview # need to change org name from "Azure" to your own org
-      endpoint: github-connection # need to set up and hardcode
-      type: github
-      ref: main
 
 stages:
 - stage: DeployTrainingPipeline
@@ -58,13 +53,6 @@ stages:
           data_type: uri_file
           data_name: taxi-data
           data_file: mlops/azureml/train/data.yml
-      - checkout: rai-vnext-preview
-        path: s/
-      - template: register-rai-components.yml
-      - checkout: self
-        path: s/
-      - checkout: mlops-templates
-        path: s/templates/
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
           pipeline_file: mlops/azureml/train/pipeline.yml
