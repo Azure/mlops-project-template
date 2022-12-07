@@ -1,0 +1,18 @@
+# <component>
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: train_model
+display_name: train-model
+type: command
+inputs:
+    train_data: 
+        type: uri_folder
+outputs:
+    model_output: 
+        type: uri_folder
+code: ../../../../data-science/src
+environment: azureml:taxi-train-env@latest
+command: >-
+    python train.py 
+    --train_data ${{inputs.train_data}} 
+    --model_output ${{outputs.model_output}}
+# </component>

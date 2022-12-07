@@ -1,0 +1,30 @@
+# <component>
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: prep_data
+display_name: prep-data
+type: command
+inputs:
+    raw_data: 
+        type: uri_file
+    enable_monitoring:
+        type: string
+    table_name:
+        type: string
+outputs:
+    train_data: 
+        type: uri_folder
+    val_data: 
+        type: uri_folder
+    test_data:
+        type: uri_folder 
+code: ../../../../data-science/src
+environment: azureml:taxi-train-env@latest
+command: >-
+    python prep.py 
+    --raw_data ${{inputs.raw_data}} 
+    --train_data ${{outputs.train_data}}
+    --val_data ${{outputs.val_data}}
+    --test_data ${{outputs.test_data}}
+    --enable_monitoring ${{inputs.enable_monitoring}}
+    --table_name ${{inputs.table_name}}
+# </component>
