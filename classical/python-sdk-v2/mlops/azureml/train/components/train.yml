@@ -9,7 +9,7 @@ inputs:
 outputs:
     model_output: 
         type: uri_folder
-code: ../../../../data-science/src/train
+code: ../../../../data-science/src
 environment: azureml:taxi-train-env@latest
 command: >-
     python train.py 

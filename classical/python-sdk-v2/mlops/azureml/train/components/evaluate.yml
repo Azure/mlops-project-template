@@ -13,7 +13,7 @@ inputs:
 outputs:
     evaluation_output: 
         type: uri_folder
-code: ../../../../data-science/src/evaluate
+code: ../../../../data-science/src
 environment: azureml:taxi-train-env@latest
 command: >-
     python evaluate.py 
