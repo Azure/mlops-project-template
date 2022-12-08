@@ -64,3 +64,4 @@ stages:
           data_name: taxi-data
           cluster_name: cpu-cluster
           enable_monitoring: $(enable_monitoring)
+          experiment_name: taxi-train-pipeline
