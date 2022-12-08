@@ -39,8 +39,9 @@ def get_config_parger(parser: argparse.ArgumentParser = None):
         required=False,
         help="Workspace name",
     )
+    # Experiment Name
     group.add_argument(
-        "--experiment_name",
+        "--n",
         type=str,
         required=True,
         default="nlp_summarization_train",
@@ -390,7 +391,7 @@ def main():
     # submits the job
     print("Submitting the pipeline job to your AzureML workspace...")
     pipeline_job = ml_client.jobs.create_or_update(
-        pipeline_job, experiment_name=args.experiment_name
+        pipeline_job, experiment_name=args.n
     )
 
     print("The url to see your live job running is returned by the sdk:")
