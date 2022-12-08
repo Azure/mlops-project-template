@@ -41,7 +41,7 @@ def get_config_parger(parser: argparse.ArgumentParser = None):
     )
     # Experiment Name
     group.add_argument(
-        "--n",
+        "-n",
         type=str,
         required=True,
         default="nlp_summarization_train",
