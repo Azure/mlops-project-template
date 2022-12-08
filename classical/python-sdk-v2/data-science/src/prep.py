@@ -71,10 +71,6 @@ def main(args):
     # ------------ Reading Data ------------ #
     # -------------------------------------- #
 
-    print("mounted_path files: ")
-    arr = os.listdir(args.raw_data)
-    print(arr)
-
     data = pd.read_csv((Path(args.raw_data)))
     data = data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS + [TARGET_COL]]
 
