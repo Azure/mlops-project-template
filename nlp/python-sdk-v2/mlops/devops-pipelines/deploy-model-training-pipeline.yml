@@ -25,7 +25,7 @@ resources:
       name: Azure/mlops-templates # need to change org name from "Azure" to your own org
       endpoint: github-connection # need to set up and hardcode
       type: github
-      ref: main-dec31
+      ref: feature/nlp-sdkv2
 
 stages:
 - stage: DeployTrainingPipeline
@@ -39,6 +39,7 @@ stages:
         path: s/templates/
       - template: templates/aml-cli-v2/install-az-cli.yml@mlops-templates
       - template: templates/aml-cli-v2/install-aml-cli.yml@mlops-templates
+      - template: templates/aml-cli-v2/install-requirements.yml@mlops-templates
       - template: templates/aml-cli-v2/connect-to-workspace.yml@mlops-templates
       - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
         parameters:
@@ -65,7 +66,8 @@ stages:
         parameters:
           build_type: docker
           environment_name: nlp_summarization_train
+          environment_path: data-science/environments/training
       - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
         parameters: 
-          pipeline_file: mlops/azureml/train/pipeline-train.py
+          pipeline_path: mlops/azureml/train/pipeline-train.py
           experiment_name: $(environment)_nlp_summarization_$(Build.SourceBranchName)
