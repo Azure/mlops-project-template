@@ -104,7 +104,7 @@ def main():
 
 
     pipeline_job = taxi_training_pipeline(
-        Input(type=AssetTypes.URI_FOLDER, path=args.d + "@latest"), args.m, "taximonitoring"
+        Input(path=args.d + "@latest"), args.m, "taximonitoring"
     )
 
     # set pipeline level compute
