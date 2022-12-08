@@ -51,7 +51,7 @@ stages:
         parameters:
           environment_name: taxi-train-env
           environment_description: "Training Environment for Taxi Pipeline"
-          environment_file: data-science/environment/train-conda.yml
+          conda_file: data-science/environment/train-conda.yml
       - template: templates/${{ variables.version }}/register-data-asset.yml@mlops-templates
         parameters:
           data_name: taxi-data
