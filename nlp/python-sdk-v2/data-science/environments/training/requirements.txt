@@ -19,10 +19,3 @@ pytest==7.1.2
 
 # for azure ml SDK v2
 azure-ai-ml==1.1.0
-azure-common==1.1.28
-azure-core==1.26.1
-azure-identity==1.10.0
-azure-mgmt-core==1.3.0 
-azure-storage-blob==12.14.1
-azure-storage-file-datalake==12.9.1
-azure-storage-file-share==12.7.0

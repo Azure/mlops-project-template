@@ -82,7 +82,9 @@ def test_prep_data():
     df = pd.DataFrame(data)
     df.to_csv(os.path.join(raw_data, "taxi-data.csv"))
     
+    raw_data= os.path.join(raw_data, "taxi-data.csv")
     cmd = f"python data-science/src/prep/prep.py --raw_data={raw_data} --train_data={train_data} --val_data={val_data} --test_data={test_data}"
+
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     out, err = p.communicate() 
     result = str(out).split('\\n')

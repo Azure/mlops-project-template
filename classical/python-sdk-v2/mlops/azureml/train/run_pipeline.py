@@ -27,6 +27,8 @@ def parse_args():
     parser.add_argument("-c", type=str, help="Compute Cluster Name")
     parser.add_argument("-m", type=str, help="Enable Monitoring", default="false")
     parser.add_argument("-d", type=str, help="Data Asset Name")
+    parser.add_argument("-n", type=str, help="Experiment Name")
+    
     args = parser.parse_args()
 
     return parser.parse_args()
@@ -111,7 +113,7 @@ def main():
     pipeline_job.settings.default_datastore = "workspaceblobstore"
 
     pipeline_job = ml_client.jobs.create_or_update(
-        pipeline_job, experiment_name="taxi-train-pipeline"
+        pipeline_job, experiment_name=args.n
     )
 
     pipeline_job
