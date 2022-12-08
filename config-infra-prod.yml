@@ -8,8 +8,8 @@ variables:
   ap_vm_image: ubuntu-20.04
 
   namespace: mlopsv2 #Note: A namespace with many characters will cause storage account creation to fail due to storage account names having a limit of 24 characters.
-  postfix: 001
-  location: uksouth
+  postfix: 0518
+  location: westeurope
   environment: prod
   enable_aml_computecluster: true
   enable_monitoring: false
