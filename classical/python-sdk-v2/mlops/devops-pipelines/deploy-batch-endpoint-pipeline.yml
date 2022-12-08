@@ -9,9 +9,9 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 - name: version
-  value: python-sdk-v2
+  value: python-sdk-v2 
 - name: endpoint_name
-  value: taxi-online-$(namespace)$(postfix)$(environment)
+  value: taxi-batch-$(namespace)$(postfix)$(environment)
 
 trigger:
 - none
@@ -27,12 +27,13 @@ resources:
       endpoint: github-connection # need to set up and hardcode
       type: github
       ref: main-dec31
+      
 
 stages:
-- stage: CreateOnlineEndpoint
-  displayName: Create/Update Online Endpoint 
+- stage: CreateBatchEndpoint
+  displayName: Create/Update Batch Endpoint 
   jobs:
-    - job: DeployOnlineEndpoint
+    - job: DeployBatchEndpoint
       steps:
       - checkout: self
         path: s/
@@ -41,18 +42,27 @@ stages:
       - template: templates/aml-cli-v2/install-az-cli.yml@mlops-templates
       - template: templates/aml-cli-v2/install-aml-cli.yml@mlops-templates
       - template: templates/aml-cli-v2/connect-to-workspace.yml@mlops-templates
-      - template: templates/${{ variables.version }}/create-online-endpoint.yml@mlops-templates
+      - template: templates/aml-cli-v2/create-compute.yml@mlops-templates
         parameters:
+          cluster_name: batch-cluster # name must match cluster name in deployment file below
+          size: STANDARD_DS3_V2
+          min_instances: 0
+          max_instances: 5
+          cluster_tier: dedicated
+      - template: templates/${{ variables.version }}/create-batch-endpoint.yml@mlops-templates
+        parameters: 
           endpoint_name: "${{ variables.endpoint_name }}"
-          endpoint_description: "Taxi Online Endpoint"
-          auth_mode: "aml_token"
-      - template: templates/${{ variables.version }}/create-online-deployment.yml@mlops-templates
+          endpoint_description: "Taxi batch endpoint"
+          auth_mode: "aad_token"
+      - template: templates/${{ variables.version }}/create-batch-deployment.yml@mlops-templates
         parameters:
-          deployment_name: taxi-online-dp
+          deployment_name: taxi-batch-dp
+          deployment_description: "Taxi batch deployment"
           endpoint_name: "${{ variables.endpoint_name }}"
           model_path: "taxi-model@latest"
-          traffic_allocation: 100
-      - template: templates/${{ variables.version }}/test-online-endpoint.yml@mlops-templates
+          compute: batch-cluster
+      - template: templates/${{ variables.version }}/test-batch-endpoint.yml@mlops-templates
         parameters:
           endpoint_name: "${{ variables.endpoint_name }}"
-          sample_request: data/taxi-request.json
+          sample_request: data/taxi-batch.csv
+          request_type: uri_file #either uri_folder or uri_file 
