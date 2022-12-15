@@ -41,8 +41,8 @@ jobs:
       namespace: ${{ needs.get-config.outputs.namespace }}
       postfix: ${{ needs.get-config.outputs.postfix }}
       environment: ${{ needs.get-config.outputs.environment }}
-      enable_aml_computecluster: ${{ needs.get-config.outputs.enable_aml_computecluster == true }} ## TBD review the evaluation of boolean
-      enable_monitoring: ${{ needs.get-config.outputs.enable_monitoring == true  }} ## TBD review the evaluation of boolean
+      enable_aml_computecluster: ${{ needs.get-config.outputs.enable_aml_computecluster == true }} ## TODO review the evaluation of boolean
+      enable_monitoring: ${{ needs.get-config.outputs.enable_monitoring == true  }} ## TODO review the evaluation of boolean
       terraform_version: ${{ needs.get-config.outputs.terraform_version }}
       terraform_workingdir: ${{ needs.get-config.outputs.terraform_workingdir }}
       terraform_st_location: ${{ needs.get-config.outputs.terraform_st_location }}
