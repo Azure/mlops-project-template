@@ -32,7 +32,8 @@ jobs:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   test-terraform-state-deployment:
     needs: [get-config,set-env-branch]
-    uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main-dec31
+    uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main-dec31 # TBD - revert to @main
+    with: 
     with:
       TFAction: 'apply'
       dply_environment: ${{ needs.set-env-branch.outputs.config-file }} 
