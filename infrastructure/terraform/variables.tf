@@ -29,3 +29,7 @@ variable "enable_monitoring" {
 variable "client_secret" {
   description = "Service Principal Secret"
 }
+
+variable "enable_feathr_deployment" {
+  description = "Variable to enable or disable Feathr Deployment"
+}

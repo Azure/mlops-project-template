@@ -13,6 +13,7 @@ variables:
   environment: dev
   enable_aml_computecluster: true
   enable_monitoring: false
+  enable_feathr_deployment: false
 
   # Azure DevOps
   ado_service_connection_rg: Azure-ARM-Dev
