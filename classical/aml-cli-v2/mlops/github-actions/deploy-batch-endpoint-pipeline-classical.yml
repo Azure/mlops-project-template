@@ -33,6 +33,7 @@ jobs:
       size: STANDARD_DS3_V2
       min_instances: 0
       max_instances: 5
+      cluster_tier: low_priority
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
     secrets:
