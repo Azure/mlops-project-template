@@ -1,42 +1,39 @@
 name: tf-gha-deploy-infra.yml
- 
-on: 
+
+on:
   push:
   workflow_dispatch:
 env:
-    config_env: 'none'
+  config_env: "none"
 jobs:
   set-env-branch:
     runs-on: ubuntu-latest
     outputs:
       config-file: ${{ steps.set-output-defaults.outputs.config-file }}
     steps:
-    - id: set-prod-branch
-      name: set-prod-branch
-      if: ${{ github.ref == 'refs/heads/main'}}
-      run: 
-          echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV; 
-    - id: set-dev-branch
-      name: setdevbranch
-      if: ${{ github.ref != 'refs/heads/main'}}
-      run: 
-           echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV;
-    - id: set-output-defaults
-      name: set-output-defaults
-      run: |
-       echo "config-file=$config_env" >> $GITHUB_OUTPUT;  
+      - id: set-prod-branch
+        name: set-prod-branch
+        if: ${{ github.ref == 'refs/heads/main'}}
+        run: echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV;
+      - id: set-dev-branch
+        name: setdevbranch
+        if: ${{ github.ref != 'refs/heads/main'}}
+        run: echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV;
+      - id: set-output-defaults
+        name: set-output-defaults
+        run: |
+          echo "config-file=$config_env" >> $GITHUB_OUTPUT;
   get-config:
     needs: set-env-branch
     uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main-dec31 # TODO - revert to @main
-    with: 
+    with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   test-terraform-state-deployment:
-    needs: [get-config,set-env-branch]
+    needs: [get-config, set-env-branch]
     uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main-dec31 # TODO - revert to @main
-    with: 
     with:
-      TFAction: 'apply'
-      dply_environment: ${{ needs.set-env-branch.outputs.config-file }} 
+      TFAction: "apply"
+      dply_environment: ${{ needs.set-env-branch.outputs.config-file }}
       location: ${{ needs.get-config.outputs.location }}
       namespace: ${{ needs.get-config.outputs.namespace }}
       postfix: ${{ needs.get-config.outputs.postfix }}
@@ -61,7 +58,6 @@ jobs:
   deploy-azureml-resources:
     runs-on: ubuntu-latest
     steps:
-    - id: deploy-aml-workspace
-      name: deploy-aml-workspace
-      run: echo "OK"
-
+      - id: deploy-aml-workspace
+        name: deploy-aml-workspace
+        run: echo "OK"
