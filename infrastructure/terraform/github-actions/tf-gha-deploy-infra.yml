@@ -13,12 +13,12 @@ jobs:
     steps:
     - id: set-prod-branch
       name: set-prod-branch
-      if: ${{ github.ref == 'refs/head/main'}}
+      if: ${{ github.ref == 'refs/heads/main'}}
       run: 
           echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV; 
     - id: set-dev-branch
       name: setdevbranch
-      if: ${{ github.ref != 'refs/head/main'}}
+      if: ${{ github.ref != 'refs/heads/main'}}
       run: 
            echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV;
     - id: set-output-defaults
