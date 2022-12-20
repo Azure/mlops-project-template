@@ -1,51 +1,69 @@
 name: deploy-cv-model-training-pipeline
 
-on: 
+on:
   workflow_dispatch:
 jobs:
+  set-env-branch:
+    runs-on: ubuntu-latest
+    outputs:
+      config-file: ${{ steps.set-output-defaults.outputs.config-file }}
+    steps:
+      - id: set-prod-branch
+        name: set-prod-branch
+        if: ${{ github.ref == 'refs/heads/main'}}
+        run: echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV;
+      - id: set-dev-branch
+        name: setdevbranch
+        if: ${{ github.ref != 'refs/heads/main'}}
+        run: echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV;
+      - id: set-output-defaults
+        name: set-output-defaults
+        run: |
+          echo "config-file=$config_env" >> $GITHUB_OUTPUT;
   get-config:
-      uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
-      with:
-        file_name: config-infra-prod.yml
+    needs: set-env-branch
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main-dec31 # TODO - revert to @main
+    with:
+      file_name: ${{ needs.set-env-branch.outputs.config-file}}
   create-compute:
-      needs: get-config
-      uses: Azure/mlops-templates/.github/workflows/cli-v2-create-compute.yml@main
-      with:
-        cluster_name: gpu-cluster
-        size: Standard_NC6
-        min_instances: 0
-        max_instances: 1
-        resource_group: ${{ needs.get-config.outputs.resource_group }}
-        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
-      secrets:
-          creds: ${{secrets.AZURE_CREDENTIALS}}
+    needs: get-config
+    uses: Azure/mlops-templates/.github/workflows/cli-v2-create-compute.yml@main-dec31 # TODO - revert to @main
+    with:
+      cluster_name: gpu-cluster
+      size: Standard_NC6
+      min_instances: 0
+      max_instances: 1
+      resource_group: ${{ needs.get-config.outputs.resource_group }}
+      workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
+    secrets:
+      creds: ${{secrets.AZURE_CREDENTIALS}}
   register-environment:
-      needs: [get-config,create-compute]
-      uses: Azure/mlops-templates/.github/workflows/cli-v2-register-environment.yml
-      with:
-        resource_group: ${{ needs.get-config.outputs.resource_group }}
-        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
-        environment_file: mlops/azureml/train/train-env.yaml 
-      secrets:
-        creds: ${{secrets.AZURE_CREDENTIALS}}
+    needs: [get-config, create-compute]
+    uses: Azure/mlops-templates/.github/workflows/cli-v2-register-environment.yml@main-dec31 # TODO - revert to @main
+    with:
+      resource_group: ${{ needs.get-config.outputs.resource_group }}
+      workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
+      environment_file: mlops/azureml/train/train-env.yaml
+    secrets:
+      creds: ${{secrets.AZURE_CREDENTIALS}}
   register-dataset:
-      needs: [get-config,register-environment]
-      uses: Azure/mlops-templates/.github/workflows/cli-v2-register-dataset.yml@main
-      with:
-        resource_group: ${{ needs.get-config.outputs.resource_group }}
-        workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
-        data_file: mlops/azureml/train/create_stanford_dogs_dataset.yaml
-        file_type: Training
-        name: stanford_dogs
-      secrets:
-        creds: ${{secrets.AZURE_CREDENTIALS}}
+    needs: [get-config, register-environment]
+    uses: Azure/mlops-templates/.github/workflows/cli-v2-register-dataset.yml@main-dec31 # TODO - revert to @main
+    with:
+      resource_group: ${{ needs.get-config.outputs.resource_group }}
+      workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
+      data_file: mlops/azureml/train/create_stanford_dogs_dataset.yaml
+      file_type: Training
+      name: stanford_dogs
+    secrets:
+      creds: ${{secrets.AZURE_CREDENTIALS}}
   run-pipeline:
-      needs: [get-config,register-dataset]
-      uses: Azure/mlops-templates/.github/workflows/cli-v2-run-pipeline.yml@main
-      with:
-        resource_group: ${{ needs.get-config.outputs.resource_group }}
-        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
-        parameters-file:  mlops/azureml/train/pipeline.yaml
-        job-name: cv-train
-      secrets:
-          creds: ${{secrets.AZURE_CREDENTIALS}}
+    needs: [get-config, register-dataset]
+    uses: Azure/mlops-templates/.github/workflows/cli-v2-run-pipeline.yml@main-dec31 # TODO - revert to @main
+    with:
+      resource_group: ${{ needs.get-config.outputs.resource_group }}
+      workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
+      parameters-file: mlops/azureml/train/pipeline.yaml
+      job-name: cv-train
+    secrets:
+      creds: ${{secrets.AZURE_CREDENTIALS}}

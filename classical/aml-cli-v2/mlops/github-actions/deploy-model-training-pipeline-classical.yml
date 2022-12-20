@@ -3,13 +3,31 @@ name: deploy-model-training-pipeline
 on:
   workflow_dispatch:
 jobs:
+  set-env-branch:
+    runs-on: ubuntu-latest
+    outputs:
+      config-file: ${{ steps.set-output-defaults.outputs.config-file }}
+    steps:
+      - id: set-prod-branch
+        name: set-prod-branch
+        if: ${{ github.ref == 'refs/heads/main'}}
+        run: echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV;
+      - id: set-dev-branch
+        name: setdevbranch
+        if: ${{ github.ref != 'refs/heads/main'}}
+        run: echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV;
+      - id: set-output-defaults
+        name: set-output-defaults
+        run: |
+          echo "config-file=$config_env" >> $GITHUB_OUTPUT;
   get-config:
-    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+    needs: set-env-branch
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main-dec31 # TODO - revert to @main
     with:
-      file_name: config-infra-prod.yml
+      file_name: ${{ needs.set-env-branch.outputs.config-file}}
   register-environment:
     needs: get-config
-    uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main
+    uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main-dec31 # TODO - revert to @main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
@@ -19,7 +37,7 @@ jobs:
       creds: ${{secrets.AZURE_CREDENTIALS}}
   create-compute:
     needs: [get-config, register-environment]
-    uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
+    uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main-dec31 # TODO - revert to @main
     with:
       cluster_name: cpu-cluster
       size: Standard_DS3_v2
@@ -32,7 +50,7 @@ jobs:
       creds: ${{secrets.AZURE_CREDENTIALS}}
   run-pipeline:
     needs: [get-config, register-environment, create-compute]
-    uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main
+    uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main-dec31 # TODO - revert to @main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
