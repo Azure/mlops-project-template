@@ -3,7 +3,6 @@
 
 # Prod environment
 variables:
-
   # Global
   ap_vm_image: ubuntu-20.04
 
@@ -13,7 +12,6 @@ variables:
   environment: prod
   enable_aml_computecluster: true
   enable_monitoring: false
-
 
   # Azure DevOps
   ado_service_connection_rg: Azure-ARM-Prod
@@ -32,7 +30,7 @@ variables:
   # For terraform reference
   terraform_version: 1.3.6
   terraform_workingdir: infrastructure
-    terraform_st_location: $(location)
+  terraform_st_location: $(location)
   terraform_st_resource_group: rg-$(namespace)-$(postfix)$(environment)-tf
   terraform_st_storage_account: st$(namespace)$(postfix)$(environment)tf
   terraform_st_container_name: default
