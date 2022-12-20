@@ -24,10 +24,12 @@ import os
 
 def parse_args():
     parser = argparse.ArgumentParser("Deploy Training Pipeline")
-    parser.add_argument("-c", type=str, help="Compute Cluster Name")
-    parser.add_argument("-m", type=str, help="Enable Monitoring", default="false")
-    parser.add_argument("-d", type=str, help="Data Asset Name")
-    parser.add_argument("-n", type=str, help="Experiment Name")
+    parser.add_argument("--experiment_name", type=str, help="Experiment Name")
+    parser.add_argument("--compute_name", type=str, help="Compute Cluster Name")
+    parser.add_argument("--data_name", type=str, help="Data Asset Name")
+    parser.add_argument("--environment_name", type=str, help="Registered Environment Name")
+    parser.add_argument("--enable_monitoring", type=str, help="Enable Monitoring", default="false")
+    parser.add_argument("--table_name", type=str, help="ADX Monitoring Table Name", default="taximonitoring")
     
     args = parser.parse_args()
 
@@ -47,8 +49,7 @@ def main():
         print(ex)
 
     try:
-        compute_target = args.c
-        print(ml_client.compute.get(compute_target))
+        print(ml_client.compute.get(args.compute_name))
     except:
         print("No compute found")
 
@@ -58,34 +59,103 @@ def main():
     print('current', os.listdir())
 
     # Create pipeline job
-    parent_dir = "mlops/azureml/train/components"
 
+    # 1. Define components
 
+    prep_data = command( 
+        name="prep_data",
+        display_name="prep-data",
+        code="../../data-science/src/prep",
+        command="python prep.py \
+                --raw_data ${{inputs.raw_data}} \
+                --train_data ${{outputs.train_data}}  \
+                --val_data ${{outputs.val_data}} \
+                --test_data ${{outputs.test_data}} \
+                --enable_monitoring ${{inputs.enable_monitoring}} \
+                --table_name ${{inputs.table_name}}",
+        environment=args.environment_name,
+        inputs={
+            "raw_data": Input(type="uri_file"),
+            "enable_monitoring": Input(type="string"),
+            "table_name": Input(type="string")
+            },
+        outputs={
+            "train_data": Output(type="uri_folder"),
+            "val_data": Output(type="uri_folder"),
+            "test_data": Output(type="uri_folder"),
+            }
+    )
 
-    # 1. Load components
-    prepare_data = load_component(source=os.path.join(parent_dir , "prep.yml"))
-    train_model = load_component(source=os.path.join(parent_dir, "train.yml"))
-    evaluate_model = load_component(source=os.path.join(parent_dir, "evaluate.yml"))
-    register_model = load_component(source=os.path.join(parent_dir, "register.yml"))
+    train_model = command( 
+        name="train_model",
+        display_name="train-model",
+        code="../../data-science/src/train",
+        command="python train.py \
+                --train_data ${{inputs.train_data}} \
+                --model_output ${{outputs.model_output}}",
+        environment=args.environment_name,
+        inputs={"train_data": Input(type="uri_folder")},
+        outputs={"model_output": Output(type="uri_folder")}
+    )
+
+    evaluate_model = command(
+        name="evaluate_model",
+        display_name="evaluate-model",
+        code="../../data-science/src/evaluate",
+        command="python evaluate.py \
+                --model_name ${{inputs.model_name}} \
+                --model_input ${{inputs.model_input}} \
+                --test_data ${{inputs.test_data}} \
+                --evaluation_output ${{outputs.evaluation_output}}",
+        environment=args.environment_name,
+        inputs={
+            "model_name": Input(type="string"),
+            "model_input": Input(type="uri_folder"),
+            "test_data": Input(type="uri_folder")
+            },
+        outputs={
+            "evaluation_output": Output(type="uri_folder")
+            }
+    )
+
+    register_model = command(
+        name="register_model",
+        display_name="register-model",
+        code="../../data-science/src/register",
+        command="python register.py \
+                --model_name ${{inputs.model_name}} \
+                --model_path ${{inputs.model_path}} \
+                --evaluation_output ${{inputs.evaluation_output}} \
+                --model_info_output_path ${{outputs.model_info_output_path}}",
+        environment=args.environment_name,
+        inputs={
+            "model_name": Input(type="string"),
+            "model_path": Input(type="uri_folder"),
+            "evaluation_output": Input(type="uri_folder")
+            },
+        outputs={
+            "model_info_output_path": Output(type="uri_folder")
+            }
+    )
 
     # 2. Construct pipeline
     @pipeline()
     def taxi_training_pipeline(raw_data, enable_monitoring, table_name):
         
-        prepare = prepare_data(
+        prep = prep_data(
             raw_data=raw_data,
             enable_monitoring=enable_monitoring, 
             table_name=table_name
         )
 
         train = train_model(
-            train_data=prepare.outputs.train_data
+            train_data=prep.outputs.train_data
         )
 
         evaluate = evaluate_model(
             model_name="taxi-model",
             model_input=train.outputs.model_output,
-            test_data=prepare.outputs.test_data
+            test_data=prep.outputs.test_data
         )
 
 
@@ -104,16 +174,16 @@ def main():
 
 
     pipeline_job = taxi_training_pipeline(
-        Input(path=args.d + "@latest"), args.m, "taximonitoring"
+        Input(path=args.data_name + "@latest"), args.enable_monitoring, args.table_name
     )
 
     # set pipeline level compute
-    pipeline_job.settings.default_compute = args.c
+    pipeline_job.settings.default_compute = args.compute_name
     # set pipeline level datastore
     pipeline_job.settings.default_datastore = "workspaceblobstore"
 
     pipeline_job = ml_client.jobs.create_or_update(
-        pipeline_job, experiment_name=args.n
+        pipeline_job, experiment_name=args.experiment_name
     )
 
     pipeline_job
