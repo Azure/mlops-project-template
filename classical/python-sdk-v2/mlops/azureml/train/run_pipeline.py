@@ -61,11 +61,12 @@ def main():
     # Create pipeline job
 
     # 1. Define components
-
+    parent_dir = "data-science/src"
+    
     prep_data = command( 
         name="prep_data",
         display_name="prep-data",
-        code="../../data-science/src/prep",
+        code=os.path.join(parent_dir, "prep"),
         command="python prep.py \
                 --raw_data ${{inputs.raw_data}} \
                 --train_data ${{outputs.train_data}}  \
@@ -73,7 +74,7 @@ def main():
                 --test_data ${{outputs.test_data}} \
                 --enable_monitoring ${{inputs.enable_monitoring}} \
                 --table_name ${{inputs.table_name}}",
-        environment=args.environment_name,
+        environment=args.environment_name+"@latest",
         inputs={
             "raw_data": Input(type="uri_file"),
             "enable_monitoring": Input(type="string"),
@@ -89,11 +90,11 @@ def main():
     train_model = command( 
         name="train_model",
         display_name="train-model",
-        code="../../data-science/src/train",
+        code=os.path.join(parent_dir, "train"),
         command="python train.py \
                 --train_data ${{inputs.train_data}} \
                 --model_output ${{outputs.model_output}}",
-        environment=args.environment_name,
+        environment=args.environment_name+"@latest",
         inputs={"train_data": Input(type="uri_folder")},
         outputs={"model_output": Output(type="uri_folder")}
     )
@@ -101,13 +102,13 @@ def main():
     evaluate_model = command(
         name="evaluate_model",
         display_name="evaluate-model",
-        code="../../data-science/src/evaluate",
+        code=os.path.join(parent_dir, "evaluate"),
         command="python evaluate.py \
                 --model_name ${{inputs.model_name}} \
                 --model_input ${{inputs.model_input}} \
                 --test_data ${{inputs.test_data}} \
                 --evaluation_output ${{outputs.evaluation_output}}",
-        environment=args.environment_name,
+        environment=args.environment_name+"@latest",
         inputs={
             "model_name": Input(type="string"),
             "model_input": Input(type="uri_folder"),
@@ -121,13 +122,13 @@ def main():
     register_model = command(
         name="register_model",
         display_name="register-model",
-        code="../../data-science/src/register",
+        code=os.path.join(parent_dir, "register"),
         command="python register.py \
                 --model_name ${{inputs.model_name}} \
                 --model_path ${{inputs.model_path}} \
                 --evaluation_output ${{inputs.evaluation_output}} \
                 --model_info_output_path ${{outputs.model_info_output_path}}",
-        environment=args.environment_name,
+        environment=args.environment_name+"@latest",
         inputs={
             "model_name": Input(type="string"),
             "model_path": Input(type="uri_folder"),
@@ -166,15 +167,15 @@ def main():
         )
 
         return {
-            "pipeline_job_train_data": prepare.outputs.train_data,
-            "pipeline_job_test_data": prepare.outputs.test_data,
+            "pipeline_job_train_data": prep.outputs.train_data,
+            "pipeline_job_test_data": prep.outputs.test_data,
             "pipeline_job_trained_model": train.outputs.model_output,
             "pipeline_job_score_report": evaluate.outputs.evaluation_output,
         }
 
 
     pipeline_job = taxi_training_pipeline(
-        Input(path=args.data_name + "@latest"), args.enable_monitoring, args.table_name
+        Input(path=args.data_name + "@latest", type="uri_file"), args.enable_monitoring, args.table_name
     )
 
     # set pipeline level compute
