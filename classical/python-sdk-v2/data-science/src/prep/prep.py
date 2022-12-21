@@ -16,29 +16,14 @@ import mlflow
 TARGET_COL = "cost"
 
 NUMERIC_COLS = [
-    "distance",
-    "dropoff_latitude",
-    "dropoff_longitude",
-    "passengers",
-    "pickup_latitude",
-    "pickup_longitude",
-    "pickup_weekday",
-    "pickup_month",
-    "pickup_monthday",
-    "pickup_hour",
-    "pickup_minute",
-    "pickup_second",
-    "dropoff_weekday",
-    "dropoff_month",
-    "dropoff_monthday",
-    "dropoff_hour",
-    "dropoff_minute",
-    "dropoff_second",
+    "distance", "dropoff_latitude", "dropoff_longitude", "passengers", "pickup_latitude",
+    "pickup_longitude", "pickup_weekday", "pickup_month", "pickup_monthday", "pickup_hour",
+    "pickup_minute", "pickup_second", "dropoff_weekday", "dropoff_month", "dropoff_monthday",
+    "dropoff_hour", "dropoff_minute", "dropoff_second"
 ]
 
 CAT_NOM_COLS = [
-    "store_forward",
-    "vendor",
+    "store_forward", "vendor"
 ]
 
 CAT_ORD_COLS = [
@@ -70,11 +55,8 @@ def main(args):
 
     # ------------ Reading Data ------------ #
     # -------------------------------------- #
-    print("mounted_path files: ")
-    arr = os.listdir(args.raw_data)
-    print(arr)
 
-    data = pd.read_csv((Path(args.raw_data) / 'taxi-data.csv'))
+    data = pd.read_csv((Path(args.raw_data)))
     data = data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS + [TARGET_COL]]
 
     # ------------- Split Data ------------- #

@@ -22,29 +22,14 @@ from mlflow.tracking import MlflowClient
 TARGET_COL = "cost"
 
 NUMERIC_COLS = [
-    "distance",
-    "dropoff_latitude",
-    "dropoff_longitude",
-    "passengers",
-    "pickup_latitude",
-    "pickup_longitude",
-    "pickup_weekday",
-    "pickup_month",
-    "pickup_monthday",
-    "pickup_hour",
-    "pickup_minute",
-    "pickup_second",
-    "dropoff_weekday",
-    "dropoff_month",
-    "dropoff_monthday",
-    "dropoff_hour",
-    "dropoff_minute",
-    "dropoff_second",
+    "distance", "dropoff_latitude", "dropoff_longitude", "passengers", "pickup_latitude",
+    "pickup_longitude", "pickup_weekday", "pickup_month", "pickup_monthday", "pickup_hour",
+    "pickup_minute", "pickup_second", "dropoff_weekday", "dropoff_month", "dropoff_monthday",
+    "dropoff_hour", "dropoff_minute", "dropoff_second"
 ]
 
 CAT_NOM_COLS = [
-    "store_forward",
-    "vendor",
+    "store_forward", "vendor"
 ]
 
 CAT_ORD_COLS = [
@@ -58,7 +43,6 @@ def parse_args():
     parser.add_argument("--model_input", type=str, help="Path of input model")
     parser.add_argument("--test_data", type=str, help="Path to test dataset")
     parser.add_argument("--evaluation_output", type=str, help="Path of eval results")
-    parser.add_argument("--runner", type=str, help="Local or Cloud Runner", default="CloudRunner")
 
     args = parser.parse_args()
 
@@ -81,8 +65,7 @@ def main(args):
     yhat_test, score = model_evaluation(X_test, y_test, model, args.evaluation_output)
 
     # ----------------- Model Promotion ---------------- #
-    if args.runner == "CloudRunner":
-        predictions, deploy_flag = model_promotion(args.model_name, args.evaluation_output, X_test, y_test, yhat_test, score)
+    predictions, deploy_flag = model_promotion(args.model_name, args.evaluation_output, X_test, y_test, yhat_test, score)
 
 
 
