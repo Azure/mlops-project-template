@@ -99,6 +99,8 @@ module "container_registry" {
   tags = local.tags
 }
 
+# Data explorer
+
 module "data_explorer" {
   source = "./modules/data-explorer"
 
@@ -114,4 +116,24 @@ module "data_explorer" {
   client_secret = var.client_secret
 
   tags = local.tags
+}
+
+# Feathr deployment
+
+module "feathr_deploy" {
+  source = "./modules/feathr-deploy"
+
+  rg_name  = module.resource_group.name
+  location = module.resource_group.location
+
+  prefix  = var.prefix
+  postfix = var.postfix
+  env = var.environment
+  key_vault_id      = module.key_vault.id
+  enable_feathr_deployment = var.enable_feathr_deployment
+  
+  client_secret = var.client_secret
+  
+  tags = local.tags
+  
 }
