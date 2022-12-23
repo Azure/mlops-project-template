@@ -1,0 +1,65 @@
+name: deploy-model-training-pipeline
+
+on: 
+  workflow_dispatch:
+jobs:
+  get-config:
+      uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+      with:
+        file_name: config-infra-prod.yml
+  create-compute-standard:
+      needs: get-config
+      uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
+      with:
+        cluster_name: cpu-cluster
+        size: STANDARD_DS3_V2
+        min_instances: 0
+        max_instances: 1
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
+      secrets:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+  create-compute-large:
+      needs: get-config
+      uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
+      with:
+        cluster_name: cpu-cluster-lg
+        size: Standard_D14_v2
+        min_instances: 0
+        max_instances: 1
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
+      secrets:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+   create-compute-gpu:
+      needs: get-config
+      uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
+      with:
+        cluster_name: gpu-cluster
+        size: Standard_NV6
+        cluster_tier: low_priority
+        min_instances: 0
+        max_instances: 1
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
+      secrets:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+   register-environment:
+      needs: [get-config,create-compute-standard,create-compute-large,create-compute-gpu]
+      uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main
+      with:
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
+        environment_file: mlops/azureml/train/train-env.yaml 
+      secrets:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+   run-pipeline:
+      needs: [get-config,create-compute-standard,create-compute-large,create-compute-gpu,register-environment]
+      uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main
+      with:
+        resource_group: ${{ needs.get-config.outputs.resource_group }}
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
+        parameters-file:  mlops/azureml/train/pipeline.yml
+        job-name: nlp_summerization
+      secrets:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
