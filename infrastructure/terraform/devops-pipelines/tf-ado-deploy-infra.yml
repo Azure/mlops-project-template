@@ -13,7 +13,7 @@ trigger:
 - none
 
 pool:
-  vmImage: $(ap_vm_image)
+  vmImage: ubuntu-20.04
 
 resources:
   repositories:

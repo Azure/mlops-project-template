@@ -1,0 +1,19 @@
+name: azureml-cli-v2
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python==3.8
+  - yapf
+  - pylint
+  - pip
+  - pip:
+      - mlflow
+      - cloudpickle==1.6.0
+      - scikit-learn==0.24.2
+      - flask==1.1.2
+      - applicationinsights
+      - pandas
+      - azureml-core
+      - azureml-dataset-runtime[fuse]
+      - opencensus-ext-azure

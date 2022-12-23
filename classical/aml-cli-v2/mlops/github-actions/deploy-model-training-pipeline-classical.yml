@@ -22,12 +22,12 @@ jobs:
           echo "config-file=$config_env" >> $GITHUB_OUTPUT;
   get-config:
     needs: set-env-branch
-    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main-dec31 # TODO - revert to @main
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   register-environment:
-    needs: get-config
-    uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main-dec31 # TODO - revert to @main
+   needs: get-config
+    uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
@@ -37,7 +37,7 @@ jobs:
       creds: ${{secrets.AZURE_CREDENTIALS}}
   register-dataset:
     needs: get-config
-    uses: Azure/mlops-templates/.github/workflows/register-dataset.yml@main-dec31 # TODO - revert to @main
+    uses: Azure/mlops-templates/.github/workflows/register-dataset.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
@@ -47,7 +47,7 @@ jobs:
       creds: ${{secrets.AZURE_CREDENTIALS}}
   create-compute:
     needs: [get-config]
-    uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main-dec31 # TODO - revert to @main
+    uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
     with:
       cluster_name: cpu-cluster
       size: Standard_DS3_v2
@@ -60,7 +60,7 @@ jobs:
       creds: ${{secrets.AZURE_CREDENTIALS}}
   run-model-training-pipeline:
     needs: [get-config, register-environment, register-dataset, create-compute]
-    uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main-dec31 # TODO - revert to @main
+    uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
