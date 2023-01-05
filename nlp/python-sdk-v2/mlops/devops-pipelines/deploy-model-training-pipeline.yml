@@ -1,0 +1,71 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+variables:
+  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      # 'main' branch: PRD environment
+      - template: ../../config-infra-prod.yml
+  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+      # 'develop' or feature branches: DEV environment
+      - template: ../../config-infra-dev.yml
+  - name: version
+    value: python-sdk-v2
+
+trigger:
+  - none
+
+pool:
+  vmImage: ubuntu-20.04
+
+resources:
+  repositories:
+    - repository: mlops-templates # Template Repo
+      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
+      endpoint: github-connection # need to set up and hardcode
+      type: github
+      ref: main
+
+stages:
+  - stage: DeployTrainingPipeline
+    displayName: Deploy Training Pipeline
+    jobs:
+      - job: DeployTrainingPipeline
+        steps:
+          - checkout: self
+            path: s/
+          - checkout: mlops-templates
+            path: s/templates/
+          - template: templates/aml-cli-v2/install-az-cli.yml@mlops-templates
+          - template: templates/aml-cli-v2/install-aml-cli.yml@mlops-templates
+          - template: templates/python-sdk-v2/install-requirements.yml@mlops-templates
+          - template: templates/aml-cli-v2/connect-to-workspace.yml@mlops-templates
+          - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+            parameters:
+              cluster_name: cpu-cluster
+              size: STANDARD_DS3_V2
+              min_instances: 0
+              max_instances: 1
+              cluster_tier: dedicated
+          - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+            parameters:
+              cluster_name: cpu-cluster-lg
+              size: Standard_D14_v2
+              min_instances: 0
+              max_instances: 1
+              cluster_tier: dedicated
+          - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+            parameters:
+              cluster_name: gpu-cluster
+              size: Standard_NV6
+              min_instances: 0
+              max_instances: 1
+              cluster_tier: dedicated
+          - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
+            parameters:
+              build_type: docker
+              environment_name: nlp_summarization_train
+              environment_path: data-science/environments/training
+          - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
+            parameters:
+              pipeline_path: mlops/azureml/train/pipeline-train.py
+              experiment_name: $(environment)_nlp_summarization_$(Build.SourceBranchName)

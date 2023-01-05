@@ -1,15 +1,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+# Dev environment
 variables:
-
   # Global
   ap_vm_image: ubuntu-20.04
 
   namespace: mlopsv2 #Note: A namespace with many characters will cause storage account creation to fail due to storage account names having a limit of 24 characters.
-  postfix: 0659
-  location: westus
-
+  postfix: 0001
+  location: eastus
   environment: dev
   enable_aml_computecluster: true
   enable_monitoring: false
@@ -29,8 +28,9 @@ variables:
   storage_account: st$(namespace)$(postfix)$(environment)
 
   # For terraform reference
-  terraform_version: 0.14.7
+  terraform_version: 1.3.6
   terraform_workingdir: infrastructure
+  terraform_st_location: $(location)
   terraform_st_resource_group: rg-$(namespace)-$(postfix)$(environment)-tf
   terraform_st_storage_account: st$(namespace)$(postfix)$(environment)tf
   terraform_st_container_name: default

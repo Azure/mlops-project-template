@@ -1,0 +1,66 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+variables:
+  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      # 'main' branch: PRD environment
+      - template: ../../config-infra-prod.yml
+  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+      # 'develop' or feature branches: DEV environment
+      - template: ../../config-infra-dev.yml
+  - name: version
+    value: python-sdk-v2
+  - name: endpoint_name
+    value: taxi-batch-$(namespace)$(postfix)$(environment)
+
+trigger:
+  - none
+
+pool:
+  vmImage: ubuntu-20.04
+
+resources:
+  repositories:
+    - repository: mlops-templates # Template Repo
+      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
+      endpoint: github-connection # need to set up and hardcode
+      type: github
+      ref: main
+
+stages:
+  - stage: CreateBatchEndpoint
+    displayName: Create/Update Batch Endpoint
+    jobs:
+      - job: DeployBatchEndpoint
+        steps:
+          - checkout: self
+            path: s/
+          - checkout: mlops-templates
+            path: s/templates/
+          - template: templates/aml-cli-v2/install-az-cli.yml@mlops-templates
+          - template: templates/aml-cli-v2/install-aml-cli.yml@mlops-templates
+          - template: templates/aml-cli-v2/connect-to-workspace.yml@mlops-templates
+          - template: templates/aml-cli-v2/create-compute.yml@mlops-templates
+            parameters:
+              cluster_name: batch-cluster # name must match cluster name in deployment file below
+              size: STANDARD_DS3_V2
+              min_instances: 0
+              max_instances: 5
+              cluster_tier: dedicated
+          - template: templates/${{ variables.version }}/create-batch-endpoint.yml@mlops-templates
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              endpoint_description: "Taxi batch endpoint"
+              auth_mode: "aad_token"
+          - template: templates/${{ variables.version }}/create-batch-deployment.yml@mlops-templates
+            parameters:
+              deployment_name: taxi-batch-dp
+              deployment_description: "Taxi batch deployment"
+              endpoint_name: "${{ variables.endpoint_name }}"
+              model_path: "taxi-model@latest"
+              compute: batch-cluster
+          - template: templates/${{ variables.version }}/test-batch-endpoint.yml@mlops-templates
+            parameters:
+              endpoint_name: "${{ variables.endpoint_name }}"
+              sample_request: data/taxi-batch.csv
+              request_type: uri_file #either uri_folder or uri_file

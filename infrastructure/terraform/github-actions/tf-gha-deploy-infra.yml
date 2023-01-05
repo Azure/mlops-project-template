@@ -1,0 +1,63 @@
+name: tf-gha-deploy-infra.yml
+
+on:
+  #push:
+  workflow_dispatch:
+env:
+  config_env: "none"
+jobs:
+  set-env-branch:
+    runs-on: ubuntu-latest
+    outputs:
+      config-file: ${{ steps.set-output-defaults.outputs.config-file }}
+    steps:
+      - id: set-prod-branch
+        name: set-prod-branch
+        if: ${{ github.ref == 'refs/heads/main'}}
+        run: echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV;
+      - id: set-dev-branch
+        name: setdevbranch
+        if: ${{ github.ref != 'refs/heads/main'}}
+        run: echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV;
+      - id: set-output-defaults
+        name: set-output-defaults
+        run: |
+          echo "config-file=$config_env" >> $GITHUB_OUTPUT;
+  get-config:
+    needs: set-env-branch
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+    with:
+      file_name: ${{ needs.set-env-branch.outputs.config-file}}
+  test-terraform-state-deployment:
+    needs: [get-config, set-env-branch]
+    uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
+    with:
+      TFAction: "apply"
+      dply_environment: ${{ needs.set-env-branch.outputs.config-file }}
+      location: ${{ needs.get-config.outputs.location }}
+      namespace: ${{ needs.get-config.outputs.namespace }}
+      postfix: ${{ needs.get-config.outputs.postfix }}
+      environment: ${{ needs.get-config.outputs.environment }}
+      enable_aml_computecluster: ${{ needs.get-config.outputs.enable_aml_computecluster == true }} ## TODO review the evaluation of boolean
+      enable_monitoring: ${{ needs.get-config.outputs.enable_monitoring == true  }} ## TODO review the evaluation of boolean
+      terraform_version: ${{ needs.get-config.outputs.terraform_version }}
+      terraform_workingdir: ${{ needs.get-config.outputs.terraform_workingdir }}
+      terraform_st_location: ${{ needs.get-config.outputs.terraform_st_location }}
+      terraform_st_storage_account: ${{ needs.get-config.outputs.terraform_st_storage_account }}
+      terraform_st_resource_group: ${{ needs.get-config.outputs.terraform_st_resource_group }}
+      terraform_st_container_name: ${{ needs.get-config.outputs.terraform_st_container_name }}
+      terraform_st_key: ${{ needs.get-config.outputs.terraform_st_key }}
+      terraform_plan_location: ${{ needs.get-config.outputs.location }}
+      terraform_plan_vnet: "TBD" # TBD
+    secrets:
+      azure_creds: ${{ secrets.AZURE_CREDENTIALS }}
+      clientId: ${{ secrets.ARM_CLIENT_ID }}
+      clientSecret: ${{ secrets.ARM_CLIENT_SECRET }}
+      subscriptionId: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      tenantId: ${{ secrets.ARM_TENANT_ID }}
+  deploy-azureml-resources:
+    runs-on: ubuntu-latest
+    steps:
+      - id: deploy-aml-workspace
+        name: deploy-aml-workspace
+        run: echo "OK"

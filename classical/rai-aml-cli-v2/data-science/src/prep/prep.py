@@ -71,11 +71,7 @@ def main(args):
     # ------------ Reading Data ------------ #
     # -------------------------------------- #
 
-    print("mounted_path files: ")
-    arr = os.listdir(args.raw_data)
-    print(arr)
-
-    data = pd.read_csv((Path(args.raw_data) / 'taxi-data.csv'))
+    data = pd.read_csv((Path(args.raw_data)))
     data = data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS + [TARGET_COL]]
 
     # ------------- Split Data ------------- #
@@ -101,7 +97,7 @@ def main(args):
     val.to_parquet((Path(args.val_data) / "val.parquet"))
     test.to_parquet((Path(args.test_data) / "test.parquet"))
 
-    if (args.enable_monitoring.lower == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower == 'yes'):
+    if (args.enable_monitoring.lower() == 'true' or args.enable_monitoring == '1' or args.enable_monitoring.lower() == 'yes'):
         log_training_data(data, args.table_name)
 
 
