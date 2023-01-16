@@ -7,11 +7,25 @@ variables:
   ap_vm_image: ubuntu-20.04
 
   namespace: mlopsv2 #Note: A namespace with many characters will cause storage account creation to fail due to storage account names having a limit of 24 characters.
-  postfix: 0001
+  postfix: 001
   location: eastus
   environment: dev
   enable_aml_computecluster: true
   enable_monitoring: false
+  # feature store details
+  enable_feature_store: true
+  sql_admin_user: sqladmin
+  sql_admin_password: ThisIsNotVerySecure!
+  fs_onlinestore_conn_name: FEATHR-ONLINE-STORE-CONN
+  feathr_app_image: feathrfeaturestore/feathr-registry
+  feathr_app_image_tag: releases-v0.9.0
+  react_enable_rbac: true
+  aad_client_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx # refer to prefeaturestore readme for details
+  spark_version: 3.1
+  priviledged_object_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx # AAD Object ID for user, used to set pividges for user in KV and Synapse for feature store components
+  # added flag for this:  https://registry.terraform.io/providers/hashicorp/azurerm/2.99.0/docs/guides/3.0-app-service-beta
+  # remove the environment variable when this is no longer required
+  ARM_THREEPOINTZERO_BETA_RESOURCES: true
 
   # Azure DevOps
   ado_service_connection_rg: Azure-ARM-Dev

@@ -32,7 +32,7 @@ resource "azurerm_key_vault_secret" "SP_ID" {
 
 resource "azurerm_key_vault_secret" "SP_KEY" {
   name         = "kvmonitoringspkey"
-  value        = trim(var.client_secret, "'")
+  value        = var.client_secret
   key_vault_id = var.key_vault_id
   count               = var.enable_monitoring ? 1 : 0
 }

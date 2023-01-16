@@ -19,7 +19,6 @@ resource "azurerm_storage_account" "st" {
   is_hns_enabled           = var.hns_enabled
 
   tags = var.tags
-  
 }
 
 # Virtual Network & Firewall configuration
@@ -31,4 +30,12 @@ resource "azurerm_storage_account_network_rules" "firewall_rules" {
   ip_rules                   = [] # [data.http.ip.body]
   virtual_network_subnet_ids = var.firewall_virtual_network_subnet_ids
   bypass                     = var.firewall_bypass
+}
+
+# Data Lake Gen2 file system required for synapse workspace
+resource "azurerm_storage_data_lake_gen2_filesystem" "st_filesystem" {
+  name               = "dl${local.safe_prefix}${local.safe_postfix}${var.env}"
+  storage_account_id = azurerm_storage_account.st.id
+
+  count = var.enable_feature_store ? 1 : 0
 }
