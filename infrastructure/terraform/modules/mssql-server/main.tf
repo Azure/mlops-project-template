@@ -54,7 +54,7 @@ resource "time_sleep" "wait_60_seconds" {
     command = "mssql-cli -S ${azurerm_mssql_server.mssql_server.fully_qualified_domain_name} -U ${var.sql_admin_user} -P ${var.sql_admin_password} -d ${azurerm_mssql_database.mssql_db.name} --input_file ./modules/mssql-server/sql/create_userroles.sql"
   }
   provisioner "local-exec" {
-    command = "mssql-cli -S ${azurerm_mssql_server.mssql_server.fully_qualified_domain_name} -U ${var.sql_admin_user} -P ${var.sql_admin_password} -d ${azurerm_mssql_database.mssql_db.name} --input_file ./modules/mssql-server/sql/create_entities_edges.sql.sql"
+    command = "mssql-cli -S ${azurerm_mssql_server.mssql_server.fully_qualified_domain_name} -U ${var.sql_admin_user} -P ${var.sql_admin_password} -d ${azurerm_mssql_database.mssql_db.name} --input_file ./modules/mssql-server/sql/create_entities_edges.sql"
   }
 }
 

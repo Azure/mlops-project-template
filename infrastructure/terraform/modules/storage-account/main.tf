@@ -39,3 +39,13 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "st_filesystem" {
 
   count = var.enable_feature_store ? 1 : 0
 }
+
+
+# make the priviledged user a storage blob data contributor of the storage account
+resource "azurerm_role_assignment" "priviledged_user_storage_contributor" {
+  scope                = azurerm_storage_account.st.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = var.priviledged_object_id
+
+  count = var.enable_feature_store ? 1 : 0
+}
