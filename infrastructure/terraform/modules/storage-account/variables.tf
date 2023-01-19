@@ -47,9 +47,3 @@ variable "enable_feature_store" {
   default     = false
   description = "flag to enable or disable feature store"
 }
-
-variable "priviledged_object_id" {
-  type        = string
-  default     = ""
-  description = "Object ID of the user or service principal that will ge granted priviledges in keyvault for feature store"
-}
