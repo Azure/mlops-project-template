@@ -42,3 +42,8 @@ variable "firewall_virtual_network_subnet_ids" {
 variable "firewall_bypass" {
   default = ["None"]
 }
+variable "enable_feature_store" {
+  type        = bool
+  default     = false
+  description = "flag to enable or disable feature store"
+}

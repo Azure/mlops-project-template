@@ -1,3 +1,8 @@
+variable "rg_name" {
+  type        = string
+  description = "Resource group name"
+}
+
 variable "location" {
   type        = string
   default     = "North Europe"
@@ -23,4 +28,14 @@ variable "postfix" {
 variable "env" {
   type        = string
   description = "Environment prefix"
+}
+
+variable "sql_admin_user" {
+  type        = string
+  description = "SQL admin user name"
+}
+
+variable "sql_admin_password" {
+  type        = string
+  description = "SQL admin password"
 }
