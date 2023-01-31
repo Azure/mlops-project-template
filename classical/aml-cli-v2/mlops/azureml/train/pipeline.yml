@@ -56,7 +56,7 @@ jobs:
     code: ../../../data-science/src
     command: >-
       python train.py
-      --prepared_data ${{inputs.prepared_data}}
+      --train_data ${{inputs.train_data}}
       --model_output ${{outputs.model_output}}
     environment: azureml:taxi-train-env@latest
     inputs:

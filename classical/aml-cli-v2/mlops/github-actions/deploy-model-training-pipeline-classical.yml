@@ -26,7 +26,7 @@ jobs:
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   register-environment:
-   needs: get-config
+    needs: get-config
     uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
