@@ -97,14 +97,17 @@ resource "azurerm_linux_web_app" "linux_web_app" {
   }
 
   app_settings = {
-    DOCKER_REGISTRY_SERVER_URL = "https://index.docker.io/v1"
-    REACT_APP_AZURE_CLIENT_ID  = var.aad_client_id
-    REACT_APP_AZURE_TENANT_ID  = var.tenant_id
-    API_BASE                   = "api/v1"
-    REACT_APP_ENABLE_RBAC      = tostring(var.react_enable_rbac)
-    AZURE_CLIENT_ID            = var.uaid_client_id
-    DOCKER_ENABLE_CI           = "true"
-    CONNECTION_STR             = local.conn_string
+    DOCKER_REGISTRY_SERVER_URL                 = "https://index.docker.io/v1"
+    REACT_APP_AZURE_CLIENT_ID                  = var.aad_client_id
+    REACT_APP_AZURE_TENANT_ID                  = var.tenant_id
+    API_BASE                                   = "api/v1"
+    REACT_APP_ENABLE_RBAC                      = tostring(var.react_enable_rbac)
+    AZURE_CLIENT_ID                            = var.uaid_client_id
+    DOCKER_ENABLE_CI                           = "true"
+    CONNECTION_STR                             = local.conn_string
+    APPINSIGHTS_INSTRUMENTATIONKEY             =  var.appi_instrumentation_key
+    APPLICATIONINSIGHTS_CONNECTION_STRING      =  var.appi_connection_string
+    ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
   }
 
   tags = var.tags

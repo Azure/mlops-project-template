@@ -79,3 +79,13 @@ variable "mssql_db_name" {
   type        = string
   description = "SQL database name"
 }
+
+variable "appi_instrumentation_key" {
+  type        = string
+  description = "Application Insights instrumentation key"
+}
+  
+variable "appi_connection_string" {
+  type        = string
+  description = "Application Insights connection string"
+}
