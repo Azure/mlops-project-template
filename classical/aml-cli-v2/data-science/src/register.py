@@ -12,13 +12,15 @@ import mlflow
 import os 
 import json
 
+from azure.identity import DefaultAzureCredential 
+from azure.ai.ml import MLClient
+
 def parse_args():
     '''Parse input arguments'''
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, help='Name under which model will be registered')
     parser.add_argument('--model_path', type=str, help='Model directory')
-    parser.add_argument('--evaluation_output', type=str, help='Path of eval results')
     parser.add_argument(
         "--model_info_output_path", type=str, help="Path to write model info JSON"
     )
@@ -30,11 +32,8 @@ def parse_args():
 
 def main(args):
     '''Loads model, registers it if deply flag is True'''
-
-    with open((Path(args.evaluation_output) / "deploy_flag"), 'rb') as infile:
-        deploy_flag = int(infile.read())
         
-    mlflow.log_metric("deploy flag", int(deploy_flag))
+    # mlflow.log_metric("deploy flag", int(deploy_flag))
     deploy_flag=1
     if deploy_flag==1:
 
@@ -63,18 +62,22 @@ def main(args):
         print("Model will not be registered!")
 
 if __name__ == "__main__":
-
-    mlflow.start_run()
     
     # ---------- Parse Arguments ----------- #
     # -------------------------------------- #
 
     args = parse_args()
+
+    ml_client = MLClient.from_config(DefaultAzureCredential(), path=args.config_path)
+    ws = ml_client.workspaces.get(ml_client.workspace_name) 
+
+    # Start Logging
+    mlflow.set_tracking_uri(ws.mlflow_tracking_uri)
+    mlflow.start_run()
     
     lines = [
         f"Model name: {args.model_name}",
         f"Model path: {args.model_path}",
-        f"Evaluation output path: {args.evaluation_output}",
     ]
 
     for line in lines:

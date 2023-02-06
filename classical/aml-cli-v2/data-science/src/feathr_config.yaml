@@ -1,0 +1,56 @@
+# Please refer to https://github.com/linkedin/feathr/blob/main/feathr_project/feathrcli/data/feathr_user_workspace/feathr_config.yaml for explanations on the meaning of each field.
+api_version: 1
+project_config:
+  project_name: "nyctaxi"
+  required_environment_variables:
+    - "REDIS_PASSWORD"
+offline_store:
+  # Please set 'enabled' flags as true (false by default) if any of items under the same paths are expected to be visited
+  adls:
+    adls_enabled: true
+  wasb:
+    wasb_enabled: true
+  s3:
+    s3_enabled: false
+    s3_endpoint: ""
+  jdbc:
+    jdbc_enabled: false
+    jdbc_database: ""
+    jdbc_table: ""
+  snowflake:
+    snowflake_enabled: false
+    url: ""
+    user: ""
+    role: ""
+spark_config:
+  spark_cluster: "azure_synapse"
+  spark_result_output_parts: "1"
+  azure_synapse:
+    dev_url: ""
+    pool_name: ""
+    workspace_dir: "abfss://{adls_fs_name}@{adls_account}.dfs.core.windows.net/nyc_taxi"
+    executor_size: "Small"
+    executor_num: 1
+  databricks:
+    workspace_instance_url: ""
+    config_template:
+      {
+        "run_name": "",
+        "new_cluster":
+          {
+            "spark_version": "9.1.x-scala2.12",
+            "node_type_id": "Standard_D3_v2",
+            "num_workers": 2,
+            "spark_conf": {},
+          },
+        "libraries": [{ "jar": "" }],
+        "spark_jar_task": { "main_class_name": "", "parameters": [""] },
+      }
+    work_dir: ""
+online_store:
+  redis:
+    host: "<replace_with_your_redis>.redis.cache.windows.net"
+    port: 6380
+    ssl_enabled: True
+feature_registry:
+  # api_endpoint: "" replace with this setting when you use the feature registry REST API

@@ -6,6 +6,6 @@ $schema: https://azuremlschemas.azureedge.net/latest/data.schema.json
 # ADLS gen2: abfss://<file_system>@<account_name>.dfs.core.windows.net/<path>/
 # Datastore: azureml://datastores/<data_store_name>/paths/<path>
 type: uri_file
-name: taxi-data
-description: taxi dataset
-path: ../../../data/taxi-data.csv
+name: feathr-data
+description: taxi dataset with Feathr features
+path: https://azurefeathrstorage.blob.core.windows.net/public/sample_data/green_tripdata_2020-04_with_index.csv

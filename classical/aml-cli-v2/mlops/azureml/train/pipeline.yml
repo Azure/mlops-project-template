@@ -1,23 +1,20 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-experiment_name: taxi-fare-training
-experiment_name: taxi-fare-training
-description: Training Pipeline to train a model that predicts taxi fare price
+experiment_name: taxi-fare-training-feathr
+experiment_name: taxi-fare-training-feathr
+description: Training Pipeline to train a model that predicts taxi fare price, using Feathr as feature store
 
 # <inputs_and_outputs>
 inputs:
   input:
     type: uri_file
-    path: azureml:taxi-data@latest
+    path: azureml:feathr-data@latest
   enable_monitoring: 'false'
   table_name: 'taximonitoring'
 
 outputs:
-  train_data:
-  val_data:
-  test_data:
+  aml_data:
   trained_model:
-  evaluation_output:
   model_info_output_path:
 # </inputs_and_outputs>
 
@@ -28,59 +25,80 @@ settings:
   continue_on_step_failure: false
 
 jobs:
+
+  create_feathr_config:
+    name: create_feathr_config
+    display_name: create-feathr-config
+    code: ../../../data-science/src
+    command: >-
+      python create_feathr_config.py
+      --project_name 'feathr_demo'
+      --spark_cluster 'azure_synapse'
+      --feathr_config_path 'feathr_config.yaml'
+    environment: azureml:feathr-demo-env@latest
+
+  create_aml_config:
+    name: create_aml_config
+    display_name: create-feathr-config
+    code: ../../../data-science/src
+    command: >-
+      python create_aml_config.py
+      --aml_config_path 'aml_config.json'
+    environment: azureml:feathr-demo-env@latest
+
   prep_data:
     name: prep_data
     display_name: prep-data
     code: ../../../data-science/src
     command: >-
+      pip install -r requirements/feathr-requirements.txt --use-deprecated=legacy-resolver &&
       python prep.py
       --raw_data ${{inputs.raw_data}}
-      --train_data ${{outputs.train_data}}
-      --val_data ${{outputs.val_data}}
-      --test_data ${{outputs.test_data}}
-      --enable_monitoring ${{inputs.enable_monitoring}}
-      --table_name ${{inputs.table_name}}
-    environment: azureml:taxi-train-env@latest
+      --aml_data ${{outputs.aml_data}}
+    environment: azureml:feathr-demo-env@latest
     inputs:
       raw_data: ${{parent.inputs.input}}
-      enable_monitoring: ${{parent.inputs.enable_monitoring}}
-      table_name: ${{parent.inputs.table_name}}
+    #   enable_monitoring: ${{parent.inputs.enable_monitoring}}
+    #   table_name: ${{parent.inputs.table_name}}
     outputs:
-      train_data: ${{parent.outputs.train_data}}
-      val_data: ${{parent.outputs.val_data}}
-      test_data: ${{parent.outputs.test_data}}
+      train_data: ${{parent.outputs.aml_data}}
+    #   val_data: ${{parent.outputs.val_data}}
+    #   test_data: ${{parent.outputs.test_data}}
 
   train_model:
     name: train_model
     display_name: train-model
     code: ../../../data-science/src
     command: >-
+      pip install -r requirements/train-requirements.txt --use-deprecated=legacy-resolver &&
       python train.py
-      --train_data ${{inputs.train_data}}
+      --config_path 'aml_config.json'
+      --data_path ${{inputs.data}}
       --model_output ${{outputs.model_output}}
-    environment: azureml:taxi-train-env@latest
+    environment: azureml:feathr-demo-env@latest
     inputs:
-      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
+      data: ${{parent.jobs.prep_data.outputs.train_data}}
     outputs:
       model_output: ${{parent.outputs.trained_model}}
 
-  evaluate_model:
-    name: evaluate_model
-    display_name: evaluate-model
-    code: ../../../data-science/src
-    command: >-
-      python evaluate.py
-      --model_name ${{inputs.model_name}}
-      --model_input ${{inputs.model_input}}
-      --test_data ${{inputs.test_data}}
-      --evaluation_output ${{outputs.evaluation_output}}
-    environment: azureml:taxi-train-env@latest
-    inputs:
-      model_name: "taxi-model"
-      model_input: ${{parent.jobs.train_model.outputs.model_output}}
-      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
-    outputs:
-      evaluation_output: ${{parent.outputs.evaluation_output}}
+
+  # evaluate_model:
+  #   name: evaluate_model
+  #   display_name: evaluate-model
+  #   code: ../../../data-science/src
+  #   command: >-
+  #     python evaluate.py
+  #     --model_name ${{inputs.model_name}}
+  #     --model_input ${{inputs.model_input}}
+  #     --test_data ${{inputs.test_data}}
+  #     --evaluation_output ${{outputs.evaluation_output}}
+  #   environment: azureml:taxi-train-env@latest
+  #   inputs:
+  #     model_name: "taxi-model"
+  #     model_input: ${{parent.jobs.train_model.outputs.model_output}}
+  #     test_data: ${{parent.jobs.prep_data.outputs.test_data}}
+  #   outputs:
+  #     evaluation_output: ${{parent.outputs.evaluation_output}}
 
   register_model:
     name: register_model
@@ -90,13 +108,11 @@ jobs:
       python register.py
       --model_name ${{inputs.model_name}}
       --model_path ${{inputs.model_path}}
-      --evaluation_output ${{inputs.evaluation_output}}
       --model_info_output_path ${{outputs.model_info_output_path}}
-    environment: azureml:taxi-train-env@latest
+    environment: azureml:feathr-demo-env@latest
     inputs:
       model_name: "taxi-model"
       model_path: ${{parent.jobs.train_model.outputs.model_output}}
-      evaluation_output: ${{parent.jobs.evaluate_model.outputs.evaluation_output}}
     outputs:
       model_info_output_path: ${{parent.outputs.model_info_output_path}}
 # </jobs>

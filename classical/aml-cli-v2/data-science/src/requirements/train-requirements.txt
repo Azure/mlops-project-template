@@ -1,0 +1,6 @@
+numpy==1.22.0
+azure-ai-ml
+mlflow
+azureml-mlflow
+mltable
+python-dotenv

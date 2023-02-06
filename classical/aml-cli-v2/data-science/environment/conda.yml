@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+    - python=3.9.12
+    - pip>=19.0
