@@ -57,9 +57,10 @@ variables:
   terraform_st_key: mlops-tab
 
   # For feathr reference
-  key_vault_name: kv-$(namespace)-$(postfix)$(environment)
-  synapse_workspace_url: sy$(namespace)-$(postfix)$(environment)
-  adls_account: st$(namespace)$(postfix)$(environment)
-  adls_fs_name: dl$(namespace)$(postfix)$(environment)
-  redis_name: rd$(namespace)$(postfix)$(environment)
-  webapp_name: app$(namespace)$(postfix)$(environment)
+  resource_prefix: $(namespace)fs
+  key_vault_name: kv-$(resource_prefix)-$(postfix)$(environment)
+  synapse_workspace_url: sy$(resource_prefix)-$(postfix)$(environment)
+  adls_account: st$(resource_prefix)$(postfix)$(environment)
+  adls_fs_name: dl$(resource_prefix)$(postfix)$(environment)
+  redis_name: rd$(resource_prefix)$(postfix)$(environment)
+  webapp_name: app$(resource_prefix)$(postfix)$(environment)
