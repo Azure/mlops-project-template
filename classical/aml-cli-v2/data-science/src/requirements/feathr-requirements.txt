@@ -8,3 +8,4 @@ ipykernel
 pyspark
 azure-cli
 python-dotenv
+pyyaml

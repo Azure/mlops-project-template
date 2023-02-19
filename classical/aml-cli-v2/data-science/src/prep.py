@@ -27,7 +27,7 @@ from azure.identity import AzureCliCredential, DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
 from feathr.spark_provider.feathr_configurations import SparkExecutionConfiguration
-from feathr_utils import nyc_taxi
+# from feathr_utils import nyc_taxi
 from feathr_utils.job_utils import get_result_df
 from feathr_utils.utils_platform import is_databricks
 
@@ -43,17 +43,31 @@ def parse_args():
     # parser.add_argument("--azure_subscription_id", type=str)
     # parser.add_argument("--adls_key", type=str)
 
+    # parser.add_argument("--azure_client_id", type=str)
+    # parser.add_argument("--azure_tenant_id", type=str)
+    parser.add_argument("--key_vault_name", type=str)
+    parser.add_argument("--synapse_workspace_url", type=str)
+    parser.add_argument("--adls_account", type=str)
+    parser.add_argument("--adls_fs_name", type=str)
+    parser.add_argument("--webapp_name", type=str)
     parser.add_argument("--raw_data", type=str)
-    parser.add_argument("--aml_data", type=str)
+    parser.add_argument("--train_data", type=str)
     args = parser.parse_args()
+
+    return args
 
 def set_environment_variables():
     load_dotenv()
-    os.environ['RESOURCE_GROUP'] = utils.fs_config.get("resource_group")
-    os.environ['RESOURCE_PREFIX'] = utils.fs_config.get("resource_prefix")
-    os.environ['AZURE_SUBSCRIPTION_ID'] = utils.fs_config.get("subscription_id")
-    os.environ['AZURE_CLIENT_ID'] = utils.fs_config.get("client_id")
-    os.environ['AZURE_TENANT_ID'] = utils.fs_config.get("tenant_id")
+    # os.environ['RESOURCE_GROUP'] = utils.fs_config.get("resource_group")
+    # os.environ['RESOURCE_PREFIX'] = utils.fs_config.get("resource_prefix")
+    # os.environ['AZURE_SUBSCRIPTION_ID'] = utils.fs_config.get("subscription_id")
+    # os.environ['AZURE_CLIENT_ID'] = utils.fs_config.get("client_id")
+    # os.environ['AZURE_TENANT_ID'] = utils.fs_config.get("tenant_id")
+
+    # # TODO: add client secret, adls key to environment variables
+    # os.environ['AZURE_CLIENT_ID'] = args.azure_client_id
+    # os.environ['AZURE_TENANT_ID'] = args.azure_tenant_id
+    os.environ['ADLS_ACCOUNT'] = args.adls_account
 
 def set_spark_session():
     global spark
@@ -84,7 +98,7 @@ def get_data_source_path(feathr_client):
 
 
 def main(args):
-    feathr_client = utils.get_feathr_client()
+    feathr_client = utils.get_feathr_client(key_vault_name=args.key_vault_name, synapse_workspace_url=args.synapse_workspace_url, adls_account=args.adls_account, adls_fs_name=args.adls_fs_name, webapp_name=args.webapp_name)
 
     set_spark_session()
     data_source_path = get_data_source_path(feathr_client)
@@ -289,7 +303,7 @@ def main(args):
     # output = df_pandas.to_csv (index_label="idx", encoding = "utf-8")
     # file_client.upload_data(output, overwrite=True)
 
-    df_pandas.to_parquet((Path(args.aml_data) / "aml.parquet"))
+    df_pandas.to_parquet((Path(args.train_data) / "aml.parquet"))
 
 
 if __name__ == '__main__':

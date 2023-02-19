@@ -9,7 +9,7 @@ from pyspark.sql import DataFrame, SparkSession
 from feathr.client import FeathrClient
 from feathr.constants import OUTPUT_FORMAT
 # from feathr.utils.platform import is_databricks
-from utils_platform import is_databricks
+from feathr_utils.utils_platform import is_databricks
 
 
 def get_result_pandas_df(

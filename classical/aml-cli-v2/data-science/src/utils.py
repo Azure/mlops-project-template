@@ -26,77 +26,34 @@ logging.basicConfig(
     ]
 )
 
-# container to hold common configs used throughout lifecycle (prep, train, deploy....)
-# current limitation to push data directly to the storage account, hence user is instructed to store data (in readme) in this specific container
-fs_config = {
-    "data_container_name": "nyctaxi",
-    "resource_group": "rizofeathr11",
-    "client_id": "7c02dbef-0dd5-4b6e-8eb3-6aed7cd5fce9",
-    "tenant_id": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-    "subscription_id": "a6c2a7cc-d67e-4a1a-b765-983f08c0423a",
-    "adls_scheme": "https",
-    "adls_data_directory": "feathr_demo_data",
-    "adls_data_file": "feathr_data.csv",
-    "workspace_name": "mlw-basicex-prod-202212150056"
-    }
-    
-def get_active_branch_name():
-    """Get the name of the active branch"""
-    head_dir = Path(os.path.join(
-        Path(__file__).parent.parent.parent.parent.parent, ".git", "HEAD"))
-    with head_dir.open("r") as f:
-        content = f.read().splitlines()
-
-    for line in content:
-        if line[0:4] == "ref:":
-            return line.partition("refs/heads/")[2]
-
-
-def get_yaml_file_path():
-    """Get the path to the config.yaml file"""
-    if get_active_branch_name() == "main":
-        # 'main' branch: PRD environment
-        logging.info("PRD environment, using config-infra-prod.yml")
-        config_file = "config-infra-prod.yml"
-    else:
-        # 'develop' or feature branches: DEV environment
-        logging.info("DEV environment, using config-infra-dev.yml")
-        config_file = "config-infra-dev.yml"
-    return os.path.join(Path(__file__).parent.parent.parent.parent.parent, config_file)
-
-
 def get_credential():
     credential = DefaultAzureCredential(
         exclude_interactive_browser_credential=True)
     return credential
 
 
-def set_required_feathr_config(credential: DefaultAzureCredential):
-    """Get configuration from config yaml file"""
-    config_file_path = get_yaml_file_path()
-    with open(config_file_path, "r") as f:
-        logging.info("Reading  {} file".format(config_file_path))
-        config = yaml.safe_load(f)
+def set_required_feathr_config(
+        key_vault_name: str,
+        synapse_workspace_url: str,
+        adls_account: str,
+        adls_fs_name: str,
+        webapp_name: str,
+        credential: DefaultAzureCredential
+):
 
-    # adding "fs" to namespace as this is what we do in the infrastructure code to separate featurestore resorces
-    resource_prefix = config.get("variables").get("namespace") + "fs"
-    resource_postfix = config.get("variables").get("postfix")
-    resource_env = config.get("variables").get("environment")
-    logging.info("using resource prefix: {}, resource postfix: {} and environment: {},".format(
-        resource_prefix, resource_postfix, resource_env))
-
-    # Get all the required credentials from Azure Key Vault
+    # # Get all the required credentials from Azure Key Vault
     # key_vault_name = "kv-"+resource_prefix+"-"+resource_postfix+resource_env
+    # key_vault_uri = f"https://{key_vault_name}.vault.azure.net"
     # synapse_workspace_url = "sy"+resource_prefix+"-"+resource_postfix+resource_env
     # adls_account = "st"+resource_prefix+resource_postfix+resource_env
     # adls_fs_name = "dl"+resource_prefix+resource_postfix+resource_env
-    resource_prefix = config.get("variables").get("namespace")
-    key_vault_name = resource_prefix + "kv"
-    key_vault_uri = f"https://{key_vault_name}.vault.azure.net"
-    synapse_workspace_url = resource_prefix + "syws"
-    adls_account = resource_prefix + "dls"
-    adls_fs_name = resource_prefix + "fs"
+    # # resource_prefix = config.get("variables").get("namespace")
+    # # key_vault_name = resource_prefix + "kv"
+    # # synapse_workspace_url = resource_prefix + "syws"
+    # # adls_account = resource_prefix + "dls"
+    # # adls_fs_name = resource_prefix + "fs"
 
+    key_vault_uri = f"https://{key_vault_name}.vault.azure.net"
     client = SecretClient(vault_url=key_vault_uri, credential=credential)
     secretName = "FEATHR-ONLINE-STORE-CONN"
     retrieved_secret = str(client.get_secret(secretName).value)
@@ -115,17 +72,18 @@ def set_required_feathr_config(credential: DefaultAzureCredential):
     os.environ['online_store__redis__port'] = redis_port
     os.environ['online_store__redis__ssl_enabled'] = redis_ssl
     os.environ['REDIS_PASSWORD'] = redis_password
-    os.environ['FEATURE_REGISTRY__API_ENDPOINT'] = f'https://app{resource_prefix+resource_postfix+resource_env}.azurewebsites.net/api/v1'
-
-    # Set common configs used throughout lifecycle (prep, train, deploy....)
-    fs_config['feathr_output_path'] = f'abfss://{adls_fs_name}@{adls_account}.dfs.core.windows.net/feathr_output'
-    fs_config['adls_account'] = adls_account
-    fs_config['resource_prefix'] = resource_prefix
+    os.environ['FEATURE_REGISTRY__API_ENDPOINT'] = f'https://{webapp_name}.azurewebsites.net/api/v1'
 
 
-def get_feathr_client():
+def get_feathr_client( 
+    key_vault_name: str,
+    synapse_workspace_url: str,
+    adls_account: str,
+    adls_fs_name: str,
+    webapp_name: str,
+):
     credential = get_credential()
-    set_required_feathr_config(credential=credential)
+    set_required_feathr_config(key_vault_name=key_vault_name, synapse_workspace_url=synapse_workspace_url, adls_account=adls_account, adls_fs_name=adls_fs_name, webapp_name=webapp_name, credential=credential)
     config_file_path = os.path.join(
         Path(__file__).parent, "feathr_config.yaml")
     logging.info("config path: {}".format(config_file_path))

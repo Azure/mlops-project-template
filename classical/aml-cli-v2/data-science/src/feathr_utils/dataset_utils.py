@@ -7,7 +7,7 @@ import requests
 from urllib.parse import urlparse
 
 from tqdm import tqdm
-from utils import *
+from feathr_utils.job_utils import *
 
 
 log = logging.getLogger(__name__)

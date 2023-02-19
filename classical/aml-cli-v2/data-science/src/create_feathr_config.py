@@ -1,9 +1,15 @@
 import argparse
-import utils 
 
 def parse_args():
     '''Parse input arguments.'''
     parser = argparse.ArgumentParser()
+    # parser.add_argument("--namespace", type=str, help="Original namespace; no fs at the end, it is added to resource prefix inside the script.")
+    parser.add_argument("--key_vault_name", type=str)
+    parser.add_argument("--synapse_workspace_url", type=str)
+    parser.add_argument("--adls_account", type=str)
+    parser.add_argument("--adls_fs_name", type=str)
+    parser.add_argument("--redis_name", type=str)
+    parser.add_argument("--webapp_name", type=str)
     parser.add_argument("--project_name", type=str, help="Name of Feathr project.")
     parser.add_argument("--spark_cluster", type=str, help="Type of Spark cluster.")
     parser.add_argument("--feathr_config_path", type=str, help="Path to resulting feathr config file.")
@@ -13,7 +19,6 @@ def parse_args():
     return args
 
 def main(args):
-    # Create Feathr config file
 
     feathr_config = f"""
     # DO NOT MOVE OR DELETE THIS FILE
@@ -92,11 +97,11 @@ def main(args):
 
     azure_synapse:
         # dev URL to the synapse cluster. Usually it's `https://yourclustername.dev.azuresynapse.net`
-        dev_url: "https://{utils.fs_config.get("resource_prefix")}syws.dev.azuresynapse.net"
+        dev_url: "https://{args.synapse_workspace_url}.dev.azuresynapse.net"
         # name of the sparkpool that you are going to use
         pool_name: "spark31"
         # workspace dir for storing all the required configuration files and the jar resources. All the feature definitions will be uploaded here
-        workspace_dir: "abfss://{utils.fs_config.get("resource_prefix")}fs@{utils.fs_config.get("resource_prefix")}dls.dfs.core.windows.net/{args.project_name}"
+        workspace_dir: "abfss://{args.adls_fs_name}@{args.adls_account}.dfs.core.windows.net/{args.project_name}"
         executor_size: "Small"
         executor_num: 1
         # This is the location of the runtime jar for Spark job submission. If you have compiled the runtime yourself, you need to specify this location.
@@ -121,16 +126,16 @@ def main(args):
     online_store:
     redis:
         # Redis configs to access Redis cluster
-        host: "{utils.fs_config.get("resource_prefix")}redis.redis.cache.windows.net"
+        host: "{args.redis_name}.redis.cache.windows.net"
         port: 6380
         ssl_enabled: True
 
     feature_registry:
-    api_endpoint: "https://{utils.fs_config.get("resource_prefix")}webapp.azurewebsites.net/api/v1"
+    api_endpoint: "https://{args.webapp_name}.azurewebsites.net/api/v1"
     # # Registry configs if use purview
     # purview:
     #   # configure the name of the purview endpoint
-    #   purview_name: "{utils.fs_config.get("resource_prefix")}purview"
+    #   purview_name: <purview-name>
     #   # delimiter indicates that how the project/workspace name, feature names etc. are delimited. By default it will be '__'
     #   # this is for global reference (mainly for feature sharing). For example, when we setup a project called foo, and we have an anchor called 'taxi_driver' and the feature name is called 'f_daily_trips'
     #   # the feature will have a globally unique name called 'foo__taxi_driver__f_daily_trips'
@@ -141,7 +146,7 @@ def main(args):
 
     secrets:
     azure_key_vault:
-        name: {utils.fs_config.get("resource_prefix")}kv
+        name: {args.key_vault_name}
     """
 
     with open(args.feathr_config_path, "w") as file:
@@ -151,3 +156,5 @@ if __name__ == '__main__':
     args = parse_args()
 
     main(args)
+
+    print("Feathr config file created:", args.feathr_config_path)

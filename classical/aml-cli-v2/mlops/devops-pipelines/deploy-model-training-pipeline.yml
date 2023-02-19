@@ -4,7 +4,7 @@
 variables:
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
-      - template: ../../config-infra-prod.yml
+      - template: ../../config-infra-dev.yml
   - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
       # 'develop' or feature branches: DEV environment
       - template: ../../config-infra-dev.yml
@@ -13,7 +13,7 @@ variables:
   # - group: env-variables
 
 trigger:
-  - none
+  - main
 
 pool:
   vmImage: ubuntu-20.04
@@ -21,10 +21,10 @@ pool:
 resources:
   repositories:
     - repository: mlops-templates # Template Repo
-      name: Rizo-R/mlops-templates # need to change org name from "Azure" to your own org
-      endpoint: github-connection # need to set up and hardcode
+      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
+      endpoint: Rizo-R # need to set up and hardcode
       type: github
-      ref: main
+      ref: feature/feathr
 
 stages:
   - stage: DeployTrainingPipeline
@@ -62,3 +62,9 @@ stages:
               experiment_name: $(environment)_taxi_fare_train_$(Build.SourceBranchName)
               display_name: $(environment)_taxi_fare_run_$(Build.BuildID)
               enable_monitoring: $(enable_monitoring)
+              key_vault_name: $(key_vault_name)
+              synapse_workspace_url: $(synapse_workspace_url)
+              adls_account: $(adls_account)
+              adls_fs_name: $(adls_fs_name)
+              redis_name: $(redis_name)
+              webapp_name: $(webapp_name)

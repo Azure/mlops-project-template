@@ -26,6 +26,8 @@ from pathlib import Path
 def parse_args():
     '''Parse input arguments.'''
     parser = argparse.ArgumentParser()
+    # parser.add_argument("--azure_client_id", type=str)
+    # parser.add_argument("--azure_tenant_id", type=str)
     parser.add_argument("--data_path", type=str, help="Path to input data.")
     # parser.add_argument("--registered_model_name", type=str, help="Model name.")
     parser.add_argument("--config_path", type=str, help="Path to AML config file.")
@@ -38,13 +40,14 @@ def parse_args():
 def main(args):
     load_dotenv()
 
-    os.environ['AZURE_TENANT_ID'] = utils.fs_config.get('tenant_id')
-    os.environ['AZURE_CLIENT_ID'] = utils.fs_config.get('client_id')
+    # os.environ['AZURE_CLIENT_ID'] = args.azure_client_id
+    # os.environ['AZURE_TENANT_ID'] = args.azure_tenant_id
 
-    ml_client = MLClient.from_config(DefaultAzureCredential(), path=args.config_path)
-    ws = ml_client.workspaces.get(ml_client.workspace_name) 
+    # ml_client = MLClient.from_config(DefaultAzureCredential(), path=args.config_path)
+    # ws = ml_client.workspaces.get(ml_client.workspace_name) 
 
     df = pd.read_parquet(Path(args.data_path))
+    print("Dataframe shape:", df.shape)
     # df = pd.read_csv(args.data_path, header=1, index_col=0)
     # # Create/retrieve the necessary clients and upload the data
     # adls_system_url = f"{utils.fs_config.get('adls_scheme')}://{utils.fs_config.get('adls_account')}.dfs.core.windows.net"
@@ -61,8 +64,8 @@ def main(args):
     # df = pd.read_csv(BytesIO(downloaded_bytes))
 
     # Start Logging
-    mlflow.set_tracking_uri(ws.mlflow_tracking_uri)
-    mlflow.start_run()
+    # mlflow.set_tracking_uri(ws.mlflow_tracking_uri)
+    # mlflow.start_run()
 
     # enable autologging
     mlflow.sklearn.autolog()
@@ -108,9 +111,11 @@ def main(args):
     ###########################
     #</save and register model>
     ###########################
-    mlflow.end_run()
+    # mlflow.end_run()
 
 if __name__ == '__main__':
+
+    mlflow.start_run()
 
     # ---------- Parse Arguments ----------- #
     # -------------------------------------- #
@@ -127,3 +132,5 @@ if __name__ == '__main__':
     args = parse_args()
 
     main(args)
+
+    mlflow.end_run()

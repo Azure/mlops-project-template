@@ -1,19 +1,23 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-experiment_name: taxi-fare-training-feathr
-experiment_name: taxi-fare-training-feathr
-description: Training Pipeline to train a model that predicts taxi fare price, using Feathr as feature store
+experiment_name:
+# description: Training Pipeline to train a model that predicts taxi fare price, using Feathr as feature store
 
 # <inputs_and_outputs>
 inputs:
   input:
     type: uri_file
     path: azureml:feathr-data@latest
-  enable_monitoring: 'false'
+  enable_monitoring: $enable_monitoring
+  key_vault_name: ''
+  synapse_workspace_url: ''
+  adls_account: ''
+  adls_fs_name: ''
+  redis_name: ''
+  webapp_name: ''
   table_name: 'taximonitoring'
-
 outputs:
-  aml_data:
+  train_data:
   trained_model:
   model_info_output_path:
 # </inputs_and_outputs>
@@ -25,25 +29,22 @@ settings:
   continue_on_step_failure: false
 
 jobs:
-
   create_feathr_config:
     name: create_feathr_config
     display_name: create-feathr-config
     code: ../../../data-science/src
     command: >-
+      echo TEST:$(key_vault_name) $(adls_account) $key &&
       python create_feathr_config.py
+      --key_vault_name $(key_vault_name)
+      --synapse_workspace_url $(synapse_workspace_url)
+      --adls_account $(adls_account)
+      --adls_fs_name $(adls_fs_name)
+      --redis_name $(redis_name)
+      --webapp_name $(webapp_name)
       --project_name 'feathr_demo'
       --spark_cluster 'azure_synapse'
       --feathr_config_path 'feathr_config.yaml'
-    environment: azureml:feathr-demo-env@latest
-
-  create_aml_config:
-    name: create_aml_config
-    display_name: create-feathr-config
-    code: ../../../data-science/src
-    command: >-
-      python create_aml_config.py
-      --aml_config_path 'aml_config.json'
     environment: azureml:feathr-demo-env@latest
 
   prep_data:
@@ -53,17 +54,18 @@ jobs:
     command: >-
       pip install -r requirements/feathr-requirements.txt --use-deprecated=legacy-resolver &&
       python prep.py
+      --key_vault_name $(key_vault_name)
+      --synapse_workspace_url $(synapse_workspace_url)
+      --adls_account $(adls_account)
+      --adls_fs_name $(adls_fs_name)
+      --webapp_name $(webapp_name)
       --raw_data ${{inputs.raw_data}}
-      --aml_data ${{outputs.aml_data}}
+      --train_data ${{outputs.train_data}}]
     environment: azureml:feathr-demo-env@latest
     inputs:
       raw_data: ${{parent.inputs.input}}
-    #   enable_monitoring: ${{parent.inputs.enable_monitoring}}
-    #   table_name: ${{parent.inputs.table_name}}
     outputs:
-      train_data: ${{parent.outputs.aml_data}}
-    #   val_data: ${{parent.outputs.val_data}}
-    #   test_data: ${{parent.outputs.test_data}}
+      train_data: ${{parent.outputs.train_data}}
 
   train_model:
     name: train_model

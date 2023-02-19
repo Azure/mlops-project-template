@@ -27,6 +27,12 @@ variables:
   # remove the environment variable when this is no longer required
   ARM_THREEPOINTZERO_BETA_RESOURCES: true
 
+  # data storage settings
+  data_container_name: nyctaxi
+  adls_scheme: https
+  adls_data_directory: feathr_demo_data
+  adls_data_file: feathr_data.csv
+
   # Azure DevOps
   ado_service_connection_rg: Azure-ARM-Dev
   ado_service_connection_aml_ws: Azure-ARM-Dev
@@ -49,3 +55,12 @@ variables:
   terraform_st_storage_account: st$(namespace)$(postfix)$(environment)tf
   terraform_st_container_name: default
   terraform_st_key: mlops-tab
+
+  # For feathr reference
+  resource_prefix: $(namespace)fs
+  key_vault_name: kv-$(resource_prefix)-$(postfix)$(environment)
+  synapse_workspace_url: sy$(resource_prefix)-$(postfix)$(environment)
+  adls_account: st$(resource_prefix)$(postfix)$(environment)
+  adls_fs_name: dl$(resource_prefix)$(postfix)$(environment)
+  redis_name: rd$(resource_prefix)$(postfix)$(environment)
+  webapp_name: app$(resource_prefix)$(postfix)$(environment)

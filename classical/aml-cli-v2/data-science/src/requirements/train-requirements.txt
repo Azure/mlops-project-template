@@ -4,3 +4,4 @@ mlflow
 azureml-mlflow
 mltable
 python-dotenv
+pyyaml
