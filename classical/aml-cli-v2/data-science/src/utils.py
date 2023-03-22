@@ -2,7 +2,7 @@ import yaml
 import os
 import logging
 from pathlib import Path
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
 from azure.keyvault.secrets import SecretClient
 from feathr import FeathrClient
 
@@ -29,16 +29,19 @@ logging.basicConfig(
 def get_credential():
     credential = DefaultAzureCredential(
         exclude_interactive_browser_credential=True)
+    # client_id = "c3830013-88b5-402a-b256-d5031e4f3b19"
+    # credential = ManagedIdentityCredential(client_id=client_id)
     return credential
 
 
 def set_required_feathr_config(
         key_vault_name: str,
-        synapse_workspace_url: str,
+        synapse_workspace_name: str,
         adls_account: str,
         adls_fs_name: str,
         webapp_name: str,
-        credential: DefaultAzureCredential
+        # credential: DefaultAzureCredential
+        credential
 ):
 
     # # Get all the required credentials from Azure Key Vault
@@ -52,9 +55,19 @@ def set_required_feathr_config(
     # # synapse_workspace_url = resource_prefix + "syws"
     # # adls_account = resource_prefix + "dls"
     # # adls_fs_name = resource_prefix + "fs"
+    # Check if given credential can get token successfully.
+    print(type(credential))
+    print("Environment variables: {")
+    for k, v in os.environ.items():
+        print(f"{k}: {v}")
+    print("}")
+    # print("Attempting to get access token...")
+    # print("Access token:", credential.get_token("https://management.azure.com/.default"))
+    # print("Got access token!")
+    print()
 
-    key_vault_uri = f"https://{key_vault_name}.vault.azure.net"
-    client = SecretClient(vault_url=key_vault_uri, credential=credential)
+    key_vault_url = f"https://{key_vault_name}.vault.azure.net"
+    client = SecretClient(vault_url=key_vault_url, credential=credential)
     secretName = "FEATHR-ONLINE-STORE-CONN"
     retrieved_secret = str(client.get_secret(secretName).value)
 
@@ -65,7 +78,7 @@ def set_required_feathr_config(
     redis_ssl = retrieved_secret.split(',')[2].split("ssl=", 1)[1]
 
     # Set appropriate environment variables for overriding feathr config
-    os.environ['spark_config__azure_synapse__dev_url'] = f'https://{synapse_workspace_url}.dev.azuresynapse.net'
+    os.environ['spark_config__azure_synapse__dev_url'] = f'https://{synapse_workspace_name}.dev.azuresynapse.net'
     os.environ['spark_config__azure_synapse__pool_name'] = 'spdev'
     os.environ['spark_config__azure_synapse__workspace_dir'] = f'abfss://{adls_fs_name}@{adls_account}.dfs.core.windows.net/feathr_project'
     os.environ['online_store__redis__host'] = redis_host
@@ -77,13 +90,13 @@ def set_required_feathr_config(
 
 def get_feathr_client( 
     key_vault_name: str,
-    synapse_workspace_url: str,
+    synapse_workspace_name: str,
     adls_account: str,
     adls_fs_name: str,
     webapp_name: str,
 ):
     credential = get_credential()
-    set_required_feathr_config(key_vault_name=key_vault_name, synapse_workspace_url=synapse_workspace_url, adls_account=adls_account, adls_fs_name=adls_fs_name, webapp_name=webapp_name, credential=credential)
+    set_required_feathr_config(key_vault_name=key_vault_name, synapse_workspace_name=synapse_workspace_name, adls_account=adls_account, adls_fs_name=adls_fs_name, webapp_name=webapp_name, credential=credential)
     config_file_path = os.path.join(
         Path(__file__).parent, "feathr_config.yaml")
     logging.info("config path: {}".format(config_file_path))

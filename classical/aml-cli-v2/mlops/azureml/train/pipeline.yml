@@ -1,6 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-experiment_name:
+experiment_name: ''
 # description: Training Pipeline to train a model that predicts taxi fare price, using Feathr as feature store
 
 # <inputs_and_outputs>
@@ -10,12 +10,15 @@ inputs:
     path: azureml:feathr-data@latest
   enable_monitoring: $enable_monitoring
   key_vault_name: ''
-  synapse_workspace_url: ''
+  synapse_workspace_name: ''
   adls_account: ''
   adls_fs_name: ''
   redis_name: ''
   webapp_name: ''
   table_name: 'taximonitoring'
+  # sp_client_id: ''
+  # sp_client_secret: ''
+  # tenant_id: ''
 outputs:
   train_data:
   trained_model:
@@ -34,17 +37,23 @@ jobs:
     display_name: create-feathr-config
     code: ../../../data-science/src
     command: >-
-      echo TEST:$(key_vault_name) $(adls_account) $key &&
       python create_feathr_config.py
-      --key_vault_name $(key_vault_name)
-      --synapse_workspace_url $(synapse_workspace_url)
-      --adls_account $(adls_account)
-      --adls_fs_name $(adls_fs_name)
-      --redis_name $(redis_name)
-      --webapp_name $(webapp_name)
+      --key_vault_name ${{inputs.key_vault_name}}
+      --synapse_workspace_name ${{inputs.synapse_workspace_name}}
+      --adls_account ${{inputs.adls_account}}
+      --adls_fs_name ${{inputs.adls_fs_name}}
+      --redis_name ${{inputs.redis_name}}
+      --webapp_name ${{inputs.webapp_name}}
       --project_name 'feathr_demo'
       --spark_cluster 'azure_synapse'
       --feathr_config_path 'feathr_config.yaml'
+    inputs:
+      key_vault_name: ${{parent.inputs.key_vault_name}}
+      synapse_workspace_name: ${{parent.inputs.synapse_workspace_name}}
+      adls_account: ${{parent.inputs.adls_account}}
+      adls_fs_name: ${{parent.inputs.adls_fs_name}}
+      redis_name: ${{parent.inputs.redis_name}}
+      webapp_name: ${{parent.inputs.webapp_name}}
     environment: azureml:feathr-demo-env@latest
 
   prep_data:
@@ -54,16 +63,27 @@ jobs:
     command: >-
       pip install -r requirements/feathr-requirements.txt --use-deprecated=legacy-resolver &&
       python prep.py
-      --key_vault_name $(key_vault_name)
-      --synapse_workspace_url $(synapse_workspace_url)
-      --adls_account $(adls_account)
-      --adls_fs_name $(adls_fs_name)
-      --webapp_name $(webapp_name)
+      --key_vault_name ${{inputs.key_vault_name}}
+      --synapse_workspace_name ${{inputs.synapse_workspace_name}}
+      --adls_account ${{inputs.adls_account}}
+      --adls_fs_name ${{inputs.adls_fs_name}}
+      --webapp_name ${{inputs.webapp_name}}
       --raw_data ${{inputs.raw_data}}
-      --train_data ${{outputs.train_data}}]
+      --train_data ${{outputs.train_data}}
+      # --sp_client_id ${{inputs.sp_client_id}}
+      # --sp_client_secret ${{inputs.sp_client_secret}}
+      # --tenant_id ${{inputs.tenant_id}}
     environment: azureml:feathr-demo-env@latest
     inputs:
+      key_vault_name: ${{parent.inputs.key_vault_name}}
+      synapse_workspace_name: ${{parent.inputs.synapse_workspace_name}}
+      adls_account: ${{parent.inputs.adls_account}}
+      adls_fs_name: ${{parent.inputs.adls_fs_name}}
+      webapp_name: ${{parent.inputs.webapp_name}}
       raw_data: ${{parent.inputs.input}}
+      # sp_client_id: ${{parent.inputs.sp_client_id}}
+      # sp_client_secret: ${{parent.inputs.sp_client_secret}}
+      # tenant_id: ${{parent.inputs.tenant_id}}
     outputs:
       train_data: ${{parent.outputs.train_data}}
 

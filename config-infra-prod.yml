@@ -6,9 +6,9 @@ variables:
   # Global
   ap_vm_image: ubuntu-20.04
 
-  namespace: mlopsv2 #Note: A namespace with many characters will cause storage account creation to fail due to storage account names having a limit of 24 characters.
-  postfix: 001
-  location: eastus
+  namespace: rizo13 #Note: A namespace with many characters will cause storage account creation to fail due to storage account names having a limit of 24 characters.
+  postfix: 002
+  location: canadacentral
   environment: prod
   enable_aml_computecluster: true
   enable_monitoring: false
@@ -20,9 +20,9 @@ variables:
   feathr_app_image: feathrfeaturestore/feathr-registry
   feathr_app_image_tag: releases-v0.9.0
   react_enable_rbac: true
-  aad_client_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx # refer to prefeaturestore readme for details
+  aad_client_id: 2327c20b-fa88-46eb-8a3a-57283a716619 # refer to prefeaturestore readme for details
   spark_version: 3.1
-  priviledged_object_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx # AAD Object ID for user, used to set pividges for user in KV and Synapse for feature store components
+  priviledged_object_id: 7cbdebc0-e724-4683-9094-4c0cb8a4266f # AAD Object ID for user, used to set pividges for user in KV and Synapse for feature store components
   # added flag for this:  https://registry.terraform.io/providers/hashicorp/azurerm/2.99.0/docs/guides/3.0-app-service-beta
   # remove the environment variable when this is no longer required
   ARM_THREEPOINTZERO_BETA_RESOURCES: true
@@ -59,8 +59,9 @@ variables:
   # For feathr reference
   resource_prefix: $(namespace)fs
   key_vault_name: kv-$(resource_prefix)-$(postfix)$(environment)
-  synapse_workspace_url: sy$(resource_prefix)-$(postfix)$(environment)
+  synapse_workspace_name: sy$(resource_prefix)-$(postfix)$(environment)
   adls_account: st$(resource_prefix)$(postfix)$(environment)
   adls_fs_name: dl$(resource_prefix)$(postfix)$(environment)
   redis_name: rd$(resource_prefix)$(postfix)$(environment)
   webapp_name: app$(resource_prefix)$(postfix)$(environment)
+  # sp_name: sp$(resource_prefix)$(postfix)$(environment)

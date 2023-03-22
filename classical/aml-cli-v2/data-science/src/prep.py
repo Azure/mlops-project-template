@@ -46,12 +46,15 @@ def parse_args():
     # parser.add_argument("--azure_client_id", type=str)
     # parser.add_argument("--azure_tenant_id", type=str)
     parser.add_argument("--key_vault_name", type=str)
-    parser.add_argument("--synapse_workspace_url", type=str)
+    parser.add_argument("--synapse_workspace_name", type=str)
     parser.add_argument("--adls_account", type=str)
     parser.add_argument("--adls_fs_name", type=str)
     parser.add_argument("--webapp_name", type=str)
     parser.add_argument("--raw_data", type=str)
     parser.add_argument("--train_data", type=str)
+    parser.add_argument("--sp_client_id", type=str)
+    parser.add_argument("--sp_client_secret", type=str)
+    parser.add_argument("--tenant_id", type=str)
     args = parser.parse_args()
 
     return args
@@ -65,8 +68,9 @@ def set_environment_variables():
     # os.environ['AZURE_TENANT_ID'] = utils.fs_config.get("tenant_id")
 
     # # TODO: add client secret, adls key to environment variables
-    # os.environ['AZURE_CLIENT_ID'] = args.azure_client_id
-    # os.environ['AZURE_TENANT_ID'] = args.azure_tenant_id
+    os.environ['AZURE_CLIENT_ID'] = args.sp_client_id
+    os.environ['AZURE_CLIENT_SECRET'] = args.sp_client_secret
+    os.environ['AZURE_TENANT_ID'] = args.tenant_id
     os.environ['ADLS_ACCOUNT'] = args.adls_account
 
 def set_spark_session():
@@ -98,7 +102,9 @@ def get_data_source_path(feathr_client):
 
 
 def main(args):
-    feathr_client = utils.get_feathr_client(key_vault_name=args.key_vault_name, synapse_workspace_url=args.synapse_workspace_url, adls_account=args.adls_account, adls_fs_name=args.adls_fs_name, webapp_name=args.webapp_name)
+    import feathr
+    print("Feathr version:", feathr.__version__)
+    feathr_client = utils.get_feathr_client(key_vault_name=args.key_vault_name, synapse_workspace_name=args.synapse_workspace_name, adls_account=args.adls_account, adls_fs_name=args.adls_fs_name, webapp_name=args.webapp_name)
 
     set_spark_session()
     data_source_path = get_data_source_path(feathr_client)

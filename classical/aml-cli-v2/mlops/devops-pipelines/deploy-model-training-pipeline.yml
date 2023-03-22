@@ -26,6 +26,8 @@ resources:
       type: github
       ref: feature/feathr
 
+      
+
 stages:
   - stage: DeployTrainingPipeline
     displayName: Deploy Training Pipeline
@@ -56,6 +58,9 @@ stages:
               data_type: uri_file
               data_name: feathr-data
               data_file: mlops/azureml/train/data.yml
+          # - template: templates/${{ variables.version }}/create-service-principal.yml@mlops-templates
+          #   parameters:
+          #     sp_name: $(sp_name)
           - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
             parameters:
               pipeline_file: mlops/azureml/train/pipeline.yml
@@ -63,8 +68,11 @@ stages:
               display_name: $(environment)_taxi_fare_run_$(Build.BuildID)
               enable_monitoring: $(enable_monitoring)
               key_vault_name: $(key_vault_name)
-              synapse_workspace_url: $(synapse_workspace_url)
+              synapse_workspace_name: $(synapse_workspace_name)
               adls_account: $(adls_account)
               adls_fs_name: $(adls_fs_name)
               redis_name: $(redis_name)
               webapp_name: $(webapp_name)
+              # sp_client_id: $(service_principal_id)
+              # sp_client_secret: $(service_principal_secret)
+              # tenant_id: $(tenant_id)
