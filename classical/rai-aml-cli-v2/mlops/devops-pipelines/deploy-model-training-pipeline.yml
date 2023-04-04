@@ -37,6 +37,14 @@ stages:
         steps:
           - checkout: self
             path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
           - checkout: mlops-templates
             path: s/templates/
           - template: templates/tests/unit-tests.yml@mlops-templates
@@ -64,6 +72,14 @@ stages:
           - template: register-rai-components.yml
           - checkout: self
             path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
           - checkout: mlops-templates
             path: s/templates/
           - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates

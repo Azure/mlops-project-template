@@ -30,6 +30,14 @@ stages:
         steps:
           - checkout: self
             path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
           - checkout: mlops-templates
             path: s/templates/
           - template: templates/infra/create-resource-group.yml@mlops-templates
@@ -43,6 +51,14 @@ stages:
         steps:
           - checkout: self
             path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
           - checkout: mlops-templates
             path: s/templates/
           - template: templates/infra/create-sp-variables.yml@mlops-templates
