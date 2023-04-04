@@ -12,8 +12,7 @@ variables:
   - name: version
     value: python-sdk-v1
 
-trigger:
-  - none
+trigger: none
 
 pool:
   vmImage: $(ap_vm_image)

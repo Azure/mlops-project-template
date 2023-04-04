@@ -11,8 +11,7 @@ variables:
   - name: version
     value: aml-cli-v2
 
-trigger:
-  - none
+trigger: none
 
 pool:
   vmImage: ubuntu-20.04

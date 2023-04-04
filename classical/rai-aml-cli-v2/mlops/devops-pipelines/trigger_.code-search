@@ -1,0 +1,84 @@
+# Query: trigger:
+# ContextLines: 1
+
+20 results - 20 files
+
+classical/aml-cli-v2/mlops/devops-pipelines/deploy-batch-endpoint-pipeline.yml:
+  17  
+  18: trigger: none
+
+classical/aml-cli-v2/mlops/devops-pipelines/deploy-model-training-pipeline.yml:
+  13  
+  14: trigger: none
+
+classical/aml-cli-v2/mlops/devops-pipelines/deploy-online-endpoint-pipeline.yml:
+  17  
+  18: trigger: none
+
+classical/python-sdk-v1/mlops/devops-pipelines/deploy-drift-detection.yml:
+  14  
+  15: trigger: none
+
+classical/python-sdk-v1/mlops/devops-pipelines/deploy-model-batch-scoring.yml:
+  14  
+  15: trigger: none
+
+classical/python-sdk-v1/mlops/devops-pipelines/deploy-model-training-pipeline.yml:
+  14  
+  15: trigger: none
+
+classical/python-sdk-v2/mlops/devops-pipelines/deploy-batch-endpoint-pipeline.yml:
+  15  
+  16: trigger: none
+
+classical/python-sdk-v2/mlops/devops-pipelines/deploy-model-training-pipeline.yml:
+  13  
+  14: trigger: none
+
+classical/python-sdk-v2/mlops/devops-pipelines/deploy-online-endpoint-pipeline.yml:
+  15  
+  16: trigger: none
+
+classical/rai-aml-cli-v2/mlops/devops-pipelines/deploy-batch-endpoint-pipeline.yml:
+  17  
+  18: trigger: none
+
+classical/rai-aml-cli-v2/mlops/devops-pipelines/deploy-model-training-pipeline.yml:
+  13  
+  14: trigger: none
+
+classical/rai-aml-cli-v2/mlops/devops-pipelines/deploy-online-endpoint-pipeline.yml:
+  17  
+  18: trigger: none
+
+cv/aml-cli-v2/mlops/devops-pipelines/deploy-model-training-pipeline.yml:
+  13  
+  14: trigger: none
+
+cv/aml-cli-v2/mlops/devops-pipelines/deploy-online-endpoint-pipeline.yml:
+  17  
+  18: trigger: none
+
+cv/python-sdk-v1/mlops/devops-pipelines/deploy-model-training-pipeline.yml:
+  14  
+  15: trigger: none
+
+infrastructure/bicep/pipelines/bicep-ado-deploy-infra.yml:
+  11  
+  12: trigger: none
+
+infrastructure/terraform/devops-pipelines/tf-ado-deploy-infra.yml:
+  11  
+  12: trigger: none
+
+nlp/aml-cli-v2/mlops/devops-pipelines/deploy-model-training-pipeline.yml:
+  13  
+  14: trigger: none
+
+nlp/aml-cli-v2/mlops/devops-pipelines/deploy-online-endpoint-pipeline.yml:
+  17  
+  18: trigger: none
+
+nlp/python-sdk-v2/mlops/devops-pipelines/deploy-model-training-pipeline.yml:
+  13  
+  14: trigger: none
