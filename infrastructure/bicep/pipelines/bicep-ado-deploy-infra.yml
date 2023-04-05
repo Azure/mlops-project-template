@@ -11,8 +11,7 @@ variables:
       # 'develop' or feature branches: DEV environment
       - template: ../../config-infra-dev.yml
 
-trigger:
-  - none
+trigger: none
 
 pool:
   vmImage: $(ap_vm_image)
