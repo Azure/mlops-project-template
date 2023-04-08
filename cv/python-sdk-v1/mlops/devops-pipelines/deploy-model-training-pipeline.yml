@@ -1,6 +1,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+name: deploy-model-training-pipeline
+
 variables:
   - template: ../../config-aml.yml
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
@@ -12,8 +14,7 @@ variables:
   - name: version
     value: python-sdk-v1
 
-trigger:
-  - none
+trigger: none
 
 pool:
   vmImage: $(ap_vm_image)
@@ -21,9 +22,8 @@ pool:
 resources:
   repositories:
     - repository: mlops-templates # Template Repo
-      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
-      endpoint: github-connection # need to set up and hardcode
-      type: github
+      name: mlops-templates
+      type: git
       ref: main
 
 stages:
@@ -35,6 +35,14 @@ stages:
           # Setup
           - checkout: self
             path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
           - checkout: mlops-templates
             path: s/templates/
           - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates

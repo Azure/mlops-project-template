@@ -1,6 +1,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+name: deploy-online-endpoint-pipeline
+
 variables:
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
@@ -13,8 +15,7 @@ variables:
   - name: endpoint_name
     value: taxi-online-$(namespace)$(postfix)$(environment)
 
-trigger:
-  - none
+trigger: none
 
 pool:
   vmImage: ubuntu-20.04
@@ -22,9 +23,8 @@ pool:
 resources:
   repositories:
     - repository: mlops-templates # Template Repo
-      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
-      endpoint: github-connection # need to set up and hardcode
-      type: github
+      name: mlops-templates
+      type: git
       ref: main
 
 stages:
@@ -35,6 +35,14 @@ stages:
         steps:
           - checkout: self
             path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
           - checkout: mlops-templates
             path: s/templates/
           - template: templates/aml-cli-v2/install-az-cli.yml@mlops-templates

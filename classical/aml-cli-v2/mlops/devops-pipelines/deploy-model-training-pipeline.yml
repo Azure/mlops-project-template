@@ -1,6 +1,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+name: deploy-model-training-pipeline
+
 variables:
   - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       # 'main' branch: PRD environment
@@ -11,8 +13,7 @@ variables:
   - name: version
     value: aml-cli-v2
 
-trigger:
-  - none
+trigger: none
 
 pool:
   vmImage: ubuntu-20.04
@@ -20,9 +21,8 @@ pool:
 resources:
   repositories:
     - repository: mlops-templates # Template Repo
-      name: Azure/mlops-templates # need to change org name from "Azure" to your own org
-      endpoint: github-connection # need to set up and hardcode
-      type: github
+      name: mlops-templates
+      type: git
       ref: main
 
 stages:
@@ -34,6 +34,14 @@ stages:
         steps:
           - checkout: self
             path: s/
+          - task: Bash@3
+            displayName: "Prevent repos dir warnings"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
           - checkout: mlops-templates
             path: s/templates/
           - template: templates/${{ variables.version }}/install-az-cli.yml@mlops-templates
