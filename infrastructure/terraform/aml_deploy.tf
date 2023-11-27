@@ -69,6 +69,19 @@ module "key_vault" {
   tags = local.tags
 }
 
+module "log_analytics_workspace" {
+  source = "./modules/log-analytics-workspace"
+
+  rg_name  = module.resource_group.name
+  location = module.resource_group.location
+
+  prefix  = var.prefix
+  postfix = var.postfix
+  env = var.environment
+
+  tags = local.tags
+}
+
 # Application insights
 
 module "application_insights" {
@@ -80,6 +93,8 @@ module "application_insights" {
   prefix  = var.prefix
   postfix = var.postfix
   env = var.environment
+
+  log_analytics_workspace_id = module.log_analytics_workspace.id
 
   tags = local.tags
 }
