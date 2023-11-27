@@ -45,6 +45,17 @@ module kv './modules/key_vault.bicep' = {
   }
 }
 
+// Log Analytics Workspace
+module log './modules/log_analytics_workspace.bicep' = {
+  name: 'log'
+  scope: resourceGroup(rg.name)
+  params: {
+    baseName: baseName
+    location: location
+    tags: tags
+  }
+}
+
 // App Insights
 module appi './modules/application_insights.bicep' = {
   name: 'appi'
@@ -52,6 +63,7 @@ module appi './modules/application_insights.bicep' = {
   params: {
     baseName: baseName
     location: location
+    workspaceResourceId: log.outputs.logOut
     tags: tags
   }
 }
