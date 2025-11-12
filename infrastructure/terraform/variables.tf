@@ -24,8 +24,6 @@ variable "enable_aml_computecluster" {
 
 variable "enable_monitoring" {
   description = "Variable to enable or disable Monitoring"
-}
-
-variable "client_secret" {
-  description = "Service Principal Secret"
+  type        = bool
+  default     = false
 }

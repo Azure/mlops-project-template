@@ -39,7 +39,3 @@ variable "enable_monitoring" {
   default     = false
 }
 
-variable "client_secret" {
-  description = "client secret"
-  default     = false
-}

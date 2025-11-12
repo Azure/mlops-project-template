@@ -111,7 +111,5 @@ module "data_explorer" {
   key_vault_id      = module.key_vault.id
   enable_monitoring = var.enable_monitoring
 
-  client_secret = var.client_secret
-
   tags = local.tags
 }

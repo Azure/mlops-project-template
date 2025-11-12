@@ -7,7 +7,10 @@ resource "azurerm_machine_learning_workspace" "mlw" {
   storage_account_id      = var.storage_account_id
   container_registry_id   = var.container_registry_id
 
-  sku_name = "Basic"
+  sku_name                          = "Basic"
+  public_network_access_enabled     = true
+  image_build_compute_name          = null
+  v1_legacy_mode_enabled            = false
 
   identity {
     type = "SystemAssigned"
@@ -22,7 +25,7 @@ resource "azurerm_machine_learning_compute_cluster" "adl_aml_ws_compute_cluster"
   name                          = "cpu-cluster"
   location                      = var.location
   vm_priority                   = "LowPriority"
-  vm_size                       = "Standard_DS3_v2"
+  vm_size                       = "Standard_D4s_v5"
   machine_learning_workspace_id = azurerm_machine_learning_workspace.mlw.id
   count                         = var.enable_aml_computecluster ? 1 : 0
 
@@ -31,6 +34,24 @@ resource "azurerm_machine_learning_compute_cluster" "adl_aml_ws_compute_cluster"
     max_node_count                       = 4
     scale_down_nodes_after_idle_duration = "PT120S" # 120 seconds
   }
+}
+
+# Private endpoint for ML Workspace
+resource "azurerm_private_endpoint" "mlw_pe" {
+  count               = var.enable_private_endpoints ? 1 : 0
+  name                = "pe-${azurerm_machine_learning_workspace.mlw.name}"
+  location            = var.location
+  resource_group_name = var.rg_name
+  subnet_id           = var.private_endpoint_subnet_id
+
+  private_service_connection {
+    name                           = "psc-${azurerm_machine_learning_workspace.mlw.name}"
+    private_connection_resource_id = azurerm_machine_learning_workspace.mlw.id
+    subresource_names              = ["amlworkspace"]
+    is_manual_connection           = false
+  }
+
+  tags = var.tags
 }
 
 # # Datastore

@@ -42,3 +42,15 @@ variable "firewall_virtual_network_subnet_ids" {
 variable "firewall_bypass" {
   default = ["None"]
 }
+
+variable "enable_private_endpoints" {
+  type        = bool
+  description = "Enable private endpoints for storage account"
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  type        = string
+  description = "Subnet ID for private endpoints"
+  default     = ""
+}

@@ -58,3 +58,15 @@ variable "storage_account_name" {
   type        = string
   description = "The Name of the Storage Account linked to AML workspace"
 }
+
+variable "enable_private_endpoints" {
+  type        = bool
+  description = "Enable private endpoints for ML Workspace"
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  type        = string
+  description = "Subnet ID for private endpoints"
+  default     = ""
+}

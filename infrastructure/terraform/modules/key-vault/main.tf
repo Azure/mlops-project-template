@@ -1,28 +1,44 @@
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "kv" {
-  name                = "kv-${var.prefix}-${var.postfix}${var.env}"
-  location            = var.location
-  resource_group_name = var.rg_name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  sku_name            = "standard"
+  name                       = "kv-${var.prefix}-${var.postfix}${var.env}"
+  location                   = var.location
+  resource_group_name        = var.rg_name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  purge_protection_enabled   = true
+  soft_delete_retention_days = 90
 
   tags = var.tags
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
+}
 
-    key_permissions = [
-      "Create",
-      "Get",
-    ]
+# RBAC role assignment for current user/service principal
+resource "azurerm_role_assignment" "kv_secrets_officer" {
+  scope                = azurerm_key_vault.kv.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
 
-    secret_permissions = [
-      "Set",
-      "Get",
-      "Delete",
-      "Purge",
-      "Recover"
-    ]
+resource "azurerm_role_assignment" "kv_crypto_officer" {
+  scope                = azurerm_key_vault.kv.id
+  role_definition_name = "Key Vault Crypto Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+# Private endpoint for Key Vault
+resource "azurerm_private_endpoint" "kv_pe" {
+  count               = var.enable_private_endpoints ? 1 : 0
+  name                = "pe-${azurerm_key_vault.kv.name}"
+  location            = var.location
+  resource_group_name = var.rg_name
+  subnet_id           = var.private_endpoint_subnet_id
+
+  private_service_connection {
+    name                           = "psc-${azurerm_key_vault.kv.name}"
+    private_connection_resource_id = azurerm_key_vault.kv.id
+    subresource_names              = ["vault"]
+    is_manual_connection           = false
   }
+
+  tags = var.tags
 }
