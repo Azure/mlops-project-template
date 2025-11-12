@@ -22,12 +22,12 @@ jobs:
           echo "config-file=$config_env" >> $GITHUB_OUTPUT;
   get-config:
     needs: set-env-branch
-    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+    uses: pgabriel-01/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   register-environment:
     needs: get-config
-    uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main
+    uses: pgabriel-01/mlops-templates/.github/workflows/register-environment.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
@@ -39,7 +39,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   register-dataset:
     needs: get-config
-    uses: Azure/mlops-templates/.github/workflows/register-dataset.yml@main
+    uses: pgabriel-01/mlops-templates/.github/workflows/register-dataset.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
@@ -51,7 +51,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   create-compute:
     needs: [get-config]
-    uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
+    uses: pgabriel-01/mlops-templates/.github/workflows/create-compute.yml@main
     with:
       cluster_name: cpu-cluster
       size: Standard_D4s_v5
@@ -66,7 +66,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   run-model-training-pipeline:
     needs: [get-config, register-environment, register-dataset, create-compute]
-    uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main
+    uses: pgabriel-01/mlops-templates/.github/workflows/run-pipeline.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
