@@ -1,7 +1,6 @@
 name: tf-gha-deploy-infra.yml
 
 on:
-  #push:
   workflow_dispatch:
 env:
   config_env: "none"
