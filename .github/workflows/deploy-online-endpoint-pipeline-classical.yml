@@ -1,0 +1,60 @@
+name: deploy-online-endpoint-pipeline
+
+on:
+  workflow_dispatch:
+jobs:
+  set-env-branch:
+    runs-on: ubuntu-latest
+    outputs:
+      config-file: ${{ steps.set-output-defaults.outputs.config-file }}
+    steps:
+      - id: set-prod-branch
+        name: set-prod-branch
+        if: ${{ github.ref == 'refs/heads/main'}}
+        run: echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV;
+      - id: set-dev-branch
+        name: setdevbranch
+        if: ${{ github.ref != 'refs/heads/main'}}
+        run: echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV;
+      - id: set-output-defaults
+        name: set-output-defaults
+        run: |
+          echo "config-file=$config_env" >> $GITHUB_OUTPUT;
+  get-config:
+    needs: set-env-branch
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+    with:
+      file_name: ${{ needs.set-env-branch.outputs.config-file}}
+  create-endpoint:
+    needs: get-config
+    uses: Azure/mlops-templates/.github/workflows/create-endpoint.yml@main
+    with:
+      resource_group: ${{ needs.get-config.outputs.resource_group }}
+      workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
+      endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
+      endpoint_name: ${{ format('taxi-gha-{0}', needs.get-config.outputs.oep) }}
+      endpoint_type: online
+    secrets:
+      creds: ${{secrets.AZURE_CREDENTIALS}}
+  create-deployment:
+    uses: Azure/mlops-templates/.github/workflows/create-deployment.yml@main
+    needs: [get-config, create-endpoint]
+    with:
+      resource_group: ${{ needs.get-config.outputs.resource_group }}
+      workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
+      endpoint_file: mlops/azureml/deploy/online/online-deployment.yml
+      endpoint_name: ${{ format('taxi-gha-{0}', needs.get-config.outputs.oep) }}
+      endpoint_type: online
+      deployment_name: taxi-online-dp
+    secrets:
+      creds: ${{secrets.AZURE_CREDENTIALS}}
+  allocate-traffic:
+    uses: Azure/mlops-templates/.github/workflows/allocate-traffic.yml@main
+    needs: [get-config, create-deployment]
+    with:
+      resource_group: ${{ needs.get-config.outputs.resource_group }}
+      workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
+      traffic_allocation: taxi-online-dp=100
+      endpoint_name: ${{ format('taxi-gha-{0}', needs.get-config.outputs.oep) }}
+    secrets:
+      creds: ${{secrets.AZURE_CREDENTIALS}}
