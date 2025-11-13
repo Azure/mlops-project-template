@@ -64,7 +64,7 @@ def parse_args():
                         help='Method of selecting samples for training each tree')
     parser.add_argument('--regressor__max_depth', type=int, default=10,
                         help=' Maximum number of levels in tree')
-    parser.add_argument('--regressor__max_features', type=str, default='auto',
+    parser.add_argument('--regressor__max_features', type=str, default='sqrt',
                         help='Number of features to consider at every split')
     parser.add_argument('--regressor__min_samples_leaf', type=int, default=4,
                         help='Minimum number of samples required at each leaf node')
