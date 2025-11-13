@@ -3,7 +3,7 @@ channels:
   - anaconda
   - conda-forge
 dependencies:
-  - python=3.9
+  - python=3.11
   - pip
   - pip:
       - azureml-mlflow==1.57.0
