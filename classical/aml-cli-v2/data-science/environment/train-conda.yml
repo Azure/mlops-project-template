@@ -6,16 +6,16 @@ dependencies:
   - python=3.11
   - pip
   - pip:
-      - protobuf==3.20.3
       - mlflow==2.9.2
+      - protobuf==3.20.3
       - azureml-mlflow==1.57.0
-      - azure-ai-ml==1.21.1
+      - azure-ai-ml==1.23.0
       - azure-identity==1.19.0
       - azureml-core==1.57.0
       - pyarrow==18.1.0
       - scikit-learn==1.5.2
       - pandas==2.2.3
       - joblib==1.4.2
-      - matplotlib==3.9.3
+      - matplotlib==3.9.2
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-client
       - git+https://github.com/microsoft/AzureML-Observability#subdirectory=aml-obs-collector
