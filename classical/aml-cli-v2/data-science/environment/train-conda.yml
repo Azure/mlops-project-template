@@ -6,6 +6,7 @@ dependencies:
   - python=3.11
   - pip
   - pip:
+      - protobuf==3.20.3
       - azureml-mlflow==1.57.0
       - azure-ai-ml==1.21.1
       - azure-identity==1.19.0
