@@ -7,6 +7,7 @@ dependencies:
   - pip
   - pip:
       - protobuf==3.20.3
+      - mlflow==2.9.2
       - azureml-mlflow==1.57.0
       - azure-ai-ml==1.21.1
       - azure-identity==1.19.0
