@@ -10,15 +10,16 @@ locals {
 }
 
 resource "azurerm_storage_account" "st" {
-  name                     = "st${local.safe_prefix}${local.safe_postfix}${var.env}"
-  resource_group_name      = var.rg_name
-  location                 = var.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  account_kind             = "StorageV2"
-  is_hns_enabled           = var.hns_enabled
-  min_tls_version          = "TLS1_2"
+  name                          = "st${local.safe_prefix}${local.safe_postfix}${var.env}"
+  resource_group_name           = var.rg_name
+  location                      = var.location
+  account_tier                  = "Standard"
+  account_replication_type      = "LRS"
+  account_kind                  = "StorageV2"
+  is_hns_enabled                = var.hns_enabled
+  min_tls_version               = "TLS1_2"
   public_network_access_enabled = var.enable_private_endpoints ? false : true
+  shared_access_key_enabled     = false  # Disable key-based authentication, use managed identity instead
   
   blob_properties {
     delete_retention_policy {

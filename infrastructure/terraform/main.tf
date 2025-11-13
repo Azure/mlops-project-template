@@ -1,5 +1,5 @@
 terraform {
-  backend "azurerm" {} 
+  # backend "azurerm" {}  # Commented out for local deployment - uses local state
   required_version = ">= 1.10.0"
   required_providers {
     azurerm = {
@@ -9,6 +9,10 @@ terraform {
     random = {
       source  = "hashicorp/random"
       version = "~> 3.7.2"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9.0"
     }
   }
 }
@@ -23,7 +27,8 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
-  use_oidc = true
+  use_oidc            = true
+  storage_use_azuread = true  # Use Azure AD authentication for storage operations instead of keys
 }
 
 data "azurerm_client_config" "current" {}
