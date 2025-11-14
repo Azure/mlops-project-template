@@ -44,11 +44,13 @@ def main(args):
         model =  mlflow.sklearn.load_model(args.model_path) 
 
         # Define explicit pip requirements to control dependencies
+        # Include pyarrow with compatible wheel version to avoid source build
         pip_reqs = [
             "mlflow==2.9.2",
             "scikit-learn==1.5.2",
             "numpy==1.26.4",
             "cloudpickle==3.1.0",
+            "pyarrow==14.0.2",  # Include pyarrow to prevent MLflow from auto-detecting incompatible version
         ]
 
         # log model using mlflow with explicit pip requirements
