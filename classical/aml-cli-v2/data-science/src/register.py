@@ -56,12 +56,10 @@ def main(args):
     ]
 
     # log model using mlflow with explicit pip requirements
-    # Use extra_pip_requirements=[] to prevent MLflow from adding detected packages
     mlflow.sklearn.log_model(
         model, 
         args.model_name,
-        pip_requirements=pip_reqs,
-        extra_pip_requirements=[]  # Critical: prevents MLflow from adding auto-detected packages
+        pip_requirements=pip_reqs
     )        # register logged model using mlflow
         run_id = mlflow.active_run().info.run_id
         model_uri = f'runs:/{run_id}/{args.model_name}'

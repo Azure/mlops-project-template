@@ -142,12 +142,10 @@ def main(args):
     ]
 
     # Save the model with explicit pip requirements only
-    # Use extra_pip_requirements=[] to prevent MLflow from adding detected packages
     mlflow.sklearn.save_model(
         sk_model=model, 
         path=args.model_output,
-        pip_requirements=pip_reqs,
-        extra_pip_requirements=[]  # Critical: prevents MLflow from adding auto-detected packages
+        pip_requirements=pip_reqs
     )
 
 
