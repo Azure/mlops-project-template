@@ -43,26 +43,22 @@ def main(args):
         # load model
         model =  mlflow.sklearn.load_model(args.model_path) 
 
-        # Define conda environment explicitly to avoid dependency conflicts
-        conda_env = {
-            "channels": ["conda-forge"],
-            "dependencies": [
-                "python=3.11",
-                "pip",
-                {
-                    "pip": [
-                        "mlflow==2.9.2",
-                        "scikit-learn==1.5.2",
-                        "numpy==1.26.4",
-                        "cloudpickle==3.1.0",
-                    ]
-                }
-            ],
-            "name": "mlflow-env"
-        }
+        # Define minimal pip requirements to avoid dependency conflicts
+        # Use pip_requirements instead of conda_env for better control
+        pip_requirements = [
+            "mlflow==2.9.2",
+            "scikit-learn==1.5.2", 
+            "numpy==1.26.4",
+            "cloudpickle==3.1.0",
+        ]
 
-        # log model using mlflow with explicit conda environment
-        mlflow.sklearn.log_model(model, args.model_name, conda_env=conda_env)
+        # log model using mlflow with explicit pip requirements
+        mlflow.sklearn.log_model(
+            model, 
+            args.model_name, 
+            pip_requirements=pip_requirements,
+            infer_pip_requirements=False  # Don't auto-infer to avoid conflicts
+        )
 
         # register logged model using mlflow
         run_id = mlflow.active_run().info.run_id
