@@ -1,0 +1,11 @@
+$schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json
+name: batch-cluster
+type: amlcompute
+size: STANDARD_DS4_V2
+min_instances: 0
+max_instances: 10
+tier: dedicated
+identity:
+  type: user_assigned
+  user_assigned_identities:
+    - resource_id: /subscriptions/c5b4600d-5da3-4298-921b-b2656cfdf1a1/resourceGroups/rg-ml-82406dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uai-ml-82406dev

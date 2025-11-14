@@ -2,10 +2,9 @@ $schema: https://azuremlschemas.azureedge.net/latest/batchDeployment.schema.json
 name: batch-dp
 endpoint_name: taxi-fare-batch
 model: azureml:taxi-model@latest
-environment: azureml:taxi-train-env@latest
-compute: azureml:cpu-cluster
+compute: azureml:batch-cluster
 resources:
-  instance_count: 1
+  instance_count: 2
 max_concurrency_per_instance: 2
 mini_batch_size: 10
 output_action: append_row
