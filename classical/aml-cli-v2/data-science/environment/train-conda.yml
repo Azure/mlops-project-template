@@ -7,6 +7,7 @@ dependencies:
   - pip
   - pip:
       - mlflow==2.9.2
+      - mlflow-skinny==2.9.2
       - protobuf==3.20.3
       - azureml-mlflow==1.57.0
       - azure-ai-ml==1.23.0
