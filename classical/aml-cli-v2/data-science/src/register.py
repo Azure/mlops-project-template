@@ -44,7 +44,6 @@ def main(args):
         model =  mlflow.sklearn.load_model(args.model_path) 
 
         # Define minimal pip requirements to avoid dependency conflicts
-        # Use pip_requirements instead of conda_env for better control
         pip_requirements = [
             "mlflow==2.9.2",
             "scikit-learn==1.5.2", 
@@ -52,12 +51,11 @@ def main(args):
             "cloudpickle==3.1.0",
         ]
 
-        # log model using mlflow with explicit pip requirements
+        # log model using mlflow with explicit pip requirements only
         mlflow.sklearn.log_model(
             model, 
             args.model_name, 
-            pip_requirements=pip_requirements,
-            infer_pip_requirements=False  # Don't auto-infer to avoid conflicts
+            pip_requirements=pip_requirements
         )
 
         # register logged model using mlflow
