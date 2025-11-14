@@ -12,7 +12,7 @@ dependencies:
       - azureml-sdk==1.57.0
       - azure-identity==1.19.0
       - azureml-core==1.57.0
-      - pyarrow==18.1.0
+      - pyarrow==14.0.2
       - scikit-learn==1.5.2
       - pandas==2.2.3
       - joblib==1.4.2
