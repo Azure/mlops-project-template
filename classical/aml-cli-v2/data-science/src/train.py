@@ -129,8 +129,18 @@ def main(args):
     plt.savefig("regression_results.png")
     mlflow.log_artifact("regression_results.png")
 
-    # Save the model
-    mlflow.sklearn.save_model(sk_model=model, path=args.model_output)
+    # Save the model with explicit pip requirements to avoid dependency conflicts
+    pip_requirements = [
+        "mlflow==2.9.2",
+        "scikit-learn==1.5.2",
+        "numpy==1.26.4",
+        "cloudpickle==3.1.0",
+    ]
+    mlflow.sklearn.save_model(
+        sk_model=model, 
+        path=args.model_output,
+        pip_requirements=pip_requirements
+    )
 
 
 if __name__ == "__main__":
