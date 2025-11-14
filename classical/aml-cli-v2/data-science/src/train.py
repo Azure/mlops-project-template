@@ -131,6 +131,7 @@ def main(args):
 
     # Define explicit pip requirements to control dependencies
     # Include pyarrow and scipy with compatible wheel versions to avoid source build
+    # NOTE: These are the ONLY packages needed for inference - no Azure ML training packages
     pip_reqs = [
         "mlflow==2.9.2",
         "scikit-learn==1.5.2",
@@ -141,10 +142,12 @@ def main(args):
     ]
 
     # Save the model with explicit pip requirements only
+    # Set conda_env=None to prevent MLflow from capturing the current training environment
     mlflow.sklearn.save_model(
         sk_model=model, 
         path=args.model_output,
-        pip_requirements=pip_reqs
+        pip_requirements=pip_reqs,
+        conda_env=None  # Critical: prevents MLflow from auto-detecting azureml packages from training env
     )
 
 

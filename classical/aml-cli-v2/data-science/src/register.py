@@ -43,25 +43,26 @@ def main(args):
         # load model
         model =  mlflow.sklearn.load_model(args.model_path) 
 
-        # Define explicit pip requirements to control dependencies
-        # Include pyarrow and scipy with compatible wheel versions to avoid source build
-        pip_reqs = [
-            "mlflow==2.9.2",
-            "scikit-learn==1.5.2",
-            "numpy==1.26.4",
-            "cloudpickle==3.1.0",
-            "pyarrow==14.0.2",  # Include pyarrow to prevent MLflow from auto-detecting incompatible version
-            "scipy==1.14.0",  # Include scipy to prevent pip from trying to build older versions from source
-        ]
+    # Define explicit pip requirements to control dependencies
+    # Include pyarrow and scipy with compatible wheel versions to avoid source build
+    # NOTE: These are the ONLY packages needed for inference - no Azure ML training packages
+    pip_reqs = [
+        "mlflow==2.9.2",
+        "scikit-learn==1.5.2",
+        "numpy==1.26.4",
+        "cloudpickle==3.1.0",
+        "pyarrow==14.0.2",  # Include pyarrow to prevent MLflow from auto-detecting incompatible version
+        "scipy==1.14.0",  # Include scipy to prevent pip from trying to build older versions from source
+    ]
 
-        # log model using mlflow with explicit pip requirements
-        mlflow.sklearn.log_model(
-            model, 
-            args.model_name,
-            pip_requirements=pip_reqs
-        )
-
-        # register logged model using mlflow
+    # log model using mlflow with explicit pip requirements
+    # Set conda_env=None to prevent MLflow from capturing the current training environment
+    mlflow.sklearn.log_model(
+        model, 
+        args.model_name,
+        pip_requirements=pip_reqs,
+        conda_env=None  # Critical: prevents MLflow from auto-detecting azureml packages from training env
+    )        # register logged model using mlflow
         run_id = mlflow.active_run().info.run_id
         model_uri = f'runs:/{run_id}/{args.model_name}'
         mlflow_model = mlflow.register_model(model_uri, args.model_name)
