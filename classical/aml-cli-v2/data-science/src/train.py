@@ -130,7 +130,6 @@ def main(args):
     mlflow.log_artifact("regression_results.png")
 
     # Define explicit pip requirements to control dependencies
-    # Use both pip_requirements and extra_pip_requirements for full control
     pip_reqs = [
         "mlflow==2.9.2",
         "scikit-learn==1.5.2",
@@ -138,13 +137,11 @@ def main(args):
         "cloudpickle==3.1.0",
     ]
 
-    # Save the model with explicit pip requirements
-    # Set both parameters to prevent MLflow from auto-inferring any dependencies
+    # Save the model with explicit pip requirements only
     mlflow.sklearn.save_model(
         sk_model=model, 
         path=args.model_output,
-        pip_requirements=pip_reqs,
-        extra_pip_requirements=[]  # Prevent any additional auto-inferred packages
+        pip_requirements=pip_reqs
     )
 
 

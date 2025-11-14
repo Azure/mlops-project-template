@@ -52,12 +52,10 @@ def main(args):
         ]
 
         # log model using mlflow with explicit pip requirements
-        # Use pip_requirements with empty extra_pip_requirements to prevent auto-inference
         mlflow.sklearn.log_model(
             model, 
             args.model_name,
-            pip_requirements=pip_reqs,
-            extra_pip_requirements=[]  # Prevent any additional auto-inferred packages
+            pip_requirements=pip_reqs
         )
 
         # register logged model using mlflow
