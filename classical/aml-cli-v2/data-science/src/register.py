@@ -43,19 +43,21 @@ def main(args):
         # load model
         model =  mlflow.sklearn.load_model(args.model_path) 
 
-        # Define minimal pip requirements to avoid dependency conflicts
-        pip_requirements = [
+        # Define explicit pip requirements to control dependencies
+        pip_reqs = [
             "mlflow==2.9.2",
-            "scikit-learn==1.5.2", 
+            "scikit-learn==1.5.2",
             "numpy==1.26.4",
             "cloudpickle==3.1.0",
         ]
 
-        # log model using mlflow with explicit pip requirements only
+        # log model using mlflow with explicit pip requirements
+        # Use pip_requirements with empty extra_pip_requirements to prevent auto-inference
         mlflow.sklearn.log_model(
             model, 
-            args.model_name, 
-            pip_requirements=pip_requirements
+            args.model_name,
+            pip_requirements=pip_reqs,
+            extra_pip_requirements=[]  # Prevent any additional auto-inferred packages
         )
 
         # register logged model using mlflow

@@ -129,26 +129,23 @@ def main(args):
     plt.savefig("regression_results.png")
     mlflow.log_artifact("regression_results.png")
 
-    # Define minimal conda environment to avoid dependency conflicts
-    conda_env = {
-        "channels": ["conda-forge"],
-        "dependencies": [
-            "python=3.11",
-            "pip",
-            {
-                "pip": [
-                    "mlflow==2.9.2",
-                    "scikit-learn==1.5.2",
-                    "numpy==1.26.4",
-                    "cloudpickle==3.1.0",
-                ]
-            }
-        ],
-        "name": "mlflow-env"
-    }
+    # Define explicit pip requirements to control dependencies
+    # Use both pip_requirements and extra_pip_requirements for full control
+    pip_reqs = [
+        "mlflow==2.9.2",
+        "scikit-learn==1.5.2",
+        "numpy==1.26.4",
+        "cloudpickle==3.1.0",
+    ]
 
-    # Save the model with explicit conda environment
-    mlflow.sklearn.save_model(sk_model=model, path=args.model_output, conda_env=conda_env)
+    # Save the model with explicit pip requirements
+    # Set both parameters to prevent MLflow from auto-inferring any dependencies
+    mlflow.sklearn.save_model(
+        sk_model=model, 
+        path=args.model_output,
+        pip_requirements=pip_reqs,
+        extra_pip_requirements=[]  # Prevent any additional auto-inferred packages
+    )
 
 
 if __name__ == "__main__":
