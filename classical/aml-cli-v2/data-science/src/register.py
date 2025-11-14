@@ -56,12 +56,12 @@ def main(args):
     ]
 
     # log model using mlflow with explicit pip requirements
-    # Set conda_env=None to prevent MLflow from capturing the current training environment
+    # Use extra_pip_requirements=[] to prevent MLflow from adding detected packages
     mlflow.sklearn.log_model(
         model, 
         args.model_name,
         pip_requirements=pip_reqs,
-        conda_env=None  # Critical: prevents MLflow from auto-detecting azureml packages from training env
+        extra_pip_requirements=[]  # Critical: prevents MLflow from adding auto-detected packages
     )        # register logged model using mlflow
         run_id = mlflow.active_run().info.run_id
         model_uri = f'runs:/{run_id}/{args.model_name}'
