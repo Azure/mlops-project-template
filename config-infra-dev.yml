@@ -12,6 +12,10 @@ variables:
   environment: dev
   enable_aml_computecluster: true
   enable_monitoring: false
+  
+  # Endpoints
+  oep: online-endpoint
+  bep: batch-endpoint
 
   # Azure DevOps
   ado_service_connection_rg: Azure-ARM-Dev
