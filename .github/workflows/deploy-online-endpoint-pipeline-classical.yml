@@ -22,11 +22,16 @@ jobs:
           echo "config-file=$config_env" >> $GITHUB_OUTPUT;
   get-config:
     needs: set-env-branch
+    permissions:
+      contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   create-endpoint:
     needs: get-config
+    permissions:
+      id-token: write
+      contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/create-endpoint.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
@@ -39,8 +44,11 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   create-deployment:
-    uses: pgabriel-01/mlops-templates/.github/workflows/create-deployment.yml@main
     needs: [get-config, create-endpoint]
+    permissions:
+      id-token: write
+      contents: read
+    uses: pgabriel-01/mlops-templates/.github/workflows/create-deployment.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
@@ -53,8 +61,11 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   allocate-traffic:
-    uses: pgabriel-01/mlops-templates/.github/workflows/allocate-traffic.yml@main
     needs: [get-config, create-deployment]
+    permissions:
+      id-token: write
+      contents: read
+    uses: pgabriel-01/mlops-templates/.github/workflows/allocate-traffic.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
