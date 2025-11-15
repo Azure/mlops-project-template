@@ -37,7 +37,9 @@ jobs:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
     secrets:
-      creds: ${{secrets.AZURE_CREDENTIALS}}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   create-endpoint:
     needs: [get-config, create-compute]
     uses: pgabriel-01/mlops-templates/.github/workflows/create-endpoint.yml@main
@@ -48,7 +50,9 @@ jobs:
       endpoint_name: ${{ format('taxi-gha-{0}', needs.get-config.outputs.bep) }}
       endpoint_type: batch
     secrets:
-      creds: ${{secrets.AZURE_CREDENTIALS}}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   create-deployment:
     uses: pgabriel-01/mlops-templates/.github/workflows/create-deployment.yml@main
     needs: [get-config, create-endpoint]
@@ -60,4 +64,6 @@ jobs:
       endpoint_type: batch
       deployment_name: eptestdeploy
     secrets:
-      creds: ${{secrets.AZURE_CREDENTIALS}}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
