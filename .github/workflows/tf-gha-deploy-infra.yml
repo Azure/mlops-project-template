@@ -30,11 +30,16 @@ jobs:
           echo "environment=$env_name" >> $GITHUB_OUTPUT
   get-config:
     needs: set-env-branch
+    permissions:
+      contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   test-terraform-state-deployment:
     needs: [get-config, set-env-branch]
+    permissions:
+      id-token: write
+      contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
     with:
       TFAction: "apply"
