@@ -122,6 +122,21 @@ resource "azurerm_role_assignment" "mlw_system_acr_push" {
   principal_id         = azurerm_machine_learning_workspace.mlw.identity[0].principal_id
 }
 
+# Grant GitHub Actions service principal access to storage account (for CI/CD pipelines)
+resource "azurerm_role_assignment" "github_actions_storage_blob_data_reader" {
+  count                = var.github_actions_service_principal_id != "" ? 1 : 0
+  scope                = var.storage_account_id
+  role_definition_name = "Storage Blob Data Reader"
+  principal_id         = var.github_actions_service_principal_id
+}
+
+resource "azurerm_role_assignment" "github_actions_storage_blob_data_contributor" {
+  count                = var.github_actions_service_principal_id != "" ? 1 : 0
+  scope                = var.storage_account_id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = var.github_actions_service_principal_id
+}
+
 # Compute cluster
 
 resource "azurerm_machine_learning_compute_cluster" "adl_aml_ws_compute_cluster" {

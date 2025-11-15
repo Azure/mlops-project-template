@@ -27,3 +27,9 @@ variable "enable_monitoring" {
   type        = bool
   default     = false
 }
+
+variable "github_actions_service_principal_id" {
+  type        = string
+  description = "The object ID of the GitHub Actions service principal for role assignments"
+  default     = ""
+}

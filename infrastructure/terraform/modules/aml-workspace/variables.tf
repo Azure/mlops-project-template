@@ -70,3 +70,9 @@ variable "private_endpoint_subnet_id" {
   description = "Subnet ID for private endpoints"
   default     = ""
 }
+
+variable "github_actions_service_principal_id" {
+  type        = string
+  description = "The object ID of the GitHub Actions service principal for role assignments"
+  default     = ""
+}
