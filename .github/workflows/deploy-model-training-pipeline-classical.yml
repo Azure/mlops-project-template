@@ -65,7 +65,7 @@ jobs:
     uses: pgabriel-01/mlops-templates/.github/workflows/create-compute.yml@main
     with:
       cluster_name: cpu-cluster
-      size: Standard_D4s_v5
+      size: STANDARD_D4S_V3
       min_instances: 0
       max_instances: 4
       cluster_tier: low_priority
