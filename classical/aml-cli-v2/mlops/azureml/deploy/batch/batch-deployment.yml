@@ -2,7 +2,9 @@ $schema: https://azuremlschemas.azureedge.net/latest/batchDeployment.schema.json
 name: batch-dp
 endpoint_name: taxi-fare-batch
 model: azureml:taxi-model@latest
-# No environment specified - let MLflow model use its embedded pip_requirements
+code_configuration:
+  code: code
+  scoring_script: batch_driver.py
 compute: azureml:batch-cluster
 resources:
   instance_count: 2
