@@ -1,5 +1,5 @@
 terraform {
-  # backend "azurerm" {}  # Commented out for local deployment - uses local state
+  backend "azurerm" {}
   required_version = ">= 1.10.0"
   required_providers {
     azurerm = {
