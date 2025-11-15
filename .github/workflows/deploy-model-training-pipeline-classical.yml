@@ -36,8 +36,8 @@ jobs:
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
-      environment_file: mlops/azureml/train/train-env.yml
-      conda_file: data-science/environment/train-conda.yml
+      environment_file: classical/aml-cli-v2/mlops/azureml/train/train-env.yml
+      conda_file: classical/aml-cli-v2/data-science/environment/train-conda.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -52,7 +52,7 @@ jobs:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
       name: taxi-data
-      data_file: mlops/azureml/train/data.yml
+      data_file: classical/aml-cli-v2/mlops/azureml/train/data.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -84,7 +84,7 @@ jobs:
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
-      parameters-file: mlops/azureml/train/pipeline.yml
+      parameters-file: classical/aml-cli-v2/mlops/azureml/train/pipeline.yml
       job-name: test
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
