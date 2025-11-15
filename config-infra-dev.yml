@@ -33,7 +33,7 @@ variables:
 
   # For terraform reference
   terraform_version: 1.10.0
-  terraform_workingdir: infrastructure
+  terraform_workingdir: infrastructure/terraform
   terraform_st_location: $(location)
   terraform_st_resource_group: rg-$(namespace)-$(postfix)$(environment)-tf
   terraform_st_storage_account: st$(namespace)$(postfix)$(environment)tf
