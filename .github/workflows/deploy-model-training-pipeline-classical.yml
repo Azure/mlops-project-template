@@ -22,11 +22,16 @@ jobs:
           echo "config-file=$config_env" >> $GITHUB_OUTPUT;
   get-config:
     needs: set-env-branch
+    permissions:
+      contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   register-environment:
     needs: get-config
+    permissions:
+      id-token: write
+      contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/register-environment.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
@@ -39,6 +44,9 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   register-dataset:
     needs: get-config
+    permissions:
+      id-token: write
+      contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/register-dataset.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
@@ -50,7 +58,10 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   create-compute:
-    needs: [get-config]
+    needs: get-config
+    permissions:
+      id-token: write
+      contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/create-compute.yml@main
     with:
       cluster_name: cpu-cluster
@@ -65,7 +76,10 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   run-model-training-pipeline:
-    needs: [get-config, register-environment, register-dataset, create-compute]
+    needs: [get-config,register-environment,register-dataset,create-compute]
+    permissions:
+      id-token: write
+      contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/run-pipeline.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
