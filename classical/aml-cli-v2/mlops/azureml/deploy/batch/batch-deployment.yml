@@ -5,7 +5,9 @@ model: azureml:taxi-model@latest
 code_configuration:
   code: code
   scoring_script: batch_driver.py
-environment: batch-environment.yml
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04
+  conda_file: conda.yml
 compute: azureml:batch-cluster
 resources:
   instance_count: 2
