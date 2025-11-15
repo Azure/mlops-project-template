@@ -5,6 +5,7 @@ model: azureml:taxi-model@latest
 code_configuration:
   code: code
   scoring_script: batch_driver.py
+environment: batch-environment.yml
 compute: azureml:batch-cluster
 resources:
   instance_count: 2
