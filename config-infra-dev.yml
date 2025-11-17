@@ -7,7 +7,7 @@ variables:
   ap_vm_image: ubuntu-22.04
 
   namespace: taxi #Note: A namespace with many characters will cause storage account creation to fail due to storage account names having a limit of 24 characters.
-  postfix: 10002
+  postfix: 10001
   location: eastus
   environment: dev
   enable_aml_computecluster: true
