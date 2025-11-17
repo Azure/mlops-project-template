@@ -140,3 +140,4 @@ terraform.tfvars
 /infrastructure/bicep/main.json
 ! /infrastructure/bicep/bicepconfig.json
 mlops-project-template/infrastructure/terraform/tfplan
+mlops-project-template/infrastructure/terraform/import-prod-resources.sh

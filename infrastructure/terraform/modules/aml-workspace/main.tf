@@ -137,6 +137,14 @@ resource "azurerm_role_assignment" "github_actions_storage_blob_data_contributor
   principal_id         = var.github_actions_service_principal_id
 }
 
+# Grant GitHub Actions service principal Contributor role on ML workspace (for endpoint deployments)
+resource "azurerm_role_assignment" "github_actions_workspace_contributor" {
+  count                = var.github_actions_service_principal_id != "" ? 1 : 0
+  scope                = azurerm_machine_learning_workspace.mlw.id
+  role_definition_name = "Contributor"
+  principal_id         = var.github_actions_service_principal_id
+}
+
 # Compute cluster
 
 resource "azurerm_machine_learning_compute_cluster" "adl_aml_ws_compute_cluster" {
