@@ -2,6 +2,15 @@ name: tf-gha-deploy-infra.yml
 
 on:
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform (apply or destroy)'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
 env:
   config_env: "none"
 jobs:
@@ -42,7 +51,7 @@ jobs:
       contents: read
     uses: pgabriel-01/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
     with:
-      TFAction: "apply"
+      TFAction: ${{ github.event.inputs.action || 'apply' }}
       dply_environment: ${{ needs.set-env-branch.outputs.environment }}
       location: ${{ needs.get-config.outputs.location }}
       namespace: ${{ needs.get-config.outputs.namespace }}
