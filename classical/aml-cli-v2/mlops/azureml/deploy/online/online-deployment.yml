@@ -1,7 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
 name: blue
-# endpoint_name is provided via --endpoint flag in the CLI command
-# endpoint_name: taxi-gha-oep-{{namespace}}-{{postfix}}{{environment}}
+endpoint_name: taxi-fare-online
 model: azureml:taxi-model@latest
 instance_type: Standard_DS3_v2
 instance_count: 1

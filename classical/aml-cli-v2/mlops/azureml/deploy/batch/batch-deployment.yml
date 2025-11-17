@@ -1,7 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/batchDeployment.schema.json
 name: batch-dp
-# endpoint_name is provided via --endpoint flag in the CLI command
-# endpoint_name: taxi-gha-bep-{{namespace}}-{{postfix}}{{environment}}
+endpoint_name: taxi-fare-batch
 model: azureml:taxi-model@latest
 code_configuration:
   code: code
