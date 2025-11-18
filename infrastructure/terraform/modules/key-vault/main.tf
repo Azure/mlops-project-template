@@ -9,6 +9,14 @@ resource "azurerm_key_vault" "kv" {
   purge_protection_enabled   = true
   soft_delete_retention_days = 90
   rbac_authorization_enabled  = true
+  
+  # Network ACL configured inline
+  network_acls {
+    default_action             = var.enable_private_endpoints ? "Deny" : "Allow"
+    bypass                     = "AzureServices"
+    virtual_network_subnet_ids = var.firewall_virtual_network_subnet_ids
+    ip_rules                   = []
+  }
 
   tags = var.tags
 }
@@ -24,15 +32,6 @@ resource "azurerm_role_assignment" "kv_crypto_officer" {
   scope                = azurerm_key_vault.kv.id
   role_definition_name = "Key Vault Crypto Officer"
   principal_id         = data.azurerm_client_config.current.object_id
-}
-
-# Network configuration
-resource "azurerm_key_vault_network_acl" "kv_acl" {
-  key_vault_id               = azurerm_key_vault.kv.id
-  default_action             = var.enable_private_endpoints ? "Deny" : "Allow"
-  bypass                     = "AzureServices"
-  virtual_network_subnet_ids = var.firewall_virtual_network_subnet_ids
-  ip_rules                   = []
 }
 
 # Private endpoint for Key Vault

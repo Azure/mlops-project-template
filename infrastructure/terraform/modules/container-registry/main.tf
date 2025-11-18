@@ -11,25 +11,25 @@ resource "azurerm_container_registry" "cr" {
   admin_enabled                 = false
   public_network_access_enabled = var.enable_private_endpoints ? false : true
   zone_redundancy_enabled       = false
+  
+  # Network rules configured inline
+  network_rule_set {
+    default_action = var.enable_private_endpoints ? "Deny" : "Allow"
+    
+    dynamic "virtual_network" {
+      for_each = var.firewall_virtual_network_subnet_ids
+      content {
+        action    = "Allow"
+        subnet_id = virtual_network.value
+      }
+    }
+  }
 
   identity {
     type = "SystemAssigned"
   }
 
   tags = var.tags
-}
-
-# Network rule set for Container Registry
-resource "azurerm_container_registry_network_rule_set" "cr_acl" {
-  container_registry_id = azurerm_container_registry.cr.id
-  default_action        = var.enable_private_endpoints ? "Deny" : "Allow"
-
-  dynamic "virtual_network" {
-    for_each = var.firewall_virtual_network_subnet_ids
-    content {
-      subnet_id = virtual_network.value
-    }
-  }
 }
 
 # Private endpoint for Container Registry
