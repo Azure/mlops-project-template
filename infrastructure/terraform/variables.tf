@@ -37,7 +37,7 @@ variable "github_actions_service_principal_id" {
 variable "enable_private_endpoints" {
   type        = bool
   description = "Enable private endpoints and VNet isolation for Azure ML workspace and dependent services"
-  default     = false
+  default     = true  # Temporarily set to true for v1.2.0 testing
 }
 
 variable "vnet_address_space" {
