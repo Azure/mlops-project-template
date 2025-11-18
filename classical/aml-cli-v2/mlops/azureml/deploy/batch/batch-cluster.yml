@@ -5,7 +5,9 @@ size: STANDARD_DS4_V2
 min_instances: 0
 max_instances: 10
 tier: dedicated
-identity:
-  type: user_assigned
-  user_assigned_identities:
-    - resource_id: /subscriptions/c5b4600d-5da3-4298-921b-b2656cfdf1a1/resourceGroups/rg-ml-82406dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uai-ml-82406dev
+# Note: GitHub Actions workflow creates compute dynamically via create-compute.yml
+# If using this file directly with Azure ML CLI, configure identity as follows:
+# identity:
+#   type: user_assigned
+#   user_assigned_identities:
+#     - resource_id: /subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<identity-name>
