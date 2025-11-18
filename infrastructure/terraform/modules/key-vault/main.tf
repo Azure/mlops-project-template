@@ -26,6 +26,15 @@ resource "azurerm_role_assignment" "kv_crypto_officer" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
+# Network configuration
+resource "azurerm_key_vault_network_acl" "kv_acl" {
+  key_vault_id               = azurerm_key_vault.kv.id
+  default_action             = var.enable_private_endpoints ? "Deny" : "Allow"
+  bypass                     = "AzureServices"
+  virtual_network_subnet_ids = var.firewall_virtual_network_subnet_ids
+  ip_rules                   = []
+}
+
 # Private endpoint for Key Vault
 resource "azurerm_private_endpoint" "kv_pe" {
   count               = var.enable_private_endpoints ? 1 : 0
@@ -39,6 +48,11 @@ resource "azurerm_private_endpoint" "kv_pe" {
     private_connection_resource_id = azurerm_key_vault.kv.id
     subresource_names              = ["vault"]
     is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "vault-dns-zone-group"
+    private_dns_zone_ids = [var.private_dns_zone_keyvault_id]
   }
 
   tags = var.tags

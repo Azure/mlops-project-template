@@ -40,3 +40,15 @@ variable "private_endpoint_subnet_id" {
   description = "Subnet ID for private endpoints"
   default     = ""
 }
+
+variable "private_dns_zone_keyvault_id" {
+  type        = string
+  description = "Private DNS zone ID for Key Vault"
+  default     = ""
+}
+
+variable "firewall_virtual_network_subnet_ids" {
+  type        = list(string)
+  description = "List of subnet IDs to allow access from"
+  default     = []
+}

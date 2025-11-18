@@ -182,5 +182,13 @@ resource "azurerm_private_endpoint" "mlw_pe" {
     is_manual_connection           = false
   }
 
+  private_dns_zone_group {
+    name = "aml-dns-zone-group"
+    private_dns_zone_ids = [
+      var.private_dns_zone_aml_api_id,
+      var.private_dns_zone_aml_notebooks_id
+    ]
+  }
+
   tags = var.tags
 }

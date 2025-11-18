@@ -54,3 +54,21 @@ variable "private_endpoint_subnet_id" {
   description = "Subnet ID for private endpoints"
   default     = ""
 }
+
+variable "private_dns_zone_blob_id" {
+  type        = string
+  description = "Private DNS zone ID for blob storage"
+  default     = ""
+}
+
+variable "private_dns_zone_file_id" {
+  type        = string
+  description = "Private DNS zone ID for file storage"
+  default     = ""
+}
+
+variable "private_dns_zone_dfs_id" {
+  type        = string
+  description = "Private DNS zone ID for DFS storage"
+  default     = ""
+}

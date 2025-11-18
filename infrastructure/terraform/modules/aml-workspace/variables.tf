@@ -71,6 +71,18 @@ variable "private_endpoint_subnet_id" {
   default     = ""
 }
 
+variable "private_dns_zone_aml_api_id" {
+  type        = string
+  description = "Private DNS zone ID for Azure ML API"
+  default     = ""
+}
+
+variable "private_dns_zone_aml_notebooks_id" {
+  type        = string
+  description = "Private DNS zone ID for Azure ML Notebooks"
+  default     = ""
+}
+
 variable "github_actions_service_principal_id" {
   type        = string
   description = "The object ID of the GitHub Actions service principal for role assignments"

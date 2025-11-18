@@ -60,6 +60,11 @@ resource "azurerm_private_endpoint" "st_blob_pe" {
     is_manual_connection           = false
   }
 
+  private_dns_zone_group {
+    name                 = "blob-dns-zone-group"
+    private_dns_zone_ids = [var.private_dns_zone_blob_id]
+  }
+
   tags = var.tags
 }
 
@@ -75,6 +80,34 @@ resource "azurerm_private_endpoint" "st_file_pe" {
     private_connection_resource_id = azurerm_storage_account.st.id
     subresource_names              = ["file"]
     is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "file-dns-zone-group"
+    private_dns_zone_ids = [var.private_dns_zone_file_id]
+  }
+
+  tags = var.tags
+}
+
+# Private endpoint for DFS (Data Lake Gen2) - only if HNS is enabled
+resource "azurerm_private_endpoint" "st_dfs_pe" {
+  count               = var.enable_private_endpoints && var.hns_enabled ? 1 : 0
+  name                = "pe-${azurerm_storage_account.st.name}-dfs"
+  location            = var.location
+  resource_group_name = var.rg_name
+  subnet_id           = var.private_endpoint_subnet_id
+
+  private_service_connection {
+    name                           = "psc-${azurerm_storage_account.st.name}-dfs"
+    private_connection_resource_id = azurerm_storage_account.st.id
+    subresource_names              = ["dfs"]
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "dfs-dns-zone-group"
+    private_dns_zone_ids = [var.private_dns_zone_dfs_id]
   }
 
   tags = var.tags
