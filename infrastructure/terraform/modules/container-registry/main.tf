@@ -13,16 +13,10 @@ resource "azurerm_container_registry" "cr" {
   zone_redundancy_enabled       = false
   
   # Network rules configured inline
+  # When using private endpoints, default action is Deny and access comes through private endpoint
+  # When not using private endpoints, default action is Allow
   network_rule_set {
     default_action = var.enable_private_endpoints ? "Deny" : "Allow"
-    
-    dynamic "virtual_network" {
-      for_each = var.firewall_virtual_network_subnet_ids
-      content {
-        action    = "Allow"
-        subnet_id = virtual_network.value
-      }
-    }
   }
 
   identity {
