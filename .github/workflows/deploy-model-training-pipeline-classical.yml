@@ -71,6 +71,8 @@ jobs:
       cluster_tier: Dedicated
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
+      vnet_name: ${{ needs.get-config.outputs.vnet_name }}
+      subnet_name: snet-training
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
