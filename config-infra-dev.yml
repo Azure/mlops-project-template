@@ -30,6 +30,7 @@ variables:
   key_vault: kv-$(namespace)-$(postfix)$(environment)
   container_registry: cr$(namespace)$(postfix)$(environment)
   storage_account: st$(namespace)$(postfix)$(environment)
+  vnet_name: vnet-$(namespace)-$(postfix)$(environment)
 
   # For terraform reference
   terraform_version: 1.10.0
