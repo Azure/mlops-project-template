@@ -28,3 +28,27 @@ variable "env" {
   type        = string
   description = "Environment prefix"
 }
+
+variable "enable_private_endpoints" {
+  type        = bool
+  description = "Enable private endpoints for Container Registry"
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  type        = string
+  description = "Subnet ID for private endpoints"
+  default     = ""
+}
+
+variable "private_dns_zone_acr_id" {
+  type        = string
+  description = "Private DNS zone ID for Container Registry"
+  default     = ""
+}
+
+variable "firewall_virtual_network_subnet_ids" {
+  type        = list(string)
+  description = "List of subnet IDs to allow access from"
+  default     = []
+}

@@ -1,0 +1,6 @@
+$schema: https://azuremlschemas.azureedge.net/latest/azureBlob.schema.json
+name: workspaceblobstore
+type: azure_blob
+description: Default workspace blob datastore with identity-based authentication
+account_name: stml82406dev
+container_name: azureml-blobstore-bacf542e-c0e8-444c-8545-4bca482f4385

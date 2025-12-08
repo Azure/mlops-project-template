@@ -49,7 +49,7 @@ stages:
           - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
             parameters:
               cluster_name: cpu-cluster
-              size: STANDARD_DS3_V2
+              size: STANDARD_D4S_V5
               min_instances: 0
               max_instances: 1
               cluster_tier: dedicated

@@ -5,13 +5,18 @@ resource "azurerm_kusto_cluster" "cluster" {
   location            = var.location
   resource_group_name = var.rg_name
   streaming_ingestion_enabled = true
-  language_extensions = ["PYTHON"]
   count               = var.enable_monitoring ? 1 : 0
 
   sku {
     name     = "Standard_D11_v2"
     capacity = 2
   }
+  
+  language_extension {
+    name  = "PYTHON"
+    image = "Python3_11_7"
+  }
+  
   tags = var.tags
 }
 
@@ -26,13 +31,6 @@ resource "azurerm_kusto_database" "database" {
 resource "azurerm_key_vault_secret" "SP_ID" {
   name         = "kvmonitoringspid"
   value        = data.azurerm_client_config.current.client_id
-  key_vault_id = var.key_vault_id
-  count               = var.enable_monitoring ? 1 : 0
-}
-
-resource "azurerm_key_vault_secret" "SP_KEY" {
-  name         = "kvmonitoringspkey"
-  value        = trim(var.client_secret, "'")
   key_vault_id = var.key_vault_id
   count               = var.enable_monitoring ? 1 : 0
 }

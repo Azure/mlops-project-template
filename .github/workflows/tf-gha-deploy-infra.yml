@@ -1,8 +1,16 @@
 name: tf-gha-deploy-infra.yml
 
 on:
-  #push:
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform (apply or destroy)'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
 env:
   config_env: "none"
 jobs:
@@ -10,30 +18,41 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       config-file: ${{ steps.set-output-defaults.outputs.config-file }}
+      environment: ${{ steps.set-output-defaults.outputs.environment }}
     steps:
       - id: set-prod-branch
         name: set-prod-branch
         if: ${{ github.ref == 'refs/heads/main'}}
-        run: echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV;
+        run: |
+          echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV
+          echo "env_name=prod" >> $GITHUB_ENV
       - id: set-dev-branch
         name: setdevbranch
         if: ${{ github.ref != 'refs/heads/main'}}
-        run: echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV;
+        run: |
+          echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV
+          echo "env_name=dev" >> $GITHUB_ENV
       - id: set-output-defaults
         name: set-output-defaults
         run: |
-          echo "config-file=$config_env" >> $GITHUB_OUTPUT;
+          echo "config-file=$config_env" >> $GITHUB_OUTPUT
+          echo "environment=$env_name" >> $GITHUB_OUTPUT
   get-config:
     needs: set-env-branch
-    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+    permissions:
+      contents: read
+    uses: pgabriel-01/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   test-terraform-state-deployment:
     needs: [get-config, set-env-branch]
-    uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
+    permissions:
+      id-token: write
+      contents: read
+    uses: pgabriel-01/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
     with:
-      TFAction: "apply"
-      dply_environment: ${{ needs.set-env-branch.outputs.config-file }}
+      TFAction: ${{ github.event.inputs.action || 'apply' }}
+      dply_environment: ${{ needs.set-env-branch.outputs.environment }}
       location: ${{ needs.get-config.outputs.location }}
       namespace: ${{ needs.get-config.outputs.namespace }}
       postfix: ${{ needs.get-config.outputs.postfix }}

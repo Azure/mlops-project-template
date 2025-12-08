@@ -1,0 +1,19 @@
+$schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json
+name: batch-cluster
+type: amlcompute
+size: STANDARD_DS4_V2
+min_instances: 0
+max_instances: 10
+tier: dedicated
+# Note: GitHub Actions workflow creates compute dynamically via create-compute.yml workflow
+# which automatically retrieves the user-assigned identity from the workspace:
+#   UAI_ID=$(az ml workspace show --name <workspace> --resource-group <rg> \
+#            --query identity.user_assigned_identities -o json | jq -r 'keys[0]')
+#
+# If using this file directly with Azure ML CLI, you can either:
+# 1. Let compute use the workspace's default identity (recommended - remove identity section)
+# 2. Manually specify identity using environment variables:
+#    export SUB_ID=$(az account show --query id -o tsv)
+#    export RG_NAME="rg-ml-<namespace>-<postfix><env>"
+#    export UAI_NAME="uai-ml-<namespace>-<postfix><env>"
+#    Then update the identity section below with these values

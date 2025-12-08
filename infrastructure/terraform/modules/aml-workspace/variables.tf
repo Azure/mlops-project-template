@@ -58,3 +58,33 @@ variable "storage_account_name" {
   type        = string
   description = "The Name of the Storage Account linked to AML workspace"
 }
+
+variable "enable_private_endpoints" {
+  type        = bool
+  description = "Enable private endpoints for ML Workspace"
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  type        = string
+  description = "Subnet ID for private endpoints"
+  default     = ""
+}
+
+variable "private_dns_zone_aml_api_id" {
+  type        = string
+  description = "Private DNS zone ID for Azure ML API"
+  default     = ""
+}
+
+variable "private_dns_zone_aml_notebooks_id" {
+  type        = string
+  description = "Private DNS zone ID for Azure ML Notebooks"
+  default     = ""
+}
+
+variable "github_actions_service_principal_id" {
+  type        = string
+  description = "The object ID of the GitHub Actions service principal for role assignments"
+  default     = ""
+}
