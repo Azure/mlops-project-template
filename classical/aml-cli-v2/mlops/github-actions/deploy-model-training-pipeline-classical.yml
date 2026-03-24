@@ -2,6 +2,22 @@ name: deploy-model-training-pipeline
 
 on:
   workflow_dispatch:
+    inputs:
+      skip_environment_registration:
+        description: 'Skip environment registration'
+        required: false
+        type: boolean
+        default: false
+      skip_data_registration:
+        description: 'Skip data registration'
+        required: false
+        type: boolean
+        default: false
+      skip_compute_creation:
+        description: 'Skip compute creation'
+        required: false
+        type: boolean
+        default: false
 jobs:
   set-env-branch:
     runs-on: ubuntu-latest
@@ -27,6 +43,7 @@ jobs:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   register-environment:
     needs: get-config
+    if: ${{ !inputs.skip_environment_registration }}
     uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
@@ -39,6 +56,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   register-dataset:
     needs: get-config
+    if: ${{ !inputs.skip_data_registration }}
     uses: Azure/mlops-templates/.github/workflows/register-dataset.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
@@ -51,6 +69,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   create-compute:
     needs: [get-config]
+    if: ${{ !inputs.skip_compute_creation }}
     uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
     with:
       cluster_name: cpu-cluster
@@ -66,6 +85,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   run-model-training-pipeline:
     needs: [get-config, register-environment, register-dataset, create-compute]
+    if: ${{ !cancelled() && !failure() }}
     uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
