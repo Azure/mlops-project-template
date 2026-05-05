@@ -1,6 +1,6 @@
 variables:
 
-  ap_vm_image: ubuntu-20.04
+  ap_vm_image: ubuntu-latest
 
 ## Training pipeline settings
 

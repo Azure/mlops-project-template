@@ -18,7 +18,7 @@ variables:
 trigger: none
 
 pool:
-  vmImage: ubuntu-20.04
+  vmImage: ubuntu-latest
 
 resources:
   repositories:
