@@ -24,7 +24,7 @@ jobs:
     needs: set-env-branch
     permissions:
       contents: read
-    uses: pgabriel-01/mlops-templates/.github/workflows/read-yaml.yml@main
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   create-compute:
@@ -32,7 +32,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    uses: pgabriel-01/mlops-templates/.github/workflows/create-compute.yml@main
+    uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
     with:
       cluster_name: batch-cluster
       size: STANDARD_D4S_V3
@@ -52,7 +52,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    uses: pgabriel-01/mlops-templates/.github/workflows/create-endpoint.yml@main
+    uses: Azure/mlops-templates/.github/workflows/create-endpoint.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
@@ -68,7 +68,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    uses: pgabriel-01/mlops-templates/.github/workflows/create-deployment.yml@main
+    uses: Azure/mlops-templates/.github/workflows/create-deployment.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}

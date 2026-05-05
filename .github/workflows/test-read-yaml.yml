@@ -24,6 +24,6 @@ jobs:
   
   test-read-config:
     needs: set-env-branch
-    uses: pgabriel-01/mlops-templates/.github/workflows/read-yaml.yml@main
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}

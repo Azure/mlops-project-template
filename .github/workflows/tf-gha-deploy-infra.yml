@@ -41,7 +41,7 @@ jobs:
     needs: set-env-branch
     permissions:
       contents: read
-    uses: pgabriel-01/mlops-templates/.github/workflows/read-yaml.yml@main
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   test-terraform-state-deployment:
@@ -49,7 +49,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    uses: pgabriel-01/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
+    uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
     with:
       TFAction: ${{ github.event.inputs.action || 'apply' }}
       dply_environment: ${{ needs.set-env-branch.outputs.environment }}
