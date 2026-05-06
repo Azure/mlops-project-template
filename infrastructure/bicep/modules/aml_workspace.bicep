@@ -6,6 +6,11 @@ param appinsightid string
 param crid string
 param tags object
 
+// Optional resource handling — main.bicep may pass empty strings when
+// enableMonitoring or enableContainerRegistry are false.
+var hasContainerRegistry = !empty(crid)
+var hasAppInsights = !empty(appinsightid)
+
 // AML workspace
 resource amls 'Microsoft.MachineLearningServices/workspaces@2020-09-01-preview' = {
   name: 'mlw-${baseName}'
@@ -20,8 +25,8 @@ resource amls 'Microsoft.MachineLearningServices/workspaces@2020-09-01-preview' 
   properties: {
     storageAccount: stoacctid
     keyVault: kvid
-    applicationInsights: appinsightid
-    containerRegistry: crid
+    applicationInsights: hasAppInsights ? appinsightid : null
+    containerRegistry: hasContainerRegistry ? crid : null
     encryption: {
       status: 'Disabled'
       keyVaultProperties: {

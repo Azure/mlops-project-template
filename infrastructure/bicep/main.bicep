@@ -5,12 +5,27 @@ param prefix string
 param postfix string
 param env string 
 
+// Feature flags — control which optional modules are deployed
+param enableMonitoring bool = true
+param enableContainerRegistry bool = true
+param enableComputeCluster bool = true
+
+// Key Vault settings
+param kvEnablePurgeProtection bool = false
+param kvSoftDeleteRetentionDays int = 7
+
+// Tag parameters
+param tagCostCenter string = ''
+param tagManagedBy string = 'bicep'
+
 param tags object = {
   Owner: 'mlops-v2'
-  Project: 'mlops-v2'
+  Project: prefix
   Environment: env
   Toolkit: 'bicep'
   Name: prefix
+  CostCenter: tagCostCenter
+  ManagedBy: tagManagedBy
 }
 
 var baseName  = '${prefix}-${postfix}${env}'
@@ -42,11 +57,13 @@ module kv './modules/key_vault.bicep' = {
     baseName: baseName
     location: location
     tags: tags
+    enablePurgeProtection: kvEnablePurgeProtection
+    softDeleteRetentionDays: kvSoftDeleteRetentionDays
   }
 }
 
-// App Insights
-module appi './modules/application_insights.bicep' = {
+// App Insights — conditional on enableMonitoring
+module appi './modules/application_insights.bicep' = if (enableMonitoring) {
   name: 'appi'
   scope: resourceGroup(rg.name)
   params: {
@@ -56,8 +73,8 @@ module appi './modules/application_insights.bicep' = {
   }
 }
 
-// Container Registry
-module cr './modules/container_registry.bicep' = {
+// Container Registry — conditional on enableContainerRegistry
+module cr './modules/container_registry.bicep' = if (enableContainerRegistry) {
   name: 'cr'
   scope: resourceGroup(rg.name)
   params: {
@@ -76,14 +93,14 @@ module mlw './modules/aml_workspace.bicep' = {
     location: location
     stoacctid: st.outputs.stoacctOut
     kvid: kv.outputs.kvOut
-    appinsightid: appi.outputs.appinsightOut
-    crid: cr.outputs.crOut
+    appinsightid: enableMonitoring ? appi!.outputs.appinsightOut : ''
+    crid: enableContainerRegistry ? cr!.outputs.crOut : ''
     tags: tags
   }
 }
 
-// AML compute cluster
-module mlwcc './modules/aml_computecluster.bicep' = {
+// AML compute cluster — conditional on enableComputeCluster
+module mlwcc './modules/aml_computecluster.bicep' = if (enableComputeCluster) {
   name: 'mlwcc'
   scope: resourceGroup(rg.name)
   params: {
