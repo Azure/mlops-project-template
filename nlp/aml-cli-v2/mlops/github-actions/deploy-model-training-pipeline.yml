@@ -12,7 +12,7 @@ jobs:
       uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
       with:
         cluster_name: cpu-cluster
-        size: STANDARD_DS3_V2
+        size: STANDARD_D4S_V5
         min_instances: 0
         max_instances: 1
         resource_group: ${{ needs.get-config.outputs.resource_group }}

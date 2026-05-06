@@ -28,3 +28,27 @@ variable "env" {
   type        = string
   description = "Environment prefix"
 }
+
+variable "enable_private_endpoints" {
+  type        = bool
+  description = "Enable private endpoints for Key Vault"
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  type        = string
+  description = "Subnet ID for private endpoints"
+  default     = ""
+}
+
+variable "private_dns_zone_keyvault_id" {
+  type        = string
+  description = "Private DNS zone ID for Key Vault"
+  default     = ""
+}
+
+variable "firewall_virtual_network_subnet_ids" {
+  type        = list(string)
+  description = "List of subnet IDs to allow access from"
+  default     = []
+}

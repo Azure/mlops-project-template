@@ -1,0 +1,12 @@
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - azureml-core==1.57.0
+      - mlflow==2.9.2
+      - scikit-learn==1.5.2
+      - numpy==1.26.4
+      - cloudpickle==3.1.0
+      - pandas==2.2.3

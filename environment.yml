@@ -3,17 +3,17 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python==3.8
+  - python==3.11
   - yapf
   - pylint
   - pip
   - pip:
-      - mlflow
-      - cloudpickle==1.6.0
-      - scikit-learn==0.24.2
-      - flask==1.1.2
-      - applicationinsights
-      - pandas
-      - azureml-core
-      - azureml-dataset-runtime[fuse]
-      - opencensus-ext-azure
+      - mlflow==2.18.0
+      - cloudpickle==3.1.0
+      - scikit-learn==1.5.2
+      - flask==3.1.0
+      - applicationinsights==0.11.10
+      - pandas==2.2.3
+      - azureml-core==1.57.0
+      - azureml-dataset-runtime[fuse]==1.57.0
+      - opencensus-ext-azure==1.1.13

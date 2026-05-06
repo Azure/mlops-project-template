@@ -42,3 +42,33 @@ variable "firewall_virtual_network_subnet_ids" {
 variable "firewall_bypass" {
   default = ["None"]
 }
+
+variable "enable_private_endpoints" {
+  type        = bool
+  description = "Enable private endpoints for storage account"
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  type        = string
+  description = "Subnet ID for private endpoints"
+  default     = ""
+}
+
+variable "private_dns_zone_blob_id" {
+  type        = string
+  description = "Private DNS zone ID for blob storage"
+  default     = ""
+}
+
+variable "private_dns_zone_file_id" {
+  type        = string
+  description = "Private DNS zone ID for file storage"
+  default     = ""
+}
+
+variable "private_dns_zone_dfs_id" {
+  type        = string
+  description = "Private DNS zone ID for DFS storage"
+  default     = ""
+}

@@ -1,5 +1,5 @@
-azureml-mlflow==1.38.0
-scikit-learn==0.24.1
-pandas==1.2.1
-joblib==1.2.0
-matplotlib==3.3.3
+azureml-mlflow==1.57.0
+scikit-learn==1.5.2
+pandas==2.2.3
+joblib==1.4.2
+matplotlib==3.9.2

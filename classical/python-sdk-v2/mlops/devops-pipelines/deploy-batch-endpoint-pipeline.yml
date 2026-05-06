@@ -51,7 +51,7 @@ stages:
           - template: templates/aml-cli-v2/create-compute.yml@mlops-templates
             parameters:
               cluster_name: batch-cluster # name must match cluster name in deployment file below
-              size: STANDARD_DS3_V2
+              size: STANDARD_D4S_V5
               min_instances: 0
               max_instances: 5
               cluster_tier: dedicated

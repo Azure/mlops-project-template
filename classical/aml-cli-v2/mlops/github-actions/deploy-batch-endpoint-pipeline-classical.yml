@@ -30,7 +30,7 @@ jobs:
     uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
     with:
       cluster_name: batch-cluster
-      size: STANDARD_DS3_V2
+      size: STANDARD_D4S_V5
       min_instances: 0
       max_instances: 5
       cluster_tier: low_priority

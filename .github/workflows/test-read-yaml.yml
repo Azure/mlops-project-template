@@ -1,0 +1,29 @@
+name: Test Read YAML
+
+on:
+  workflow_dispatch:
+
+jobs:
+  set-env-branch:
+    runs-on: ubuntu-latest
+    outputs:
+      config-file: ${{ steps.set-output-defaults.outputs.config-file }}
+    steps:
+      - id: set-prod-branch
+        name: set-prod-branch
+        if: ${{ github.ref == 'refs/heads/main'}}
+        run: echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV
+      - id: set-dev-branch
+        name: setdevbranch
+        if: ${{ github.ref != 'refs/heads/main'}}
+        run: echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV
+      - id: set-output-defaults
+        name: set-output-defaults
+        run: |
+          echo "config-file=$config_env" >> $GITHUB_OUTPUT
+  
+  test-read-config:
+    needs: set-env-branch
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+    with:
+      file_name: ${{ needs.set-env-branch.outputs.config-file}}
