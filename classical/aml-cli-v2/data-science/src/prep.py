@@ -49,39 +49,8 @@ CAT_NOM_COLS = [
 
 CAT_ORD_COLS = [
 ]
-TARGET_COL = "cost"
-
-NUMERIC_COLS = [
-    "distance",
-    "dropoff_latitude",
-    "dropoff_longitude",
-    "passengers",
-    "pickup_latitude",
-    "pickup_longitude",
-    "pickup_weekday",
-    "pickup_month",
-    "pickup_monthday",
-    "pickup_hour",
-    "pickup_minute",
-    "pickup_second",
-    "dropoff_weekday",
-    "dropoff_month",
-    "dropoff_monthday",
-    "dropoff_hour",
-    "dropoff_minute",
-    "dropoff_second",
-]
-
-CAT_NOM_COLS = [
-    "store_forward",
-    "vendor",
-]
-
-CAT_ORD_COLS = [
-]
 
 def parse_args():
-    '''Parse input arguments'''
     '''Parse input arguments'''
 
     parser = argparse.ArgumentParser("prep")
@@ -102,8 +71,6 @@ def log_training_data(df, table_name):
     collector = Online_Collector(table_name)
     collector.batch_collect(df)
 
-def main(args):
-    '''Read, split, and save datasets'''
 def main(args):
     '''Read, split, and save datasets'''
 
@@ -127,15 +94,11 @@ def main(args):
     train = data[msk_train]
     val = data[msk_val]
     test = data[msk_test]
-    test = data[msk_test]
 
     mlflow.log_metric('train size', train.shape[0])
     mlflow.log_metric('val size', val.shape[0])
     mlflow.log_metric('test size', test.shape[0])
 
-    train.to_parquet((Path(args.train_data) / "train.parquet"))
-    val.to_parquet((Path(args.val_data) / "val.parquet"))
-    test.to_parquet((Path(args.test_data) / "test.parquet"))
     train.to_parquet((Path(args.train_data) / "train.parquet"))
     val.to_parquet((Path(args.val_data) / "val.parquet"))
     test.to_parquet((Path(args.test_data) / "test.parquet"))
