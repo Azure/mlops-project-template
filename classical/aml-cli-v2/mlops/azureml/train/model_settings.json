@@ -1,0 +1,24 @@
+{
+  "docs": "Metric comparison settings for champion/challenger model promotion. Positive weight = new model must be X% better. Negative weight = new model can be X% worse and still promote.",
+  "problem_type": "regression",
+  "compare_metrics": ["RMSE", "R2", "Spearman_Correlation"],
+  "metric_weights": {
+    "RMSE": {
+      "promote_weight": 0.3,
+      "direction": "minimize",
+      "description": "New model RMSE must be at least 30% lower to promote on this metric"
+    },
+    "R2": {
+      "promote_weight": -0.5,
+      "direction": "maximize",
+      "description": "New model R2 can be up to 50% worse and still promote (if other metrics pass)"
+    },
+    "Spearman_Correlation": {
+      "promote_weight": -0.3,
+      "direction": "maximize",
+      "description": "New model Spearman can be up to 30% worse and still promote"
+    }
+  },
+  "promote_on_all_metrics": false,
+  "minimum_samples": 100
+}

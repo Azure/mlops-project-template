@@ -25,7 +25,7 @@ stages:
         steps:
           - checkout: self
           - script: |
-              az bicep build --file ./infrastructure/main.bicep
+              az bicep build --file ./infrastructure/bicep/main.bicep
             name: LintBicepCode
             displayName: Run Bicep Linter
 
@@ -44,9 +44,18 @@ stages:
               inlineScript: |
                 az deployment sub validate \
                   --name $(Build.DefinitionName) \
-                  --template-file ./infrastructure/main.bicep \
+                  --template-file ./infrastructure/bicep/main.bicep \
                   --location $(location) \
-                  --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)
+                  --parameters \
+                    location=$(location) \
+                    prefix=$(namespace) \
+                    postfix=$(postfix) \
+                    env=$(environment) \
+                    enableMonitoring=$(enable_monitoring) \
+                    enableContainerRegistry=$(enable_container_registry) \
+                    enableComputeCluster=$(enable_aml_computecluster) \
+                    tagCostCenter='$(tag_cost_center)' \
+                    tagManagedBy='$(tag_managed_by)'
 
   - stage: CheckOutBicepAndDeploy
     displayName: Deploy AML Workspace
@@ -73,5 +82,15 @@ stages:
                       az deployment sub create \
                         --name $(Build.DefinitionName) \
                         --location $(location) \
-                        --template-file ./infrastructure/main.bicep \
-                        --parameters location=$(location) prefix=$(namespace) postfix=$(postfix) env=$(environment)
+                        --template-file ./infrastructure/bicep/main.bicep \
+                        --parameters \
+                          location=$(location) \
+                          prefix=$(namespace) \
+                          postfix=$(postfix) \
+                          env=$(environment) \
+                          enableMonitoring=$(enable_monitoring) \
+                          enableContainerRegistry=$(enable_container_registry) \
+                          enableComputeCluster=$(enable_aml_computecluster) \
+                          tagCostCenter='$(tag_cost_center)' \
+                          tagManagedBy='$(tag_managed_by)'
+

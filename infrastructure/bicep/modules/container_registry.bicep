@@ -10,7 +10,7 @@ resource cr 'Microsoft.ContainerRegistry/registries@2020-11-01-preview' = {
   }
 
   properties: {
-    adminUserEnabled: true
+    adminUserEnabled: false
   }
 
   tags: tags

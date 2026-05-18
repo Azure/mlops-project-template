@@ -12,6 +12,11 @@ variables:
   environment: dev
   enable_aml_computecluster: true
   enable_monitoring: false
+  enable_container_registry: true
+  
+  # Tags
+  tag_cost_center: ''
+  tag_managed_by: bicep-ado
   
   # Endpoints
   oep: online-endpoint
